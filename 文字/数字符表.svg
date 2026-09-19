@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 800" width="700" height="800">
+  <rect width="700" height="800" fill="#0a0e1a"/>
+  <style>
+    .t{fill:#e8f0f8;font-family:sans-serif;font-size:26px;font-weight:bold}
+    .h{fill:#9fb4c8;font-family:sans-serif;font-size:19px;font-weight:bold}
+    .s{fill:none;stroke:#6fd6ff;stroke-width:3;stroke-linecap:round}
+    .d{fill:#ffd166;stroke:none}
+    .lb{fill:#cfe0ef;font-family:sans-serif;font-size:15px;text-anchor:middle}
+    .n{fill:#7a8fa3;font-family:sans-serif;font-size:16px}
+    .e{fill:#e8f0f8;font-family:sans-serif;font-size:18px}
+  </style>
+
+  <text x="350" y="44" class="t" text-anchor="middle">星数 · 数字符号表</text>
+
+  <!-- Section 1: digits -->
+  <text x="20" y="88" class="h">一、数字 0–9</text>
+
+  <defs>
+    <g id="d0"><path class="s" d="M30 46 A20 20 0 1 1 70 46"/></g>
+    <g id="d1"><circle class="s" cx="50" cy="50" r="20"/><circle class="d" cx="50" cy="50" r="4.5"/></g>
+    <g id="d2"><circle class="d" cx="40" cy="38" r="4.5"/><circle class="d" cx="60" cy="62" r="4.5"/></g>
+    <g id="d3"><circle class="d" cx="40" cy="38" r="4.5"/><circle class="d" cx="50" cy="50" r="4.5"/><circle class="d" cx="60" cy="62" r="4.5"/></g>
+    <g id="d4"><circle class="d" cx="40" cy="38" r="4.5"/><circle class="d" cx="60" cy="38" r="4.5"/><circle class="d" cx="40" cy="62" r="4.5"/><circle class="d" cx="60" cy="62" r="4.5"/></g>
+    <g id="d5"><circle class="d" cx="40" cy="38" r="4.5"/><circle class="d" cx="60" cy="38" r="4.5"/><circle class="d" cx="50" cy="50" r="4.5"/><circle class="d" cx="40" cy="62" r="4.5"/><circle class="d" cx="60" cy="62" r="4.5"/></g>
+    <g id="d6"><circle class="d" cx="40" cy="38" r="4.5"/><circle class="d" cx="60" cy="38" r="4.5"/><circle class="d" cx="40" cy="50" r="4.5"/><circle class="d" cx="60" cy="50" r="4.5"/><circle class="d" cx="40" cy="62" r="4.5"/><circle class="d" cx="60" cy="62" r="4.5"/></g>
+    <g id="d7"><circle class="d" cx="40" cy="38" r="4.5"/><circle class="d" cx="60" cy="38" r="4.5"/><circle class="d" cx="40" cy="50" r="4.5"/><circle class="d" cx="60" cy="50" r="4.5"/><circle class="d" cx="40" cy="62" r="4.5"/><circle class="d" cx="60" cy="62" r="4.5"/><circle class="d" cx="50" cy="50" r="4.5"/></g>
+    <g id="d8"><circle class="d" cx="40" cy="38" r="4.5"/><circle class="d" cx="50" cy="38" r="4.5"/><circle class="d" cx="60" cy="38" r="4.5"/><circle class="d" cx="40" cy="50" r="4.5"/><circle class="d" cx="60" cy="50" r="4.5"/><circle class="d" cx="40" cy="62" r="4.5"/><circle class="d" cx="50" cy="62" r="4.5"/><circle class="d" cx="60" cy="62" r="4.5"/></g>
+    <g id="d9"><circle class="d" cx="40" cy="38" r="4.5"/><circle class="d" cx="50" cy="38" r="4.5"/><circle class="d" cx="60" cy="38" r="4.5"/><circle class="d" cx="40" cy="50" r="4.5"/><circle class="d" cx="50" cy="50" r="4.5"/><circle class="d" cx="60" cy="50" r="4.5"/><circle class="d" cx="40" cy="62" r="4.5"/><circle class="d" cx="50" cy="62" r="4.5"/><circle class="d" cx="60" cy="62" r="4.5"/></g>
+  </defs>
+
+  <!-- row 1: 0-4 -->
+  <g transform="translate(35,112)"><use href="#d0"/></g><text x="85" y="252" class="lb">0 vaka</text>
+  <g transform="translate(165,112)"><use href="#d1"/></g><text x="215" y="252" class="lb">1 sola</text>
+  <g transform="translate(295,112)"><use href="#d2"/></g><text x="345" y="252" class="lb">2 dua</text>
+  <g transform="translate(425,112)"><use href="#d3"/></g><text x="475" y="252" class="lb">3 tia</text>
+  <g transform="translate(555,112)"><use href="#d4"/></g><text x="605" y="252" class="lb">4 teta</text>
+
+  <!-- row 2: 5-9 -->
+  <g transform="translate(35,282)"><use href="#d5"/></g><text x="85" y="422" class="lb">5 penta</text>
+  <g transform="translate(165,282)"><use href="#d6"/></g><text x="215" y="422" class="lb">6 hesa</text>
+  <g transform="translate(295,282)"><use href="#d7"/></g><text x="345" y="422" class="lb">7 heta</text>
+  <g transform="translate(425,282)"><use href="#d8"/></g><text x="475" y="422" class="lb">8 ota</text>
+  <g transform="translate(555,282)"><use href="#d9"/></g><text x="605" y="422" class="lb">9 enea</text>
+
+  <!-- Section 2: multi-digit -->
+  <text x="20" y="470" class="h">二、多位数（位值横排）</text>
+
+  <g transform="translate(30,500) scale(0.4)"><use href="#d1"/></g><g transform="translate(75,500) scale(0.4)"><use href="#d0"/></g><text x="130" y="545" class="e">= 10</text>
+  <g transform="translate(30,565) scale(0.4)"><use href="#d2"/></g><g transform="translate(75,565) scale(0.4)"><use href="#d5"/></g><text x="130" y="610" class="e">= 25</text>
+  <g transform="translate(30,630) scale(0.4)"><use href="#d1"/></g><g transform="translate(75,630) scale(0.4)"><use href="#d0"/></g><g transform="translate(120,630) scale(0.4)"><use href="#d0"/></g><text x="175" y="675" class="e">= 100</text>
+  <g transform="translate(30,695) scale(0.4)"><use href="#d2"/></g><g transform="translate(75,695) scale(0.4)"><use href="#d0"/></g><g transform="translate(120,695) scale(0.4)"><use href="#d2"/></g><g transform="translate(165,695) scale(0.4)"><use href="#d5"/></g><text x="220" y="740" class="e">= 2025</text>
+
+  <!-- Section 3: large numbers -->
+  <text x="20" y="775" class="n">三、大数（复合，不新造词）：10000 = deka kilo（十千）· 100000 = sento kilo（百千）· 1000000 = kilo kilo（千千）</text>
+</svg>

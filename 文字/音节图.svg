@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 1840" width="640" height="1840">
+  <rect width="640" height="1840" fill="#0a0e1a"/>
+  <style>
+    .t{fill:#e8f0f8;font-family:sans-serif;font-size:28px;font-weight:bold}
+    .h{fill:#9fb4c8;font-family:sans-serif;font-size:20px;text-anchor:middle}
+    .l{fill:#9fb4c8;font-family:sans-serif;font-size:20px;text-anchor:end}
+    .s{fill:none;stroke:#6fd6ff;stroke-width:3;stroke-linecap:round}
+    .d{fill:#ffd166;stroke:none}
+    .v{fill:none;stroke:#6fd6ff;stroke-width:2}
+    .n{fill:#7a8fa3;font-family:sans-serif;font-size:18px}
+  </style>
+
+  <text x="320" y="42" class="t" text-anchor="middle">Lumia 音节图 · Selagrafi Syllabary</text>
+
+  <!-- vowel header -->
+  <text x="170" y="112" class="h">a /ɑ/</text>
+  <text x="270" y="112" class="h">e /ɛ/</text>
+  <text x="370" y="112" class="h">i /i/</text>
+  <text x="470" y="112" class="h">o /ɒ/</text>
+  <text x="570" y="112" class="h">u /u/</text>
+
+  <!-- consonant base shapes (defs), local 0..100 cell, center (50,50) -->
+  <defs>
+    <g id="c0"><path class="s" d="M50 78 V34"/></g>
+    <g id="c1"><path class="s" d="M50 78 V34 M36 34 H64"/></g>
+    <g id="c2"><path class="s" d="M38 78 L64 34"/></g>
+    <g id="c3"><path class="s" d="M50 78 V34"/><circle class="d" cx="50" cy="56" r="3.5"/></g>
+    <g id="c4"><path class="s" d="M50 78 V34 M36 34 H64"/><circle class="d" cx="50" cy="56" r="3.5"/></g>
+    <g id="c5"><path class="s" d="M38 78 L64 34"/><circle class="d" cx="51" cy="56" r="3.5"/></g>
+    <g id="c6"><path class="s" d="M44 78 C44 60 58 56 58 42"/></g>
+    <g id="c7"><path class="s" d="M44 78 C44 60 58 56 58 42"/><circle class="d" cx="51" cy="58" r="3.5"/></g>
+    <g id="c8"><path class="s" d="M34 62 Q42 48 50 62 T66 62"/></g>
+    <g id="c9"><path class="s" d="M34 72 Q50 44 66 72"/></g>
+    <g id="c10"><path class="s" d="M28 78 Q36 52 44 78 Q52 52 60 78"/></g>
+    <g id="c11"><path class="s" d="M38 78 Q50 52 62 78"/></g>
+    <g id="c12"><path class="s" d="M52 78 V38 C52 28 66 28 66 42 C66 54 54 54 54 66"/></g>
+    <g id="c13"><path class="s" d="M40 74 Q40 56 54 56 Q66 56 66 66"/></g>
+    <g id="c14"><path class="s" d="M32 66 Q40 48 48 66 Q56 48 64 66"/></g>
+    <g id="c15"><path class="s" d="M50 34 Q62 48 52 64 L66 78"/></g>
+  </defs>
+
+  <!-- row 0 p -->
+  <text x="108" y="188" class="l">p /p/</text>
+  <use href="#c0" x="120" y="130"/><use href="#c0" x="220" y="130"/><use href="#c0" x="320" y="130"/><use href="#c0" x="420" y="130"/><use href="#c0" x="520" y="130"/>
+  <circle class="v" cx="170" cy="148" r="4"/><circle class="v" cx="236" cy="180" r="4"/><circle class="v" cx="370" cy="212" r="4"/><circle class="v" cx="504" cy="180" r="4"/>
+
+  <!-- row 1 t -->
+  <text x="108" y="288" class="l">t /t/</text>
+  <use href="#c1" x="120" y="230"/><use href="#c1" x="220" y="230"/><use href="#c1" x="320" y="230"/><use href="#c1" x="420" y="230"/><use href="#c1" x="520" y="230"/>
+  <circle class="v" cx="170" cy="248" r="4"/><circle class="v" cx="236" cy="280" r="4"/><circle class="v" cx="370" cy="312" r="4"/><circle class="v" cx="504" cy="280" r="4"/>
+
+  <!-- row 2 k -->
+  <text x="108" y="388" class="l">k /k/</text>
+  <use href="#c2" x="120" y="330"/><use href="#c2" x="220" y="330"/><use href="#c2" x="320" y="330"/><use href="#c2" x="420" y="330"/><use href="#c2" x="520" y="330"/>
+  <circle class="v" cx="170" cy="348" r="4"/><circle class="v" cx="236" cy="380" r="4"/><circle class="v" cx="370" cy="412" r="4"/><circle class="v" cx="504" cy="380" r="4"/>
+
+  <!-- row 3 b -->
+  <text x="108" y="488" class="l">b /b/</text>
+  <use href="#c3" x="120" y="430"/><use href="#c3" x="220" y="430"/><use href="#c3" x="320" y="430"/><use href="#c3" x="420" y="430"/><use href="#c3" x="520" y="430"/>
+  <circle class="v" cx="170" cy="448" r="4"/><circle class="v" cx="236" cy="480" r="4"/><circle class="v" cx="370" cy="512" r="4"/><circle class="v" cx="504" cy="480" r="4"/>
+
+  <!-- row 4 d -->
+  <text x="108" y="588" class="l">d /d/</text>
+  <use href="#c4" x="120" y="530"/><use href="#c4" x="220" y="530"/><use href="#c4" x="320" y="530"/><use href="#c4" x="420" y="530"/><use href="#c4" x="520" y="530"/>
+  <circle class="v" cx="170" cy="548" r="4"/><circle class="v" cx="236" cy="580" r="4"/><circle class="v" cx="370" cy="612" r="4"/><circle class="v" cx="504" cy="580" r="4"/>
+
+  <!-- row 5 g -->
+  <text x="108" y="688" class="l">g /g/</text>
+  <use href="#c5" x="120" y="630"/><use href="#c5" x="220" y="630"/><use href="#c5" x="320" y="630"/><use href="#c5" x="420" y="630"/><use href="#c5" x="520" y="630"/>
+  <circle class="v" cx="170" cy="648" r="4"/><circle class="v" cx="236" cy="680" r="4"/><circle class="v" cx="370" cy="712" r="4"/><circle class="v" cx="504" cy="680" r="4"/>
+
+  <!-- row 6 f -->
+  <text x="108" y="788" class="l">f /f/</text>
+  <use href="#c6" x="120" y="730"/><use href="#c6" x="220" y="730"/><use href="#c6" x="320" y="730"/><use href="#c6" x="420" y="730"/><use href="#c6" x="520" y="730"/>
+  <circle class="v" cx="170" cy="748" r="4"/><circle class="v" cx="236" cy="780" r="4"/><circle class="v" cx="370" cy="812" r="4"/><circle class="v" cx="504" cy="780" r="4"/>
+
+  <!-- row 7 v -->
+  <text x="108" y="888" class="l">v /v/</text>
+  <use href="#c7" x="120" y="830"/><use href="#c7" x="220" y="830"/><use href="#c7" x="320" y="830"/><use href="#c7" x="420" y="830"/><use href="#c7" x="520" y="830"/>
+  <circle class="v" cx="170" cy="848" r="4"/><circle class="v" cx="236" cy="880" r="4"/><circle class="v" cx="370" cy="912" r="4"/><circle class="v" cx="504" cy="880" r="4"/>
+
+  <!-- row 8 s -->
+  <text x="108" y="988" class="l">s /s/</text>
+  <use href="#c8" x="120" y="930"/><use href="#c8" x="220" y="930"/><use href="#c8" x="320" y="930"/><use href="#c8" x="420" y="930"/><use href="#c8" x="520" y="930"/>
+  <circle class="v" cx="170" cy="948" r="4"/><circle class="v" cx="236" cy="980" r="4"/><circle class="v" cx="370" cy="1012" r="4"/><circle class="v" cx="504" cy="980" r="4"/>
+
+  <!-- row 9 h -->
+  <text x="108" y="1088" class="l">h /h/</text>
+  <use href="#c9" x="120" y="1030"/><use href="#c9" x="220" y="1030"/><use href="#c9" x="320" y="1030"/><use href="#c9" x="420" y="1030"/><use href="#c9" x="520" y="1030"/>
+  <circle class="v" cx="170" cy="1048" r="4"/><circle class="v" cx="236" cy="1080" r="4"/><circle class="v" cx="370" cy="1112" r="4"/><circle class="v" cx="504" cy="1080" r="4"/>
+
+  <!-- row 10 m -->
+  <text x="108" y="1188" class="l">m /m/</text>
+  <use href="#c10" x="120" y="1130"/><use href="#c10" x="220" y="1130"/><use href="#c10" x="320" y="1130"/><use href="#c10" x="420" y="1130"/><use href="#c10" x="520" y="1130"/>
+  <circle class="v" cx="170" cy="1148" r="4"/><circle class="v" cx="236" cy="1180" r="4"/><circle class="v" cx="370" cy="1212" r="4"/><circle class="v" cx="504" cy="1180" r="4"/>
+
+  <!-- row 11 n -->
+  <text x="108" y="1288" class="l">n /n/</text>
+  <use href="#c11" x="120" y="1230"/><use href="#c11" x="220" y="1230"/><use href="#c11" x="320" y="1230"/><use href="#c11" x="420" y="1230"/><use href="#c11" x="520" y="1230"/>
+  <circle class="v" cx="170" cy="1248" r="4"/><circle class="v" cx="236" cy="1280" r="4"/><circle class="v" cx="370" cy="1312" r="4"/><circle class="v" cx="504" cy="1280" r="4"/>
+
+  <!-- row 12 l -->
+  <text x="108" y="1388" class="l">l /l/</text>
+  <use href="#c12" x="120" y="1330"/><use href="#c12" x="220" y="1330"/><use href="#c12" x="320" y="1330"/><use href="#c12" x="420" y="1330"/><use href="#c12" x="520" y="1330"/>
+  <circle class="v" cx="170" cy="1348" r="4"/><circle class="v" cx="236" cy="1380" r="4"/><circle class="v" cx="370" cy="1412" r="4"/><circle class="v" cx="504" cy="1380" r="4"/>
+
+  <!-- row 13 r -->
+  <text x="108" y="1488" class="l">r /r/</text>
+  <use href="#c13" x="120" y="1430"/><use href="#c13" x="220" y="1430"/><use href="#c13" x="320" y="1430"/><use href="#c13" x="420" y="1430"/><use href="#c13" x="520" y="1430"/>
+  <circle class="v" cx="170" cy="1448" r="4"/><circle class="v" cx="236" cy="1480" r="4"/><circle class="v" cx="370" cy="1512" r="4"/><circle class="v" cx="504" cy="1480" r="4"/>
+
+  <!-- row 14 w -->
+  <text x="108" y="1588" class="l">w /w/</text>
+  <use href="#c14" x="120" y="1530"/><use href="#c14" x="220" y="1530"/><use href="#c14" x="320" y="1530"/><use href="#c14" x="420" y="1530"/><use href="#c14" x="520" y="1530"/>
+  <circle class="v" cx="170" cy="1548" r="4"/><circle class="v" cx="236" cy="1580" r="4"/><circle class="v" cx="370" cy="1612" r="4"/><circle class="v" cx="504" cy="1580" r="4"/>
+
+  <!-- row 15 j -->
+  <text x="108" y="1688" class="l">j /j/</text>
+  <use href="#c15" x="120" y="1630"/><use href="#c15" x="220" y="1630"/><use href="#c15" x="320" y="1630"/><use href="#c15" x="420" y="1630"/><use href="#c15" x="520" y="1630"/>
+  <circle class="v" cx="170" cy="1648" r="4"/><circle class="v" cx="236" cy="1680" r="4"/><circle class="v" cx="370" cy="1712" r="4"/><circle class="v" cx="504" cy="1680" r="4"/>
+
+  <!-- legend -->
+  <text x="20" y="1760" class="n">· 元音定位点：a＝上 · e＝左 · i＝下 · o＝右 · u＝无点（空心圈＝元音位置）</text>
+  <text x="20" y="1790" class="n">· 浊音 b d g v ＝ 主体形上加一颗实心点</text>
+  <text x="20" y="1820" class="n">· -n 尾 ＝ 音节符右下加一短勾 ⌐</text>
+</svg>

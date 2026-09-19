@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 690 750" width="690" height="750">
+  <rect width="690" height="750" fill="#0a0e1a"/>
+  <style>
+    .t{fill:#e8f0f8;font-family:sans-serif;font-size:28px;font-weight:bold}
+    .s{fill:none;stroke:#6fd6ff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+    .d{fill:#ffd166;stroke:none}
+    .lb{fill:#cfe0ef;font-family:sans-serif;font-size:15px;text-anchor:middle}
+  </style>
+
+  <text x="345" y="44" class="t" text-anchor="middle">天文·科幻借词 · 星符表（19）</text>
+
+  <defs>
+    <g id="g_lumia"><path class="s" d="M60 60 A8 8 0 0 1 76 60 A16 16 0 0 1 44 60 A24 24 0 0 1 92 60 A32 32 0 0 1 28 60 A40 40 0 0 1 108 60"/><circle class="d" cx="60" cy="60" r="4"/></g>
+    <g id="g_sela"><path class="s" d="M60 14 C66 40 80 46 106 60 C80 74 66 80 60 106 C54 80 40 74 14 60 C40 46 54 40 60 14 Z"/><circle class="d" cx="60" cy="60" r="4"/></g>
+    <g id="g_sola"><path class="s" d="M60 34 A26 26 0 1 1 60 86 A26 26 0 1 1 60 34 Z"/><circle class="d" cx="60" cy="60" r="5"/></g>
+    <g id="g_luna"><path class="s" d="M60 18 A42 42 0 1 0 60 102 A34 34 0 1 1 60 18 Z"/></g>
+    <g id="g_paneta"><circle class="d" cx="48" cy="60" r="14"/><path class="s" d="M62 66 C 78 58 90 62 102 74"/></g>
+    <g id="g_komo"><circle class="s" cx="60" cy="60" r="42"/><circle class="d" cx="48" cy="46" r="3"/><circle class="d" cx="72" cy="54" r="3"/><circle class="d" cx="58" cy="74" r="3"/></g>
+    <g id="g_oba"><ellipse class="s" cx="60" cy="60" rx="42" ry="14"/><circle class="d" cx="102" cy="60" r="5"/></g>
+    <g id="g_vaka"><path class="s" d="M20 60 A46 46 0 1 1 100 60"/></g>
+    <g id="g_pusa"><path class="s" d="M8 60 C20 36 28 36 38 60 C48 84 56 84 66 60 C76 36 84 36 94 60 C102 80 110 80 116 60"/></g>
+    <g id="g_nova"><path class="s" d="M60 80 V48 M52 56 L60 48 L68 56"/><circle class="d" cx="60" cy="40" r="3.5"/></g>
+    <g id="g_kometa"><circle class="d" cx="44" cy="42" r="6"/><path class="s" d="M50 46 C66 72 88 88 112 104"/></g>
+    <g id="g_nebula"><path class="s" d="M18 58 C34 44 46 72 62 58 C76 46 86 66 102 54"/><circle class="d" cx="46" cy="42" r="3"/><circle class="d" cx="74" cy="66" r="3"/><circle class="d" cx="56" cy="76" r="3"/></g>
+    <g id="g_gala"><path class="s" d="M60 60 A8 8 0 0 1 76 60 A16 16 0 0 1 44 60 A24 24 0 0 1 92 60 A32 32 0 0 1 28 60 A40 40 0 0 1 108 60"/></g>
+    <g id="g_tele"><circle class="d" cx="40" cy="60" r="5"/><path class="s" d="M47 60 C 66 57 88 53 108 49"/></g>
+    <g id="g_meta"><circle class="d" cx="34" cy="70" r="5"/><path class="s" d="M42 68 Q68 26 98 48"/></g>
+    <g id="g_miko"><path class="s" d="M32 46 L48 60 L32 74"/><path class="s" d="M88 46 L72 60 L88 74"/></g>
+    <g id="g_mako"><path class="s" d="M48 46 L32 60 L48 74"/><path class="s" d="M72 46 L88 60 L72 74"/></g>
+    <g id="g_enega"><path class="s" d="M20 70 L44 28 L58 50 L74 26 L100 64"/></g>
+    <g id="g_era"><path class="s" d="M20 60 Q60 38 100 60"/></g>
+  </defs>
+
+  <!-- row 1 -->
+  <g transform="translate(37,100) scale(0.8)"><use href="#g_lumia"/></g>
+  <text x="85" y="242" class="lb">lumia 光</text>
+  <g transform="translate(167,100) scale(0.8)"><use href="#g_sela"/></g>
+  <text x="215" y="242" class="lb">sela 星</text>
+  <g transform="translate(297,100) scale(0.8)"><use href="#g_sola"/></g>
+  <text x="345" y="242" class="lb">sola 太阳</text>
+  <g transform="translate(427,100) scale(0.8)"><use href="#g_luna"/></g>
+  <text x="475" y="242" class="lb">luna 月亮</text>
+  <g transform="translate(557,100) scale(0.8)"><use href="#g_paneta"/></g>
+  <text x="605" y="242" class="lb">paneta 行星</text>
+
+  <!-- row 2 -->
+  <g transform="translate(37,260) scale(0.8)"><use href="#g_komo"/></g>
+  <text x="85" y="402" class="lb">komo 宇宙</text>
+  <g transform="translate(167,260) scale(0.8)"><use href="#g_oba"/></g>
+  <text x="215" y="402" class="lb">oba 轨道</text>
+  <g transform="translate(297,260) scale(0.8)"><use href="#g_vaka"/></g>
+  <text x="345" y="402" class="lb">vaka 虚空</text>
+  <g transform="translate(427,260) scale(0.8)"><use href="#g_pusa"/></g>
+  <text x="475" y="402" class="lb">pusa 脉冲</text>
+  <g transform="translate(557,260) scale(0.8)"><use href="#g_nova"/></g>
+  <text x="605" y="402" class="lb">nova 新</text>
+
+  <!-- row 3 -->
+  <g transform="translate(37,420) scale(0.8)"><use href="#g_kometa"/></g>
+  <text x="85" y="562" class="lb">kometa 彗星</text>
+  <g transform="translate(167,420) scale(0.8)"><use href="#g_nebula"/></g>
+  <text x="215" y="562" class="lb">nebula 星云</text>
+  <g transform="translate(297,420) scale(0.8)"><use href="#g_gala"/></g>
+  <text x="345" y="562" class="lb">gala 星系</text>
+  <g transform="translate(427,420) scale(0.8)"><use href="#g_tele"/></g>
+  <text x="475" y="562" class="lb">tele 远</text>
+  <g transform="translate(557,420) scale(0.8)"><use href="#g_meta"/></g>
+  <text x="605" y="562" class="lb">meta 超越</text>
+
+  <!-- row 4 -->
+  <g transform="translate(37,580) scale(0.8)"><use href="#g_miko"/></g>
+  <text x="85" y="722" class="lb">miko 小</text>
+  <g transform="translate(167,580) scale(0.8)"><use href="#g_mako"/></g>
+  <text x="215" y="722" class="lb">mako 大</text>
+  <g transform="translate(297,580) scale(0.8)"><use href="#g_enega"/></g>
+  <text x="345" y="722" class="lb">enega 能量</text>
+  <g transform="translate(427,580) scale(0.8)"><use href="#g_era"/></g>
+  <text x="475" y="722" class="lb">era 大气</text>
+</svg>

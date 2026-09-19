@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 690 750" width="690" height="750">
+  <rect width="690" height="750" fill="#0a0e1a"/>
+  <style>
+    .t{fill:#e8f0f8;font-family:sans-serif;font-size:28px;font-weight:bold}
+    .s{fill:none;stroke:#6fd6ff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+    .d{fill:#ffd166;stroke:none}
+    .lb{fill:#cfe0ef;font-family:sans-serif;font-size:15px;text-anchor:middle}
+  </style>
+
+  <text x="345" y="44" class="t" text-anchor="middle">功能词 · 星符表（17）</text>
+
+  <defs>
+    <g id="f_mi"><circle class="d" cx="60" cy="60" r="8"/></g>
+    <g id="f_tu"><circle class="d" cx="46" cy="60" r="6"/><path class="s" d="M58 60 H88"/></g>
+    <g id="f_ta"><circle class="d" cx="74" cy="60" r="6"/><path class="s" d="M32 60 H62"/></g>
+    <g id="f_li"><path class="s" d="M36 60 H84"/></g>
+    <g id="f_e"><path class="s" d="M60 36 V84"/></g>
+    <g id="f_la"><path class="s" d="M36 72 Q60 40 84 72"/></g>
+    <g id="f_pi"><circle class="s" cx="60" cy="60" r="26"/></g>
+    <g id="f_o"><path class="s" d="M60 44 V82"/><circle class="d" cx="60" cy="34" r="5"/></g>
+    <g id="f_en"><path class="s" d="M36 52 H84 M36 68 H84"/></g>
+    <g id="f_u"><path class="s" d="M48 36 V84 M72 36 V84"/></g>
+    <g id="f_no"><path class="s" d="M34 80 L86 40"/></g>
+    <g id="f_ka"><circle class="d" cx="60" cy="46" r="5"/><path class="s" d="M60 56 C60 72 50 74 50 82"/></g>
+    <g id="f_wo"><path class="s" d="M32 60 H80 M72 48 L84 60 L72 72"/></g>
+    <g id="f_fo"><path class="s" d="M88 60 H40 M48 48 L36 60 L48 72"/></g>
+    <g id="f_lo"><path class="s" d="M40 52 Q60 82 80 52"/><circle class="d" cx="60" cy="62" r="5"/></g>
+    <g id="f_ku"><circle class="d" cx="60" cy="46" r="6"/><path class="s" d="M40 72 H80"/></g>
+    <g id="f_na"><circle class="d" cx="60" cy="70" r="6"/><path class="s" d="M40 44 H80"/></g>
+  </defs>
+
+  <g transform="translate(37,100) scale(0.8)"><use href="#f_mi"/></g><text x="85" y="242" class="lb">mi 我</text>
+  <g transform="translate(167,100) scale(0.8)"><use href="#f_tu"/></g><text x="215" y="242" class="lb">tu 你</text>
+  <g transform="translate(297,100) scale(0.8)"><use href="#f_ta"/></g><text x="345" y="242" class="lb">ta 他/它</text>
+  <g transform="translate(427,100) scale(0.8)"><use href="#f_li"/></g><text x="475" y="242" class="lb">li 谓语</text>
+  <g transform="translate(557,100) scale(0.8)"><use href="#f_e"/></g><text x="605" y="242" class="lb">e 宾语</text>
+
+  <g transform="translate(37,260) scale(0.8)"><use href="#f_la"/></g><text x="85" y="402" class="lb">la 语境</text>
+  <g transform="translate(167,260) scale(0.8)"><use href="#f_pi"/></g><text x="215" y="402" class="lb">pi 重组</text>
+  <g transform="translate(297,260) scale(0.8)"><use href="#f_o"/></g><text x="345" y="402" class="lb">o 呼格</text>
+  <g transform="translate(427,260) scale(0.8)"><use href="#f_en"/></g><text x="475" y="402" class="lb">en 和</text>
+  <g transform="translate(557,260) scale(0.8)"><use href="#f_u"/></g><text x="605" y="402" class="lb">u 或</text>
+
+  <g transform="translate(37,420) scale(0.8)"><use href="#f_no"/></g><text x="85" y="562" class="lb">no 否定</text>
+  <g transform="translate(167,420) scale(0.8)"><use href="#f_ka"/></g><text x="215" y="562" class="lb">ka 疑问</text>
+  <g transform="translate(297,420) scale(0.8)"><use href="#f_wo"/></g><text x="345" y="562" class="lb">wo 向/给</text>
+  <g transform="translate(427,420) scale(0.8)"><use href="#f_fo"/></g><text x="475" y="562" class="lb">fo 从/因</text>
+  <g transform="translate(557,420) scale(0.8)"><use href="#f_lo"/></g><text x="605" y="562" class="lb">lo 在/是</text>
+
+  <g transform="translate(37,580) scale(0.8)"><use href="#f_ku"/></g><text x="85" y="722" class="lb">ku 用</text>
+  <g transform="translate(167,580) scale(0.8)"><use href="#f_na"/></g><text x="215" y="722" class="lb">na 专名</text>
+</svg>

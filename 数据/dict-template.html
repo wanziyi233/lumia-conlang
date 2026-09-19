@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lumia 词典</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { font-family: system-ui, "Microsoft YaHei", sans-serif; background: #0b1020; color: #dbe7f3; margin: 0; padding: 22px 26px 40px; }
+  h1 { font-size: 21px; margin: 0 0 4px; color: #e8f0f8; }
+  .sub { color: #7a8fa3; font-size: 12px; margin-bottom: 18px; }
+  .bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+  input, select { background: #131b2e; color: #dbe7f3; border: 1px solid #2a3a55; border-radius: 6px; padding: 8px 10px; font-size: 14px; outline: none; }
+  input:focus, select:focus { border-color: #6fd6ff; }
+  input { flex: 1; min-width: 200px; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .chip { cursor: pointer; padding: 4px 13px; border-radius: 999px; border: 1px solid #2a3a55; color: #9fb4c8; font-size: 13px; user-select: none; }
+  .chip.on { background: #1b3a5e; color: #6fd6ff; border-color: #6fd6ff; }
+  .count { color: #7a8fa3; font-size: 12px; margin-bottom: 10px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #1a2438; }
+  th { color: #9fb4c8; font-weight: 600; }
+  .w { color: #6fd6ff; font-weight: 700; }
+  .ipa { color: #9fb4c8; font-family: "Doulos SIL", serif; }
+  .ety { color: #7a8fa3; }
+  tbody tr:hover { background: #101728; }
+</style>
+</head>
+<body>
+  <h1>Lumia 词典 · 检索</h1>
+  <div class="sub">数据来源：<code>数据/lumia.json</code>（本页由 <code>数据/生成词典.ps1</code> 生成，勿手改）</div>
+
+  <div class="bar">
+    <input id="q" type="text" placeholder="搜索：词形 / 中文 / 英文 / IPA …">
+    <select id="sort">
+      <option value="id">按编号</option>
+      <option value="w">按词形</option>
+    </select>
+  </div>
+  <div class="chips" id="chips"></div>
+  <div class="count" id="count"></div>
+
+  <table id="tbl">
+    <thead><tr><th>#</th><th>词</th><th>IPA</th><th>词性</th><th>中文</th><th>英文</th><th>词源</th></tr></thead>
+    <tbody></tbody>
+  </table>
+
+<script>
+const DATA = __DATA__;
+const CATS = { func: '功能词', astro: '天文词', num: '数字', base: '基础词' };
+let curCat = 'all';
+const rows = DATA.lexicon || [];
+const tbody = document.querySelector('#tbl tbody');
+const q = document.getElementById('q');
+const sort = document.getElementById('sort');
+const chips = document.getElementById('chips');
+const count = document.getElementById('count');
+
+function renderChips() {
+  chips.innerHTML = '';
+  [['all', '全部'], ...Object.entries(CATS)].forEach(([k, label]) => {
+    const c = document.createElement('span');
+    c.className = 'chip' + (k === curCat ? ' on' : '');
+    c.textContent = label;
+    c.onclick = () => { curCat = k; renderChips(); render(); };
+    chips.appendChild(c);
+  });
+}
+
+function render() {
+  const s = q.value.trim().toLowerCase();
+  let list = rows.filter(r => curCat === 'all' || r.cat === curCat);
+  if (s) list = list.filter(r => [r.w, r.zh, r.en, r.ipa, r.ety].join(' ').toLowerCase().includes(s));
+  list = list.slice().sort((a, b) => sort.value === 'w' ? a.w.localeCompare(b.w) : (a.id - b.id));
+  tbody.innerHTML = list.map(r =>
+    '<tr><td>' + r.id + '</td><td class="w">' + r.w + '</td><td class="ipa">' + r.ipa +
+    '</td><td>' + r.pos + '</td><td>' + r.zh + '</td><td>' + r.en + '</td><td class="ety">' + r.ety + '</td></tr>'
+  ).join('');
+  count.textContent = '共 ' + list.length + ' 词';
+}
+
+q.oninput = render;
+sort.onchange = render;
+renderChips();
+render();
+</script>
+</body>
+</html>
