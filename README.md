@@ -14,6 +14,26 @@
 
 ---
 
+## 📖 在线阅读 · Read Online
+
+**🌐 网站在线版（推荐）→ <https://wanziyi233.github.io/lumia-conlang/>**
+
+| 内容 | 在线查看 | 源文件 |
+| --- | --- | --- |
+| 🔍 **可检索词典**（97 词） | [打开词典](https://wanziyi233.github.io/lumia-conlang/词典.html) | `词典.html` |
+| ⭐ **星符总表**（文字系统） | [查看星符](https://wanziyi233.github.io/lumia-conlang/文字/符表.svg) | `文字/符表.svg` |
+| 📝 实用语速查 | [阅读](https://wanziyi233.github.io/lumia-conlang/实用语.html) | `实用语.md` |
+| 🔊 音系（发音规则） | [阅读](https://wanziyi233.github.io/lumia-conlang/音系/音系.html) | `音系/音系.md` |
+| 🧩 语法 | [阅读](https://wanziyi233.github.io/lumia-conlang/语法/语法.html) | `语法/语法.md` |
+| 📚 词典全表 | [阅读](https://wanziyi233.github.io/lumia-conlang/词典/词典.html) | `词典/词典.md` |
+| 🔢 数字 | [阅读](https://wanziyi233.github.io/lumia-conlang/数字/数字.html) | `数字/数字.md` |
+| ✍️ 文字设计说明 | [阅读](https://wanziyi233.github.io/lumia-conlang/文字/文字.html) | `文字/文字.md` |
+
+> **关于图片**：GitHub 的仓库文件预览有时无法显示 SVG（在本机装了网络加速工具时尤其常见）。
+> **本站点（github.io）不受此影响**，所有星符图表均正常显示。
+
+---
+
 ## 这是什么 · What is Lumia?
 
 Lumia 是一门道本语（Toki Pona）式的**极简、模糊、娱乐向**人造语言，专为天文科幻社团设计。
@@ -59,8 +79,9 @@ It is deliberately "unbalanced": it names stars, planets, Saturn, the universe, 
 
 ## 快速开始 · Quick Start
 
-- 打开 `词典.html` 可检索全部 97 词。
-- 从 `音系/`、`词典/`、`语法/`、`数字/`、`文字/` 快速了解全貌。
+- 想查词？打开 **[在线词典](https://wanziyi233.github.io/lumia-conlang/词典.html)**（可检索全部 97 词）。
+- 想系统了解？按这个顺序读：**[实用语速查](https://wanziyi233.github.io/lumia-conlang/实用语.html)** → **[音系](https://wanziyi233.github.io/lumia-conlang/音系/音系.html)** → **[语法](https://wanziyi233.github.io/lumia-conlang/语法/语法.html)** → **[文字](https://wanziyi233.github.io/lumia-conlang/文字/文字.html)**。
+- 想看星符？直接开 **[星符总表](https://wanziyi233.github.io/lumia-conlang/文字/符表.svg)**。
 - 示例句 / Example：
 
 | Lumia | 中文 / English |
@@ -72,15 +93,17 @@ It is deliberately "unbalanced": it names stars, planets, Saturn, the universe, 
 
 ## 工具 · Tooling
 
-需要 PowerShell（Windows 自带；macOS/Linux 装 [PowerShell](https://github.com/PowerShell/PowerShell)）。
+需要 PowerShell。**注意命令名不一样**：Windows 自带的是 Windows PowerShell 5.1，命令为 `powershell`；`pwsh` 是 PowerShell 7+ 的命令，Windows 默认**没有**安装（macOS/Linux 需自行安装 [PowerShell](https://github.com/PowerShell/PowerShell)）。
 
 ```bash
 # 一致性体检（18 项检查）
-pwsh -File 数据/校验.ps1
+powershell -File 数据/校验.ps1
 
 # 改完 数据/lumia.json 后，刷新可检索词典
-pwsh -File 数据/生成词典.ps1
+powershell -File 数据/生成词典.ps1
 ```
+
+> macOS / Linux 用户请把上面的 `powershell` 换成 `pwsh`。
 
 > **数据是唯一权威源**：所有词条/音系/语法/字形改动请先改 `数据/lumia.json`，再同步 Markdown 文档，并运行校验确保全 PASS。
 

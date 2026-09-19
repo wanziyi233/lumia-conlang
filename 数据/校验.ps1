@@ -1,5 +1,5 @@
 # Lumia consistency validator.
-# Run from repo root: pwsh -File data/validate.ps1
+# Run from repo root: powershell -File 数据/校验.ps1
 # Exit code: 0 = all pass, 1 = some fail.
 $ErrorActionPreference = 'Stop'
 $script:pass = 0

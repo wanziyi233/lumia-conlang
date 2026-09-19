@@ -10,11 +10,11 @@
 2. **同步 Markdown 文档**（`词典/`、`音系/`、`语法/`、`数字/`、`文字/` 等）。
 3. **运行校验，确保全部 PASS**：
    ```bash
-   pwsh -File 数据/校验.ps1
+   powershell -File 数据/校验.ps1
    ```
 4. 若改动了 `lumia.json`，**刷新可检索词典**：
    ```bash
-   pwsh -File 数据/生成词典.ps1
+   powershell -File 数据/生成词典.ps1
    ```
 
 ## 提交建议
@@ -29,4 +29,8 @@
 
 ## 编码注意
 
-`数据/校验.ps1`、`数据/生成词典.ps1` 采用纯 ASCII（中文路径用 Unicode 码点拼出），以规避 PowerShell 5.1 的 GBK 误读问题。修改脚本时请保持这一做法。
+`数据/校验.ps1`、`数据/生成词典.ps1` 的**可执行代码**保持纯 ASCII（中文路径用 Unicode 码点拼出），以规避 PowerShell 5.1 的 GBK 误读问题。修改脚本时请保持这一做法——**不要**在字符串、路径、标识符里直接写中文。
+
+> 注释里出现中文是安全的（已实测：PowerShell 5.1 下 18 项校验全 PASS），因为注释不参与求值。但为稳妥起见，代码部分请始终用码点拼中文。
+
+> 另注：Windows 自带的 Windows PowerShell 5.1 命令是 `powershell`，PowerShell 7+ 才是 `pwsh`。两个都能跑本项目的脚本。
