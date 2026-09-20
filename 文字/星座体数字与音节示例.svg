@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 1140" width="1120" height="1140">
+  <style>
+    .s{fill:none;stroke:#6fd6ff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+    .y{fill:none;stroke:#6fd6ff;stroke-width:3.6;stroke-linecap:round;stroke-linejoin:round}
+    .d{fill:#ffd166;stroke:none}
+    .v{fill:none;stroke:#6fd6ff;stroke-width:2}
+    .halo{fill:none;stroke:#6fd6ff;stroke-width:.5;opacity:.13}
+    .track{fill:none;stroke:#6fd6ff;stroke-width:.9;opacity:.34}
+    .arc{fill:none;stroke:#6fd6ff;stroke-width:1;opacity:.27;stroke-dasharray:3 6}
+    .bond{fill:none;stroke:#6fd6ff;stroke-width:.8;opacity:.24}
+    .fall{fill:#9fb4c8;stroke:none;opacity:.75}
+    .t{fill:#e8f0f8;font-family:sans-serif;font-size:20px;font-weight:bold}
+    .sub{fill:#9fb4c8;font-family:sans-serif;font-size:13px}
+    .cap{fill:#cfe0ef;font-family:sans-serif;font-size:15px;font-weight:bold}
+    .capz{fill:#9fb4c8;font-family:sans-serif;font-size:13px}
+    .lg{fill:#9fb4c8;font-family:sans-serif;font-size:13px}
+    .an{fill:#ffd166;font-family:sans-serif;font-size:12px;text-anchor:middle}
+  </style>
+
+  <defs>
+    <pattern id="sky" width="163" height="151" patternUnits="userSpaceOnUse">
+      <circle cx="18" cy="30" r="1" fill="#9fb4c8" opacity=".30"/>
+      <circle cx="86" cy="14" r="1.3" fill="#9fb4c8" opacity=".20"/>
+      <circle cx="52" cy="72" r=".9" fill="#9fb4c8" opacity=".26"/>
+      <circle cx="131" cy="96" r="1.1" fill="#9fb4c8" opacity=".18"/>
+      <circle cx="26" cy="124" r="1" fill="#9fb4c8" opacity=".24"/>
+      <circle cx="109" cy="58" r=".8" fill="#9fb4c8" opacity=".24"/>
+    </pattern>
+
+    <!-- 星符：120 格，中心 (60,60) -->
+    <g id="sela"><path class="s" d="M60 14 C66 40 80 46 106 60 C80 74 66 80 60 106 C54 80 40 74 14 60 C40 46 54 40 60 14 Z"/><circle class="d" cx="60" cy="60" r="4"/></g>
+    <g id="oba"><ellipse class="s" cx="60" cy="60" rx="42" ry="14"/><circle class="d" cx="102" cy="60" r="5"/></g>
+    <g id="lumia"><path class="s" d="M60 60 A8 8 0 0 1 76 60 A16 16 0 0 1 44 60 A24 24 0 0 1 92 60 A32 32 0 0 1 28 60 A40 40 0 0 1 108 60"/><circle class="d" cx="60" cy="60" r="4"/></g>
+    <g id="li"><path class="s" d="M36 60 H84"/></g>
+    <g id="luna"><path class="s" d="M60 18 A42 42 0 1 0 60 102 A34 34 0 1 1 60 18 Z"/></g>
+    <g id="na"><circle class="d" cx="60" cy="70" r="6"/><path class="s" d="M40 44 H80"/></g>
+
+    <!-- 数字符：100 格，中心 (50,50) -->
+    <g id="num2"><circle class="d" cx="40" cy="38" r="4.5"/><circle class="d" cx="60" cy="62" r="4.5"/></g>
+    <g id="num3"><circle class="d" cx="40" cy="38" r="4.5"/><circle class="d" cx="50" cy="50" r="4.5"/><circle class="d" cx="60" cy="62" r="4.5"/></g>
+
+    <!-- 音节符：100 格　辅音主体形 + 元音定位点（空心圈） -->
+    <g id="ve"><path class="y" d="M44 78 C44 60 58 56 58 42"/><circle class="d" cx="51" cy="58" r="3.5"/><circle class="v" cx="16" cy="50" r="4"/></g>
+    <g id="ga"><path class="y" d="M38 78 L64 34"/><circle class="d" cx="51" cy="56" r="3.5"/><circle class="v" cx="50" cy="18" r="4"/></g>
+  </defs>
+
+  <rect width="1120" height="1140" fill="#0a0e1a"/>
+  <rect width="1120" height="1140" fill="url(#sky)"/>
+
+  <!-- 句间弧轨 -->
+  <path class="arc" d="M677.7 329.1 C 790 450, 300 470, 411.6 581.6"/>
+  <path class="arc" d="M736.9 619.7 C 840 740, 300 760, 388.4 936.7"/>
+
+  <!-- 句轨 -->
+  <path class="track" d="M357.8 295.4 L546.8 140.8 M568.3 144.9 L647.4 287.3"/>
+  <path class="track" d="M447.1 580.4 L558.8 452.8 M581.6 452.4 L702.2 581"/>
+  <path class="track" d="M417.7 941 L528.4 822.4 M549.8 823.9 L650.8 966.9 M669.4 967 L780 813.8 M800.6 813.3 L893.8 929.7"/>
+
+  <!-- 星位光晕 -->
+  <circle class="halo" cx="340" cy="310" r="23"/><circle class="halo" cx="560" cy="130" r="17"/><circle class="halo" cx="660" cy="310" r="26"/>
+  <circle class="halo" cx="430" cy="600" r="26"/><circle class="halo" cx="359" cy="600" r="15"/><circle class="halo" cx="570" cy="440" r="17"/><circle class="halo" cx="720" cy="600" r="26"/>
+  <circle class="halo" cx="400" cy="960" r="26"/><circle class="halo" cx="540" cy="810" r="17"/><circle class="halo" cx="660" cy="980" r="16"/>
+  <circle class="halo" cx="660" cy="1022" r="16"/><circle class="halo" cx="790" cy="800" r="17"/><circle class="halo" cx="910" cy="950" r="26"/>
+
+  <!-- ══ 一：tia li oba.　数词作主语 ⇒ 实义 ⇒ 主干星体 ══ -->
+  <g transform="translate(318,288) scale(.44)"><use href="#num3"/></g>
+  <text x="340" y="360" class="an">实义 ⇒ 主干</text>
+  <g transform="translate(544,114) scale(.267)" opacity=".6"><use href="#li"/></g>
+  <g transform="translate(635,285) scale(.417)"><use href="#oba"/></g>
+  <circle class="fall" cx="712" cy="352" r="2.5"/>
+
+  <!-- ══ 二：dua luna li oba.　数词作修饰 ⇒ 数值 ⇒ 卫星 ══ -->
+  <g transform="translate(405,575) scale(.417)"><use href="#luna"/></g>
+  <g transform="translate(345,586) scale(.28)"><use href="#num2"/></g>
+  <path class="bond" d="M374 600 L404 600"/>
+  <text x="359" y="646" class="an">数值 ⇒ 卫星</text>
+  <g transform="translate(554,424) scale(.267)" opacity=".6"><use href="#li"/></g>
+  <g transform="translate(695,575) scale(.417)"><use href="#oba"/></g>
+  <circle class="fall" cx="772" cy="642" r="2.5"/>
+
+  <!-- ══ 三：sela na Vega li lumia.　专名 ⇒ 音节符串（双体） ══ -->
+  <g transform="translate(375,935) scale(.417)"><use href="#sela"/></g>
+  <g transform="translate(524,794) scale(.267)" opacity=".6"><use href="#na"/></g>
+  <g transform="translate(645,965) scale(.30)"><use href="#ve"/></g>
+  <path class="bond" d="M660 996 L660 1006"/>
+  <g transform="translate(645,1007) scale(.30)"><use href="#ga"/></g>
+  <text x="716" y="1028" class="an">双体链</text>
+  <g transform="translate(774,784) scale(.267)" opacity=".6"><use href="#li"/></g>
+  <g transform="translate(885,925) scale(.417)"><use href="#lumia"/></g>
+  <circle class="fall" cx="962" cy="992" r="2.5"/>
+
+  <!-- 题名与句注 -->
+  <text x="46" y="46" class="t">星座体 · 数词的两种身份与音节串</text>
+  <text x="46" y="70" class="sub">Selagrafi · Numeral Identity &amp; Syllable Chain</text>
+
+  <circle cx="46" cy="195" r="2.5" fill="#6fd6ff"/>
+  <text x="60" y="200" class="cap">tia li oba.</text>
+  <text x="60" y="222" class="capz">三体在旋转。　数词作主语 ⇒ 实义</text>
+
+  <circle cx="46" cy="495" r="2.5" fill="#6fd6ff"/>
+  <text x="60" y="500" class="cap">dua luna li oba.</text>
+  <text x="60" y="522" class="capz">两个月亮在绕行。　数词作修饰 ⇒ 数值</text>
+
+  <circle cx="46" cy="875" r="2.5" fill="#6fd6ff"/>
+  <text x="60" y="880" class="cap">sela na Vega li lumia.</text>
+  <text x="60" y="902" class="capz">织女星是亮的。　专名以音节串拼写</text>
+
+  <!-- 图例 -->
+  <path class="track" d="M56 1100 H96"/><text x="106" y="1105" class="lg">句轨</text>
+  <path class="arc" d="M186 1100 H226"/><text x="236" y="1105" class="lg">弧轨</text>
+  <path class="bond" d="M316 1100 H356"/><text x="366" y="1105" class="lg">卫星连线（较浅）</text>
+  <circle class="halo" cx="506" cy="1100" r="10"/><text x="522" y="1105" class="lg">星位光晕</text>
+  <g transform="translate(626,1086) scale(.28)"><use href="#num3"/></g><text x="656" y="1105" class="lg">数字符</text>
+  <g transform="translate(746,1086) scale(.28)"><use href="#ve"/></g><text x="776" y="1105" class="lg">音节符</text>
+</svg>

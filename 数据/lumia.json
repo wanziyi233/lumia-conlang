@@ -4,7 +4,7 @@
     "native": "露米亚",
     "gloss": "光",
     "ipa": "/ˈlu.mi.ɑ/",
-    "version": "0.8.0",
+    "version": "0.9.0",
     "purpose": "面向天文科幻社团的极简人造语（道本语式，娱乐向，偏科天文科幻）",
     "coreWordCount": 97,
     "designDecisions": [
@@ -15,6 +15,7 @@
       "文字：表意 + 表音混合（Selagrafi 星文 · 星轨体一笔连写 + 星座体艺术排布）",
       "语法：道本语框架 + 科幻特色（天体隐喻时态）",
       "数字：十进制 + 天文意象；数词一词双义，无一纯数字词（0=vaka，1=sola）",
+      "时间：全部复用现有词——一天=oba（圆），一小时=aka（圆上的一段弧），星期=sema na 天体名（七曜）",
       "偏科：刻意缺少厨房/球类/体育词汇"
     ]
   },
@@ -148,7 +149,7 @@
     { "id": 93, "w": "dama", "ipa": "/ˈdɑ.mɑ/", "cat": "base", "pos": "形", "zh": "漆黑的/深黑的", "en": "pitch-black", "ety": "自" },
     { "id": 94, "w": "rufa", "ipa": "/ˈru.fɑ/", "cat": "base", "pos": "形", "zh": "红", "en": "red", "ety": "自" },
     { "id": 95, "w": "laja", "ipa": "/ˈlɑ.jɑ/", "cat": "base", "pos": "形", "zh": "蓝", "en": "blue", "ety": "自" },
-    { "id": 96, "w": "aka", "ipa": "/ˈɑ.kɑ/", "cat": "base", "pos": "名", "zh": "弧/曲线", "en": "arc/curve", "ety": "自" },
+    { "id": 96, "w": "aka", "ipa": "/ˈɑ.kɑ/", "cat": "base", "pos": "名", "zh": "弧/曲线/一小时", "en": "arc/curve/hour", "ety": "自" },
     { "id": 97, "w": "koma", "ipa": "/ˈkɒ.mɑ/", "cat": "base", "pos": "名", "zh": "尾/拖尾/彗尾", "en": "tail/comet tail", "ety": "自" }
   ],
   "numerals": {
@@ -363,7 +364,22 @@
       "interiorAngleTarget": [50, 90],
       "backtrackLimit": 120,
       "spatialAllocation": "按词数分配；目标为每节点的平均占地面积大致相等",
-      "interSentence": { "mode": "弧轨（虚线弧）", "dasharray": "3 6", "opacity": 0.27 }
+      "interSentence": { "mode": "弧轨（虚线弧）", "dasharray": "3 6", "opacity": 0.27 },
+      "haloFormula": "光晕半径 = cell / 2 + 1",
+      "cell": { "main": 50, "companion": 32, "numeral": 44, "numeralAttached": 28, "syllable": 30 },
+      "attachments": {
+        "note": "数词与专名没有星符：数词用星数、专名用音节符串（均为 100 格）",
+        "numeral": {
+          "identity": "一词双义：实义 ⇒ 主干节点；数值义 ⇒ 卫星",
+          "standalone": "作句子成分（主/宾）时 cell 44，坐在句轨上",
+          "satellite": "作修饰语时 cell 28，挂在被修饰星符旁侧，不落句轨（地球—月球关系）",
+          "satelliteDistance": "主星 cell/2 + 卫星 cell/2 + 30",
+          "bond": { "width": 0.8, "opacity": 0.24, "rule": "卫星连线须比句轨更细更淡（句轨 0.9 / 0.34）" }
+        },
+        "syllabary": { "cell": 30, "chainGap": 42, "rule": "首节坐句轨节点位，后续音节向句轨外侧依次延伸，并以同款较浅连线相接" },
+        "rule": "附着物不参与句轨主路径；句轨只连词级节点"
+      },
+      "example2": "文字/星座体数字与音节示例.svg"
     },
     "direction": "横写左→右；艺术模式=星座式排布（见 文字/星座体规范.md）"
   },
@@ -388,5 +404,25 @@
     { "lumia": "komo li mako, mi li miko.", "zh": "宇宙很大，我很小。" },
     { "lumia": "meta la mi vega wo komo.", "zh": "未来我赴宇宙。" },
     { "lumia": "vaka la, no ena.", "zh": "虚空中没有人。" }
-  ]
+  ],
+  "time": {
+    "note": "时间表达全部复用现有词，不新造：一天 = oba（一个完整循环），一小时 = aka（这个圆上的一段弧）",
+    "hour": {
+      "w": "aka",
+      "sense": "一小时",
+      "en": "hour",
+      "reason": "aka 的基元义含「部分」——弧即圆的一部分",
+      "usage": "八点 = ota aka（数词前置）；在八点 = ota aka la"
+    },
+    "weekdays": [
+      { "zh": "周日", "lumia": "sema na Sola", "astro": "sola", "ety": "日曜日（太阳）" },
+      { "zh": "周一", "lumia": "sema na Luna", "astro": "luna", "ety": "月曜日（月亮）" },
+      { "zh": "周二", "lumia": "sema na Masa", "astro": "Masa", "ety": "火曜日（火星）" },
+      { "zh": "周三", "lumia": "sema na Mekuria", "astro": "Mekuria", "ety": "水曜日（水星）" },
+      { "zh": "周四", "lumia": "sema na Jupita", "astro": "Jupita", "ety": "木曜日（木星）" },
+      { "zh": "周五", "lumia": "sema na Venusa", "astro": "Venusa", "ety": "金曜日（金星）" },
+      { "zh": "周六", "lumia": "sema na Satuna", "astro": "Satuna", "ety": "土曜日（土星）" }
+    ],
+    "weekdayRule": "sema（时间）+ na + 天体名（首字母大写，视作专名）。只取肉眼可见的五颗行星 + 日月，故地球/天王星/海王星不入七曜。"
+  }
 }

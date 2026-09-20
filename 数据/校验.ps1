@@ -109,16 +109,18 @@ try {
 
 # 12. full-library scan
 $scan = Get-ChildItem -Path $root -Recurse -File | Where-Object { $_.Extension -in '.md', '.json', '.svg', '.html' }
-$longHits = @(); $greetHits = @(); $panHits = @()
+$longHits = @(); $greetHits = @(); $panHits = @(); $numHits = @()
 foreach ($f in $scan) {
     $c = [System.IO.File]::ReadAllText($f.FullName)
     if ($c.Contains([string][char]0x02D0)) { $longHits += $f.Name }
     if ($c.Contains('o mi tu!')) { $greetHits += $f.Name }
     if ($c.Contains('paneta ta')) { $panHits += $f.Name }
+    if ($c.Contains('e luna dua')) { $numHits += $f.Name }
 }
 if ($longHits.Count -eq 0) { OK "no length mark in whole repo" } else { BAD ("length mark still in: " + ($longHits -join ', ')) }
 if ($greetHits.Count -eq 0) { OK "no legacy greeting o mi tu!" } else { BAD ("legacy greeting still in: " + ($greetHits -join ', ')) }
 if ($panHits.Count -eq 0) { OK "no legacy paneta ta" } else { BAD ("legacy paneta ta still in: " + ($panHits -join ', ')) }
+if ($numHits.Count -eq 0) { OK "no legacy postposed numeral (luna dua)" } else { BAD ("postposed numeral still in: " + ($numHits -join ', ')) }
 
 # 13. dictionary html freshness (WARN only: dict.html is a derived artifact)
 if (Test-Path $dictHtml) {
@@ -165,13 +167,35 @@ if ($constSpecPath -and (Test-Path $constSpecPath)) {
             @{ n = 'halo.companion';      p = $CS + '\s*\|\s*\*{0,2}' + [string]$const.halo.companion + '\*{0,2}\s*\|' },
             @{ n = 'closure.maxWords';    p = '\u2264\s*' + [string]$const.closure.maxWords + '\s*\u8BCD' },
             @{ n = 'interiorAngleTarget'; p = [string]($const.interiorAngleTarget[0]) + '[\u2013-]' + [string]($const.interiorAngleTarget[1]) },
-            @{ n = 'backtrackLimit';      p = [string]$const.backtrackLimit + 'px' }
+            @{ n = 'backtrackLimit';      p = [string]$const.backtrackLimit + 'px' },
+            @{ n = 'cell.main';           p = $MS + '\s*\|\s*' + [string]$const.cell.main + '\s*\|' },
+            @{ n = 'cell.companion';      p = $CS + '\s*\|\s*' + [string]$const.cell.companion + '\s*\|' },
+            @{ n = 'cell.numeral';        p = '\u5B9E\u4E49\*{0,2}\s*\|\s*[^\r\n|]*\|\s*[^\r\n|]*\|\s*\*{0,2}' + [string]$const.cell.numeral },
+            @{ n = 'cell.numeralAttached'; p = '\u6570\u503C\*{0,2}\s*\|\s*[^\r\n|]*\|\s*[^\r\n|]*\|\s*\*{0,2}' + [string]$const.cell.numeralAttached },
+            @{ n = 'cell.syllable';       p = '\u6BCF\u8282\s*cell\s*\*{0,2}' + [string]$const.cell.syllable },
+            @{ n = 'syllabary.chainGap';  p = [string]$const.attachments.syllabary.chainGap + 'px' },
+            @{ n = 'numeral.bond.opacity'; p = '\u4E0D\u900F\u660E\u5EA6\s*\*{0,2}' + [regex]::Escape([string]$const.attachments.numeral.bond.opacity) }
         )
         $drift = @($anchors | Where-Object { $specText -notmatch $_.p })
         if ($drift.Count -eq 0) { OK ("constellation params match spec (" + $anchors.Count + " anchors)") }
         else { BAD ("constellation vs spec drift: " + (($drift | ForEach-Object { $_.n }) -join ', ')) }
     } catch { BAD ("constellation/spec compare error: " + $_.Exception.Message) }
 } else { BAD "cannot compare constellation params: spec file unavailable" }
+
+# 17. every SVG <use href="#id"> resolves to an id defined in the same file
+#     An undefined reference renders silently as blank -- no other check can see it.
+$svgFiles = @(Get-ChildItem -Path $root -Recurse -File -Filter *.svg)
+$dangling = @()
+foreach ($f in $svgFiles) {
+    $c = [System.IO.File]::ReadAllText($f.FullName)
+    $ids  = @([regex]::Matches($c, 'id="([^"]+)"')     | ForEach-Object { $_.Groups[1].Value })
+    $uses = @([regex]::Matches($c, 'href="#([^"]+)"')  | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
+    foreach ($u in $uses) {
+        if ($ids -notcontains $u) { $dangling += ($f.Name + ' -> #' + $u) }
+    }
+}
+if ($dangling.Count -eq 0) { OK ("all SVG <use> refs resolve (" + $svgFiles.Count + " files)") }
+else { BAD ("dangling SVG refs: " + ($dangling -join '; ')) }
 
 Write-Output ""
 Write-Output ("== RESULT: PASS " + $script:pass + " / FAIL " + $script:fail + " ==")
