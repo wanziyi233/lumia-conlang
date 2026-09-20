@@ -28,6 +28,7 @@
 | 📚 词典全表 | [阅读](https://wanziyi233.github.io/lumia-conlang/词典/词典.html) | `词典/词典.md` |
 | 🔢 数字 | [阅读](https://wanziyi233.github.io/lumia-conlang/数字/数字.html) | `数字/数字.md` |
 | ✍️ 文字设计说明 | [阅读](https://wanziyi233.github.io/lumia-conlang/文字/文字.html) | `文字/文字.md` |
+| 🌌 **星座体**（艺术排布） | [规范](https://wanziyi233.github.io/lumia-conlang/文字/星座体规范.html) · [示例](https://wanziyi233.github.io/lumia-conlang/文字/星座体示例.svg) | `文字/星座体规范.md` |
 
 > **关于图片**：GitHub 的仓库文件预览有时无法显示 SVG（在本机装了网络加速工具时尤其常见）。
 > **本站点（github.io）不受此影响**，所有星符图表均正常显示。
@@ -44,7 +45,7 @@ It is deliberately "unbalanced": it names stars, planets, Saturn, the universe, 
 
 - 语言名 / Name：**Lumia**（/ˈlu.mi.ɑ/，露米亚），本义就是「光」/ *light*。
 - 核心词汇 / Core words：**97 个**（极简）。
-- 文字 / Script：**Selagrafi（星文 · 星轨体）**，表意 + 表音混合。
+- 文字 / Script：**Selagrafi（星文）**——星轨体一笔连写 + 星座体艺术排布，表意 + 表音混合。
 
 ## 特性 · Features
 
