@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 420" width="880" height="420">
+  <rect width="880" height="420" fill="#0a0e1a"/>
+  <style>
+    .s{fill:none;stroke:#6fd6ff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+    .d{fill:#ffd166;stroke:none}
+    .lb{fill:#9fb4c8;font-family:sans-serif;font-size:13px;text-anchor:middle}
+    .t{fill:#e8f0f8;font-family:sans-serif;font-size:22px;font-weight:bold;text-anchor:middle}
+    .sub{fill:#9fb4c8;font-family:sans-serif;font-size:13px;text-anchor:middle}
+    .ln{fill:none;stroke:#6fd6ff;stroke-width:1;stroke-dasharray:3 6;opacity:.35}
+  </style>
+
+  <text x="440" y="40" class="t">komo li mako, mi li miko.</text>
+  <text x="440" y="64" class="sub">宇宙很大，我很小 · The universe is big, I am small</text>
+
+  <defs>
+    <g id="komo"><circle class="s" cx="60" cy="60" r="42"/><circle class="d" cx="48" cy="46" r="3"/><circle class="d" cx="72" cy="54" r="3"/><circle class="d" cx="58" cy="74" r="3"/></g>
+    <g id="li"><path class="s" d="M36 60 H84"/></g>
+    <g id="mako"><path class="s" d="M48 46 L32 60 L48 74"/><path class="s" d="M72 46 L88 60 L72 74"/></g>
+    <g id="mi"><circle class="d" cx="60" cy="60" r="9"/></g>
+    <g id="miko"><path class="s" d="M32 46 L48 60 L32 74"/><path class="s" d="M88 46 L72 60 L88 74"/></g>
+  </defs>
+
+  <!-- 句轨：词与词以细线连成星座 -->
+  <path class="ln" d="M210 140 L390 220 L570 130 L730 250 L530 320 L310 300"/>
+
+  <g transform="translate(180,110) scale(0.5)"><use href="#komo"/></g>
+  <text x="210" y="192" class="lb">komo 宇宙</text>
+
+  <g transform="translate(360,190) scale(0.5)"><use href="#li"/></g>
+  <text x="390" y="272" class="lb">li 谓语</text>
+
+  <g transform="translate(540,100) scale(0.5)"><use href="#mako"/></g>
+  <text x="570" y="182" class="lb">mako 大</text>
+
+  <g transform="translate(700,220) scale(0.5)"><use href="#mi"/></g>
+  <text x="730" y="302" class="lb">mi 我</text>
+
+  <g transform="translate(500,290) scale(0.5)"><use href="#li"/></g>
+  <text x="530" y="372" class="lb">li 谓语</text>
+
+  <g transform="translate(280,270) scale(0.5)"><use href="#miko"/></g>
+  <text x="310" y="352" class="lb">miko 小</text>
+</svg>

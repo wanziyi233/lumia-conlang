@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 1090" width="860" height="1090">
+  <style>
+    .s{fill:none;stroke:#6fd6ff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+    .d{fill:#ffd166;stroke:none}
+    .halo{fill:none;stroke:#6fd6ff;stroke-width:.5;opacity:.13}
+    .track{fill:none;stroke:#6fd6ff;stroke-width:.9;opacity:.34}
+    .close{fill:none;stroke:#6fd6ff;stroke-width:.9;opacity:.16}
+    .arc{fill:none;stroke:#6fd6ff;stroke-width:1;opacity:.27;stroke-dasharray:3 6}
+    .node{fill:#9fb4c8;stroke:none}
+    .fall{fill:#9fb4c8;stroke:none;opacity:.75}
+    .t{fill:#e8f0f8;font-family:sans-serif;font-size:20px;font-weight:bold}
+    .sub{fill:#9fb4c8;font-family:sans-serif;font-size:13px}
+    .cap{fill:#cfe0ef;font-family:sans-serif;font-size:15px;font-weight:bold}
+    .capz{fill:#9fb4c8;font-family:sans-serif;font-size:13px}
+    .lg{fill:#9fb4c8;font-family:sans-serif;font-size:13px}
+  </style>
+
+  <defs>
+    <pattern id="sky" width="163" height="151" patternUnits="userSpaceOnUse">
+      <circle cx="18" cy="30" r="1" fill="#9fb4c8" opacity=".30"/>
+      <circle cx="86" cy="14" r="1.3" fill="#9fb4c8" opacity=".20"/>
+      <circle cx="52" cy="72" r=".9" fill="#9fb4c8" opacity=".26"/>
+      <circle cx="131" cy="96" r="1.1" fill="#9fb4c8" opacity=".18"/>
+      <circle cx="26" cy="124" r="1" fill="#9fb4c8" opacity=".24"/>
+      <circle cx="109" cy="58" r=".8" fill="#9fb4c8" opacity=".24"/>
+    </pattern>
+
+    <g id="sela"><path class="s" d="M60 14 C66 40 80 46 106 60 C80 74 66 80 60 106 C54 80 40 74 14 60 C40 46 54 40 60 14 Z"/><circle class="d" cx="60" cy="60" r="4"/></g>
+    <g id="lumia"><path class="s" d="M60 60 A8 8 0 0 1 76 60 A16 16 0 0 1 44 60 A24 24 0 0 1 92 60 A32 32 0 0 1 28 60 A40 40 0 0 1 108 60"/><circle class="d" cx="60" cy="60" r="4"/></g>
+    <g id="li"><path class="s" d="M36 60 H84"/></g>
+    <g id="komo"><circle class="s" cx="60" cy="60" r="42"/><circle class="d" cx="48" cy="46" r="3"/><circle class="d" cx="72" cy="54" r="3"/><circle class="d" cx="58" cy="74" r="3"/></g>
+    <g id="mako"><path class="s" d="M48 46 L32 60 L48 74"/><path class="s" d="M72 46 L88 60 L72 74"/></g>
+    <g id="mi"><circle class="d" cx="60" cy="60" r="8"/></g>
+    <g id="miko"><path class="s" d="M32 46 L48 60 L32 74"/><path class="s" d="M88 46 L72 60 L88 74"/></g>
+    <g id="Satuna"><ellipse class="s" cx="60" cy="60" rx="47" ry="14" stroke-width="7"/><circle class="d" cx="60" cy="60" r="10"/></g>
+    <g id="paneta"><circle class="d" cx="48" cy="60" r="14"/><path class="s" d="M62 66 C 78 58 90 62 102 74"/></g>
+    <g id="ku"><circle class="d" cx="60" cy="46" r="6"/><path class="s" d="M40 72 H80"/></g>
+    <g id="oba"><ellipse class="s" cx="60" cy="60" rx="42" ry="14"/><circle class="d" cx="102" cy="60" r="5"/></g>
+  </defs>
+
+  <rect width="860" height="1090" fill="#0a0e1a"/>
+  <rect width="860" height="1090" fill="url(#sky)"/>
+
+  <!-- 句间弧轨（模式 B） -->
+  <path class="arc" d="M723.4 352.3 C 830 530, 280 560, 347.1 677.4"/>
+  <path class="arc" d="M787.3 604 C 900 790, 330 820, 407.3 957.3"/>
+
+  <!-- 句轨：在节点处断开，断口 = 星位光晕半径 -->
+  <path class="track" d="M464.7 313.5 L570.4 159 M589.8 158.9 L695.1 308.7"/>
+  <path class="track" d="M369.7 675.9 L419.1 553.5 M438.9 548.2 L495.6 592.5 M520.6 582.9 L547.2 432.2 M553.1 429.7 L625.2 480.2 M630.5 515.6 L589.3 568.4 M595.8 581.8 L747.8 581.8"/>
+  <path class="track" d="M428.9 955.6 L480.9 812.8 M497.6 809.8 L560 884.1 M595.1 885.6 L677.8 802.9 M697 806.3 L752.8 925.9"/>
+
+  <!-- 星位光晕：标记"此处是一颗星"，半径 = 句轨断口 -->
+  <circle class="halo" cx="450" cy="335" r="26"/><circle class="halo" cx="580" cy="145" r="17"/><circle class="halo" cx="710" cy="330" r="26"/>
+  <circle class="halo" cx="360" cy="700" r="26"/><circle class="halo" cx="425.5" cy="537.7" r="17"/><circle class="halo" cx="516.1" cy="608.5" r="26"/>
+  <circle class="halo" cx="646.5" cy="495.1" r="26"/><circle class="halo" cx="578.8" cy="581.8" r="17"/><circle class="halo" cx="773.8" cy="581.8" r="26"/>
+  <circle class="halo" cx="420" cy="980" r="26"/><circle class="halo" cx="486.7" cy="796.8" r="17"/><circle class="halo" cx="576.7" cy="904" r="26"/>
+  <circle class="halo" cx="689.8" cy="790.9" r="17"/><circle class="halo" cx="763.8" cy="949.5" r="26"/>
+
+  <!-- 星座一：sela li lumia.（3 词 → 闭合三角形） -->
+  <path class="close" d="M684 330.5 L476 334.5"/>
+  <g transform="translate(424.8,309.8) scale(.42)"><use href="#sela"/></g>
+  <g transform="translate(563.8,128.8) scale(.27)" opacity=".6"><use href="#li"/></g>
+  <g transform="translate(684.8,304.8) scale(.42)"><use href="#lumia"/></g>
+  <circle class="fall" cx="580" cy="358" r="2.5"/>
+
+  <!-- 星座二：komo li mako, mi li miko.（6 词 → 开放） -->
+  <g transform="translate(334.8,674.8) scale(.42)"><use href="#komo"/></g>
+  <g transform="translate(409.3,521.5) scale(.27)" opacity=".6"><use href="#li"/></g>
+  <g transform="translate(490.9,583.3) scale(.42)"><use href="#mako"/></g>
+  <circle class="node" cx="548.2" cy="426.3" r="3.5"/>
+  <g transform="translate(621.3,469.9) scale(.42)"><use href="#mi"/></g>
+  <g transform="translate(562.6,565.6) scale(.27)" opacity=".6"><use href="#li"/></g>
+  <g transform="translate(748.6,556.6) scale(.42)"><use href="#miko"/></g>
+  <circle class="fall" cx="808" cy="610" r="2.5"/>
+
+  <!-- 星座三：Satuna li paneta ku oba.（5 词 → 开放） -->
+  <g transform="translate(394.8,954.8) scale(.42)"><use href="#Satuna"/></g>
+  <path class="track" d="M436 972 L461 940"/><circle class="d" cx="464" cy="936" r="3.5"/>
+  <g transform="translate(470.5,780.6) scale(.27)" opacity=".6"><use href="#li"/></g>
+  <g transform="translate(551.5,878.8) scale(.42)"><use href="#paneta"/></g>
+  <g transform="translate(673.6,774.7) scale(.27)" opacity=".6"><use href="#ku"/></g>
+  <g transform="translate(738.6,924.3) scale(.42)"><use href="#oba"/></g>
+  <circle class="fall" cx="798" cy="978" r="2.5"/>
+
+  <!-- 题名与句注 -->
+  <text x="46" y="46" class="t">星座体 · 星座式排布</text>
+  <text x="46" y="70" class="sub">Selagrafi · Constellation Layout　一句一星座，短句闭合，长句开放</text>
+
+  <circle cx="46" cy="165" r="2.5" fill="#6fd6ff"/>
+  <text x="60" y="170" class="cap">sela li lumia.</text>
+  <text x="60" y="192" class="capz">星星是亮的。　3 词 → 闭合</text>
+
+  <circle cx="46" cy="445" r="2.5" fill="#6fd6ff"/>
+  <text x="60" y="450" class="cap">komo li mako, mi li miko.</text>
+  <text x="60" y="472" class="capz">宇宙很大，我很小。　6 词 → 开放</text>
+
+  <circle cx="46" cy="810" r="2.5" fill="#6fd6ff"/>
+  <text x="60" y="815" class="cap">Satuna li paneta ku oba.</text>
+  <text x="60" y="837" class="capz">土星是带环的行星。　5 词 → 开放</text>
+
+  <!-- 图例 -->
+  <circle class="d" cx="56" cy="1036" r="4"/><text x="70" y="1041" class="lg">星点</text>
+  <path class="track" d="M156 1036 H196"/><text x="206" y="1041" class="lg">句轨</text>
+  <path class="arc" d="M286 1036 H326"/><text x="336" y="1041" class="lg">弧轨</text>
+  <circle class="node" cx="416" cy="1036" r="3.5"/><text x="430" y="1041" class="lg">节点星</text>
+  <circle class="fall" cx="506" cy="1036" r="2.5"/><text x="520" y="1041" class="lg">落星</text>
+  <path class="close" d="M606 1036 H646"/><text x="656" y="1041" class="lg">闭合轨</text>
+  <circle class="halo" cx="736" cy="1036" r="10"/><text x="752" y="1041" class="lg">星位光晕</text>
+</svg>
