@@ -126,6 +126,53 @@ if (Test-Path $dictHtml) {
     else { Write-Output "  [WARN] dict.html older than lumia.json; run data/gen-dict.ps1" }
 } else { Write-Output "  [WARN] dict.html missing; run data/gen-dict.ps1" }
 
+# 14. constellation section completeness
+$const = $j.script.constellation
+if ($null -eq $const) {
+    BAD "script.constellation missing"
+} else {
+    $needConst = @('name','spec','example','unit','nodeScale','halo','closure','interiorAngleTarget','backtrackLimit','spatialAllocation','interSentence')
+    $haveConst = @($const.PSObject.Properties.Name)
+    $goneConst = @($needConst | Where-Object { $haveConst -notcontains $_ })
+    if ($goneConst.Count -eq 0) { OK ("constellation has all " + $needConst.Count + " keys") }
+    else { BAD ("constellation missing keys: " + ($goneConst -join ', ')) }
+}
+
+# 15. constellation referenced files exist
+$constSpecPath = $null
+try {
+    $sep = [IO.Path]::DirectorySeparatorChar
+    $constSpecPath = Join-Path $root ($const.spec -replace '/', $sep)
+    $constExPath   = Join-Path $root ($const.example -replace '/', $sep)
+    $missRef = @()
+    if (-not (Test-Path $constSpecPath)) { $missRef += $const.spec }
+    if (-not (Test-Path $constExPath))   { $missRef += $const.example }
+    if ($missRef.Count -eq 0) { OK "constellation spec/example files exist" }
+    else { BAD ("constellation references missing: " + ($missRef -join ', ')) }
+} catch { BAD ("constellation file check error: " + $_.Exception.Message) }
+
+# 16. constellation params agree with the spec document
+#     Chinese anchors are written as \uXXXX escapes so this file stays pure ASCII.
+if ($constSpecPath -and (Test-Path $constSpecPath)) {
+    try {
+        $specText = [System.IO.File]::ReadAllText($constSpecPath)
+        $MS = '\u4E3B\u661F'   # main star
+        $CS = '\u4F34\u661F'   # companion star
+        $anchors = @(
+            @{ n = 'nodeScale.main';      p = $MS + '\*{0,2}\s*\|\s*[^\r\n|]*\|\s*' + [regex]::Escape([string]$const.nodeScale.main) },
+            @{ n = 'nodeScale.companion'; p = $CS + '\*{0,2}\s*\|\s*[^\r\n|]*\|\s*' + [regex]::Escape([string]$const.nodeScale.companion) },
+            @{ n = 'halo.main';           p = $MS + '\s*\|\s*\*{0,2}' + [string]$const.halo.main + '\*{0,2}\s*\|' },
+            @{ n = 'halo.companion';      p = $CS + '\s*\|\s*\*{0,2}' + [string]$const.halo.companion + '\*{0,2}\s*\|' },
+            @{ n = 'closure.maxWords';    p = '\u2264\s*' + [string]$const.closure.maxWords + '\s*\u8BCD' },
+            @{ n = 'interiorAngleTarget'; p = [string]($const.interiorAngleTarget[0]) + '[\u2013-]' + [string]($const.interiorAngleTarget[1]) },
+            @{ n = 'backtrackLimit';      p = [string]$const.backtrackLimit + 'px' }
+        )
+        $drift = @($anchors | Where-Object { $specText -notmatch $_.p })
+        if ($drift.Count -eq 0) { OK ("constellation params match spec (" + $anchors.Count + " anchors)") }
+        else { BAD ("constellation vs spec drift: " + (($drift | ForEach-Object { $_.n }) -join ', ')) }
+    } catch { BAD ("constellation/spec compare error: " + $_.Exception.Message) }
+} else { BAD "cannot compare constellation params: spec file unavailable" }
+
 Write-Output ""
 Write-Output ("== RESULT: PASS " + $script:pass + " / FAIL " + $script:fail + " ==")
 if ($script:fail -gt 0) { exit 1 } else { exit 0 }

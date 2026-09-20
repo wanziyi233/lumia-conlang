@@ -97,7 +97,7 @@ It is deliberately "unbalanced": it names stars, planets, Saturn, the universe, 
 需要 PowerShell。**注意命令名不一样**：Windows 自带的是 Windows PowerShell 5.1，命令为 `powershell`；`pwsh` 是 PowerShell 7+ 的命令，Windows 默认**没有**安装（macOS/Linux 需自行安装 [PowerShell](https://github.com/PowerShell/PowerShell)）。
 
 ```bash
-# 一致性体检（18 项检查）
+# 一致性体检（21 项检查）
 powershell -File 数据/校验.ps1
 
 # 改完 数据/lumia.json 后，刷新可检索词典
