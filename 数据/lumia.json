@@ -4,7 +4,7 @@
     "native": "露米亚",
     "gloss": "光",
     "ipa": "/ˈlu.mi.ɑ/",
-    "version": "0.7.0",
+    "version": "0.8.0",
     "purpose": "面向天文科幻社团的极简人造语（道本语式，娱乐向，偏科天文科幻）",
     "coreWordCount": 97,
     "designDecisions": [
@@ -352,7 +352,20 @@
       "多位数": "位值横排（如 2025 = 2·0·2·5）",
       "大数": "复合不新造词（10000 = deka kilo）"
     },
-    "direction": "横写左→右；艺术模式=星座式排布"
+    "constellation": {
+      "name": "星座体（星座式排布）",
+      "spec": "文字/星座体规范.md",
+      "example": "文字/星座体示例.svg",
+      "unit": "一句 = 一个星座；词 = 星；段 = 星系",
+      "nodeScale": { "main": 0.42, "companion": 0.27, "companionOpacity": 0.6 },
+      "halo": { "main": 26, "companion": 17, "rule": "句轨断口 = 该节点的光晕半径" },
+      "closure": { "maxWords": 4, "opacity": 0.16, "note": "短句首尾闭合成图形（对应句号）；长句保持开放" },
+      "interiorAngleTarget": [50, 90],
+      "backtrackLimit": 120,
+      "spatialAllocation": "按词数分配；目标为每节点的平均占地面积大致相等",
+      "interSentence": { "mode": "弧轨（虚线弧）", "dasharray": "3 6", "opacity": 0.27 }
+    },
+    "direction": "横写左→右；艺术模式=星座式排布（见 文字/星座体规范.md）"
   },
   "properNames": [
     { "zh": "水星", "w": "Mekuria", "ipa": "/ˈmɛ.ku.ri.ɑ/", "ety": "Mercurius" },

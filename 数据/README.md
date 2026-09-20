@@ -17,11 +17,11 @@
 | `lexicon` | 97 个核心词数组（`w`=词形，`ipa`，`cat`=func/astro/num/base，`pos`，`zh`，`en`，`ety`=自/借） |
 | `numerals` | 十进制数词（一词双义）与组数示例 |
 | `grammar` | 语序、功能词、代词、天体隐喻时态、例句 |
-| `script` | Selagrafi 星文：原则、基元、字形配方、音节符、方向 |
+| `script` | Selagrafi 星文：原则、基元、字形配方、音节符、方向、**星座体参数** |
 | `properNames` | 八大行星专名 |
 
 ## 使用约定
 
 - **lexicon 的 `cat` 取值**：`func` 功能词 · `astro` 天文科幻借词 · `num` 数词 · `base` 基础自创词。
 - 此 JSON 是权威数据源；`词典.md`、`数字.md` 等 Markdown 是人类可读版本，二者应保持同步。
-- 版本号随设计变更递增（当前 `0.7.0`）。
+- 版本号随设计变更递增（当前 `0.8.0`）。

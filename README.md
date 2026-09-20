@@ -6,7 +6,7 @@
 作者 / 维护者：**wanziyi233** · Maintainer: [@wanziyi233](https://github.com/wanziyi233)
 
 [![License: CC BY-SA 4.0](https://img.shields.io/badge/License-CC%20BY--SA%204.0-lightgrey.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-v0.7.0-blue.svg)](数据/lumia.json)
+[![Version](https://img.shields.io/badge/version-v0.8.0-blue.svg)](数据/lumia.json)
 [![Validate](https://github.com/wanziyi233/lumia-conlang/actions/workflows/validate.yml/badge.svg)](.github/workflows/validate.yml)
 
 > **komo li mako, mi li miko.**
@@ -120,4 +120,4 @@ powershell -File 数据/生成词典.ps1
 
 ---
 
-*This project is a work-in-progress development version (v0.7.0). 本项目为开发版，仍会持续改动。*
+*This project is a work-in-progress development version (v0.8.0). 本项目为开发版，仍会持续改动。*
