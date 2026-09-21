@@ -6,7 +6,7 @@
 作者 / 维护者：**wanziyi233** · Maintainer: [@wanziyi233](https://github.com/wanziyi233)
 
 [![License: CC BY-SA 4.0](https://img.shields.io/badge/License-CC%20BY--SA%204.0-lightgrey.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-v0.11.0-blue.svg)](数据/lumia.json)
+[![Version](https://img.shields.io/badge/version-v0.12.0-blue.svg)](数据/lumia.json)
 [![Validate](https://github.com/wanziyi233/lumia-conlang/actions/workflows/validate.yml/badge.svg)](.github/workflows/validate.yml)
 
 > **komo li mako, mi li miko.**
@@ -22,6 +22,7 @@
 | --- | --- | --- |
 | 🚀 **五分钟上手**（新社员从这里开始） | [阅读](https://wanziyi233.github.io/lumia-conlang/上手.html) | `上手.md` |
 | 🔍 **可检索词典**（97 词） | [打开词典](https://wanziyi233.github.io/lumia-conlang/词典.html) | `词典.html` |
+| 🗺️ **语域总览图**（97 词分层） | [查看总览](https://wanziyi233.github.io/lumia-conlang/文字/语域总览.svg) | `文字/语域总览.svg` |
 | 📣 社团宣言（Lumia 原文） | [阅读](https://wanziyi233.github.io/lumia-conlang/社团宣言.html) | `社团宣言.md` |
 | ⭐ **星符总表**（文字系统） | [查看星符](https://wanziyi233.github.io/lumia-conlang/文字/符表.svg) | `文字/符表.svg` |
 | 📝 实用语速查 | [阅读](https://wanziyi233.github.io/lumia-conlang/实用语.html) | `实用语.md` |
@@ -99,7 +100,7 @@ It is deliberately "unbalanced": it names stars, planets, Saturn, the universe, 
 需要 PowerShell。**注意命令名不一样**：Windows 自带的是 Windows PowerShell 5.1，命令为 `powershell`；`pwsh` 是 PowerShell 7+ 的命令，Windows 默认**没有**安装（macOS/Linux 需自行安装 [PowerShell](https://github.com/PowerShell/PowerShell)）。
 
 ```bash
-# 一致性体检（23 项检查）
+# 一致性体检（24 项检查）
 powershell -File 数据/校验.ps1
 
 # 改完 数据/lumia.json 后，刷新可检索词典
@@ -123,4 +124,4 @@ powershell -File 数据/生成词典.ps1
 
 ---
 
-*This project is a work-in-progress development version (v0.11.0). 本项目为开发版，仍会持续改动。*
+*This project is a work-in-progress development version (v0.12.0). 本项目为开发版，仍会持续改动。*

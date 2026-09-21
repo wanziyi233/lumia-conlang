@@ -1,0 +1,253 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1300 1300" width="1300" height="1300">
+  <!-- counts: astro=19 base=50 func=17 num=11 -->
+  <!-- generated from lumia.json; each node draws its real Selagrafi glyph -->
+  <style>
+    .s{fill:none;stroke:#6fd6ff;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+    .d{fill:#ffd166;stroke:none}
+    .ring{fill:none;stroke:#6fd6ff;stroke-width:.6;opacity:.14}
+    .t{fill:#e8f0f8;font-family:sans-serif;font-size:22px;font-weight:bold}
+    .sub{fill:#9fb4c8;font-family:sans-serif;font-size:13px}
+    .lb{fill:#cfe0ef;font-family:sans-serif;font-size:13px;text-anchor:middle}
+    .rl{fill:#ffd166;font-family:sans-serif;font-size:13px;font-weight:bold;text-anchor:middle}
+    .lg{fill:#9fb4c8;font-family:sans-serif;font-size:13px}
+  </style>
+  <rect width="1300" height="1300" fill="#0a0e1a"/>
+  <defs>
+    <g id="g_lumia"><path class="s" d="M60 60 A8 8 0 0 1 76 60 A16 16 0 0 1 44 60 A24 24 0 0 1 92 60 A32 32 0 0 1 28 60 A40 40 0 0 1 108 60"/><circle class="d" cx="60" cy="60" r="4"/></g>
+    <g id="g_sela"><path class="s" d="M60 14 C66 40 80 46 106 60 C80 74 66 80 60 106 C54 80 40 74 14 60 C40 46 54 40 60 14 Z"/><circle class="d" cx="60" cy="60" r="4"/></g>
+    <g id="g_pusa"><path class="s" d="M8 60 C20 36 28 36 38 60 C48 84 56 84 66 60 C76 36 84 36 94 60 C102 80 110 80 116 60"/></g>
+    <g id="g_sola"><path class="s" d="M60 34 A26 26 0 1 1 60 86 A26 26 0 1 1 60 34 Z"/><circle class="d" cx="60" cy="60" r="5"/></g>
+    <g id="g_komo"><circle class="s" cx="60" cy="60" r="42"/><circle class="d" cx="48" cy="46" r="3"/><circle class="d" cx="72" cy="54" r="3"/><circle class="d" cx="58" cy="74" r="3"/></g>
+    <g id="g_oba"><ellipse class="s" cx="60" cy="60" rx="42" ry="14"/><circle class="d" cx="102" cy="60" r="5"/></g>
+    <g id="g_mako"><path class="s" d="M48 46 L32 60 L48 74"/><path class="s" d="M72 46 L88 60 L72 74"/></g>
+    <g id="g_enega"><path class="s" d="M20 70 L44 28 L58 50 L74 26 L100 64"/></g>
+    <g id="g_vaka"><path class="s" d="M20 60 A46 46 0 1 1 100 60"/></g>
+    <g id="g_gala"><path class="s" d="M60 60 A8 8 0 0 1 76 60 A16 16 0 0 1 44 60 A24 24 0 0 1 92 60 A32 32 0 0 1 28 60 A40 40 0 0 1 108 60"/></g>
+    <g id="g_nebula"><path class="s" d="M18 58 C34 44 46 72 62 58 C76 46 86 66 102 54"/><circle class="d" cx="46" cy="42" r="3"/><circle class="d" cx="74" cy="66" r="3"/><circle class="d" cx="56" cy="76" r="3"/></g>
+    <g id="g_kometa"><circle class="d" cx="44" cy="42" r="6"/><path class="s" d="M50 46 C66 72 88 88 112 104"/></g>
+    <g id="g_luna"><path class="s" d="M60 18 A42 42 0 1 0 60 102 A34 34 0 1 1 60 18 Z"/></g>
+    <g id="g_nova"><path class="s" d="M60 80 V48 M52 56 L60 48 L68 56"/><circle class="d" cx="60" cy="40" r="3.5"/></g>
+    <g id="g_miko"><path class="s" d="M32 46 L48 60 L32 74"/><path class="s" d="M88 46 L72 60 L88 74"/></g>
+    <g id="g_meta"><circle class="d" cx="34" cy="70" r="5"/><path class="s" d="M42 68 Q68 26 98 48"/></g>
+    <g id="g_paneta"><circle class="d" cx="48" cy="60" r="14"/><path class="s" d="M62 66 C 78 58 90 62 102 74"/></g>
+    <g id="g_tele"><circle class="d" cx="40" cy="60" r="5"/><path class="s" d="M47 60 C 66 57 88 53 108 49"/></g>
+    <g id="g_era"><path class="s" d="M20 60 Q60 38 100 60"/></g>
+    <g id="f_tu"><circle class="d" cx="46" cy="60" r="6"/><path class="s" d="M58 60 H88"/></g>
+    <g id="f_fo"><path class="s" d="M88 60 H40 M48 48 L36 60 L48 72"/></g>
+    <g id="f_no"><path class="s" d="M34 80 L86 40"/></g>
+    <g id="f_pi"><circle class="s" cx="60" cy="60" r="26"/></g>
+    <g id="f_ka"><circle class="d" cx="60" cy="46" r="5"/><path class="s" d="M60 56 C60 72 50 74 50 82"/></g>
+    <g id="f_ta"><circle class="d" cx="74" cy="60" r="6"/><path class="s" d="M32 60 H62"/></g>
+    <g id="f_en"><path class="s" d="M36 52 H84 M36 68 H84"/></g>
+    <g id="f_wo"><path class="s" d="M32 60 H80 M72 48 L84 60 L72 72"/></g>
+    <g id="f_u"><path class="s" d="M48 36 V84 M72 36 V84"/></g>
+    <g id="f_na"><circle class="d" cx="60" cy="70" r="6"/><path class="s" d="M40 44 H80"/></g>
+    <g id="f_lo"><path class="s" d="M40 52 Q60 82 80 52"/><circle class="d" cx="60" cy="62" r="5"/></g>
+    <g id="f_e"><path class="s" d="M60 36 V84"/></g>
+    <g id="f_o"><path class="s" d="M60 44 V82"/><circle class="d" cx="60" cy="34" r="5"/></g>
+    <g id="f_li"><path class="s" d="M36 60 H84"/></g>
+    <g id="f_la"><path class="s" d="M36 72 Q60 40 84 72"/></g>
+    <g id="f_ku"><circle class="d" cx="60" cy="46" r="6"/><path class="s" d="M40 72 H80"/></g>
+    <g id="f_mi"><circle class="d" cx="60" cy="60" r="8"/></g>
+    <g id="b_supa"><path class="s" d="M60 84 V40 M48 52 L60 40 L72 52"/></g>
+    <g id="b_vira"><circle class="d" cx="60" cy="44" r="5"/><circle class="s" cx="60" cy="68" r="16"/></g>
+    <g id="b_fora"><path class="s" d="M60 36 V84 M48 46 H72 M48 74 H72"/></g>
+    <g id="b_mira"><ellipse class="s" cx="54" cy="60" rx="26" ry="16"/><circle class="d" cx="54" cy="60" r="5"/><path class="s" d="M80 60 H100"/></g>
+    <g id="b_wela"><path class="s" d="M30 60 H64 M56 48 L68 60 L56 72"/><path class="s" d="M90 60 H56 M64 48 L52 60 L64 72"/></g>
+    <g id="b_kopo"><ellipse class="s" cx="60" cy="60" rx="22" ry="32"/></g>
+    <g id="b_pela"><path class="s" d="M86 60 Q50 40 36 60"/></g>
+    <g id="b_uvo"><path class="s" d="M60 40 Q72 60 60 78 Q48 60 60 40 Z"/></g>
+    <g id="b_seva"><path class="s" d="M36 68 Q60 88 84 68"/><circle class="d" cx="48" cy="50" r="4"/><circle class="d" cx="72" cy="50" r="4"/></g>
+    <g id="b_aka"><path class="s" d="M70 32 A28 28 0 0 1 70 88"/></g>
+    <g id="b_ala"><circle class="d" cx="60" cy="60" r="28"/></g>
+    <g id="b_rufa"><circle class="d" cx="60" cy="66" r="5"/><path class="s" d="M44 48 Q60 32 76 48"/></g>
+    <g id="b_nesa"><path class="s" d="M40 52 Q60 82 80 52"/><circle class="d" cx="52" cy="62" r="4"/><circle class="d" cx="68" cy="62" r="4"/></g>
+    <g id="b_sena"><circle class="d" cx="64" cy="52" r="5"/><path class="s" d="M54 60 L38 76"/></g>
+    <g id="b_keta"><path class="s" d="M40 66 Q60 84 80 66"/><circle class="d" cx="60" cy="46" r="5"/></g>
+    <g id="b_pala"><path class="s" d="M30 76 L60 44 L90 60"/></g>
+    <g id="b_laja"><circle class="d" cx="60" cy="54" r="5"/><path class="s" d="M44 72 Q60 88 76 72"/></g>
+    <g id="b_malu"><path class="s" d="M40 44 L80 76 M80 44 L40 76"/></g>
+    <g id="b_kefa"><circle class="d" cx="60" cy="72" r="5"/><path class="s" d="M48 54 Q60 42 72 54"/><path class="s" d="M42 62 Q60 50 78 62"/></g>
+    <g id="b_gava"><path class="s" d="M36 48 Q60 80 84 48"/></g>
+    <g id="b_fera"><circle class="d" cx="60" cy="60" r="5"/><path class="s" d="M42 44 L50 36 M78 44 L70 36 M32 60 L24 58 M88 60 L96 58"/></g>
+    <g id="b_dona"><circle class="d" cx="40" cy="60" r="5"/><circle class="d" cx="80" cy="60" r="5"/><path class="s" d="M46 60 H74"/></g>
+    <g id="b_domo"><path class="s" d="M36 60 L60 38 L84 60"/><path class="s" d="M36 60 H84"/></g>
+    <g id="b_veta"><path class="s" d="M44 40 Q68 60 44 80"/><circle class="d" cx="80" cy="60" r="5"/></g>
+    <g id="b_mola"><circle class="d" cx="44" cy="48" r="4"/><circle class="d" cx="72" cy="44" r="4"/><circle class="d" cx="58" cy="76" r="4"/></g>
+    <g id="b_kolo"><circle class="d" cx="60" cy="48" r="5"/><path class="s" d="M50 58 L42 80 M70 58 L78 80"/></g>
+    <g id="b_sama"><circle class="d" cx="44" cy="60" r="6"/><circle class="d" cx="76" cy="60" r="6"/></g>
+    <g id="b_koma"><circle class="d" cx="36" cy="44" r="5"/><path class="s" d="M42 48 C56 62 70 72 88 82"/></g>
+    <g id="b_vola"><path class="s" d="M28 70 Q46 44 60 62"/><path class="s" d="M92 70 Q74 44 60 62"/></g>
+    <g id="b_pota"><path class="s" d="M40 64 H80 M60 64 V40"/></g>
+    <g id="b_rapa"><path class="s" d="M28 50 L60 62 M28 62 L60 74 M28 74 L60 86"/></g>
+    <g id="b_vega"><circle class="d" cx="40" cy="60" r="5"/><path class="s" d="M47 60 C56 48 60 72 68 60 C74 50 80 66 88 58"/></g>
+    <g id="b_anu"><circle class="d" cx="64" cy="50" r="6"/><path class="s" d="M58 54 C44 52 34 60 38 76"/></g>
+    <g id="b_kosa"><path class="s" d="M60 36 L82 60 L60 84 L38 60 Z"/></g>
+    <g id="b_kela"><path class="s" d="M40 74 L80 74 L60 42 Z"/></g>
+    <g id="b_ena"><circle class="d" cx="60" cy="42" r="6"/><path class="s" d="M50 84 L60 54 L70 84"/></g>
+    <g id="b_bena"><path class="s" d="M36 60 L54 78 L84 42"/></g>
+    <g id="b_heva"><path class="s" d="M28 52 Q36 42 44 52"/><path class="s" d="M40 60 Q48 50 56 60"/><path class="s" d="M52 68 Q60 58 68 68"/></g>
+    <g id="b_lova"><path class="s" d="M60 76 C38 56 34 36 46 32 C54 29 60 34 60 40 C60 34 66 29 74 32 C86 36 82 56 60 76 Z"/></g>
+    <g id="b_sema"><path class="s" d="M8 60 C20 36 28 36 38 60 C48 84 56 84 66 60 C76 36 84 36 94 60 C102 80 110 80 116 60"/><circle class="d" cx="66" cy="60" r="4"/></g>
+    <g id="b_lena"><path class="s" d="M24 64 Q60 52 96 64"/><circle class="d" cx="60" cy="70" r="4"/></g>
+    <g id="b_tena"><path class="s" d="M30 60 H90"/><path class="s" d="M48 60 Q60 74 72 60"/></g>
+    <g id="b_veva"><circle class="d" cx="60" cy="74" r="6"/><path class="s" d="M60 68 C60 52 66 42 78 40"/></g>
+    <g id="b_inta"><path class="s" d="M44 46 V70 Q44 84 60 84 Q76 84 76 70 V46"/><circle class="d" cx="60" cy="64" r="5"/></g>
+    <g id="b_fela"><circle class="d" cx="60" cy="60" r="7"/><circle class="d" cx="38" cy="60" r="4"/><circle class="d" cx="82" cy="60" r="4"/></g>
+    <g id="b_noma"><circle class="d" cx="56" cy="52" r="5"/><path class="s" d="M66 60 L84 76"/></g>
+    <g id="b_suba"><path class="s" d="M60 36 V80 M48 68 L60 80 L72 68"/></g>
+    <g id="b_paka"><path class="s" d="M28 58 H92"/><path class="s" d="M52 64 Q60 70 68 64"/></g>
+    <g id="b_dama"><circle class="d" cx="60" cy="60" r="26"/><path class="s" d="M36 60 H84"/></g>
+    <g id="b_ni"><circle class="d" cx="60" cy="46" r="5"/><circle class="d" cx="60" cy="74" r="5"/></g>
+    <g id="d7"><circle class="d" cx="40" cy="38" r="4.5"/><circle class="d" cx="60" cy="38" r="4.5"/><circle class="d" cx="40" cy="50" r="4.5"/><circle class="d" cx="60" cy="50" r="4.5"/><circle class="d" cx="40" cy="62" r="4.5"/><circle class="d" cx="60" cy="62" r="4.5"/><circle class="d" cx="50" cy="50" r="4.5"/></g>
+    <g id="d9"><circle class="d" cx="40" cy="38" r="4.5"/><circle class="d" cx="50" cy="38" r="4.5"/><circle class="d" cx="60" cy="38" r="4.5"/><circle class="d" cx="40" cy="50" r="4.5"/><circle class="d" cx="50" cy="50" r="4.5"/><circle class="d" cx="60" cy="50" r="4.5"/><circle class="d" cx="40" cy="62" r="4.5"/><circle class="d" cx="50" cy="62" r="4.5"/><circle class="d" cx="60" cy="62" r="4.5"/></g>
+    <g id="d3"><circle class="d" cx="40" cy="38" r="4.5"/><circle class="d" cx="50" cy="50" r="4.5"/><circle class="d" cx="60" cy="62" r="4.5"/></g>
+    <g id="d4"><circle class="d" cx="40" cy="38" r="4.5"/><circle class="d" cx="60" cy="38" r="4.5"/><circle class="d" cx="40" cy="62" r="4.5"/><circle class="d" cx="60" cy="62" r="4.5"/></g>
+    <g id="d2"><circle class="d" cx="40" cy="38" r="4.5"/><circle class="d" cx="60" cy="62" r="4.5"/></g>
+    <g id="d1"><circle class="s" cx="50" cy="50" r="20"/><circle class="d" cx="50" cy="50" r="4.5"/></g>
+    <g id="d0"><path class="s" d="M30 46 A20 20 0 1 1 70 46"/></g>
+    <g id="d6"><circle class="d" cx="40" cy="38" r="4.5"/><circle class="d" cx="60" cy="38" r="4.5"/><circle class="d" cx="40" cy="50" r="4.5"/><circle class="d" cx="60" cy="50" r="4.5"/><circle class="d" cx="40" cy="62" r="4.5"/><circle class="d" cx="60" cy="62" r="4.5"/></g>
+    <g id="d5"><circle class="d" cx="40" cy="38" r="4.5"/><circle class="d" cx="60" cy="38" r="4.5"/><circle class="d" cx="50" cy="50" r="4.5"/><circle class="d" cx="40" cy="62" r="4.5"/><circle class="d" cx="60" cy="62" r="4.5"/></g>
+    <g id="d8"><circle class="d" cx="40" cy="38" r="4.5"/><circle class="d" cx="50" cy="38" r="4.5"/><circle class="d" cx="60" cy="38" r="4.5"/><circle class="d" cx="40" cy="50" r="4.5"/><circle class="d" cx="60" cy="50" r="4.5"/><circle class="d" cx="40" cy="62" r="4.5"/><circle class="d" cx="50" cy="62" r="4.5"/><circle class="d" cx="60" cy="62" r="4.5"/></g>
+  </defs>
+  <circle class="ring" cx="650" cy="660" r="250"/>
+  <circle class="ring" cx="650" cy="660" r="345"/>
+  <circle class="ring" cx="650" cy="660" r="440"/>
+  <circle class="ring" cx="650" cy="660" r="545"/>
+  <g transform="translate(614,624) scale(.6)"><use href="#g_komo"/></g>
+  <text x="650" y="732" class="lb">komo 宇宙</text>
+  <g transform="translate(696.7,400.5) scale(0.300)"><use href="#g_lumia"/></g>
+  <text x="725.6" y="381.9" class="lb">lumia</text>
+  <g transform="translate(769.4,433.1) scale(0.300)"><use href="#g_sela"/></g>
+  <text x="810.5" y="420.0" class="lb">sela</text>
+  <g transform="translate(828.1,486.9) scale(0.300)"><use href="#g_sola"/></g>
+  <text x="879.0" y="482.9" class="lb">sola</text>
+  <g transform="translate(866.9,556.5) scale(0.300)"><use href="#g_luna"/></g>
+  <text x="924.4" y="564.1" class="lb">luna</text>
+  <g transform="translate(881.9,634.7) scale(0.300)"><use href="#g_paneta"/></g>
+  <text x="941.9" y="655.5" class="lb">paneta</text>
+  <g transform="translate(871.5,713.7) scale(0.300)"><use href="#g_komo"/></g>
+  <text x="929.7" y="747.7" class="lb">komo</text>
+  <g transform="translate(836.8,785.4) scale(0.300)"><use href="#g_oba"/></g>
+  <text x="889.2" y="831.5" class="lb">oba</text>
+  <g transform="translate(781.3,842.5) scale(0.300)"><use href="#g_vaka"/></g>
+  <text x="824.4" y="898.2" class="lb">vaka</text>
+  <g transform="translate(710.6,879.3) scale(0.300)"><use href="#g_pusa"/></g>
+  <text x="741.8" y="941.2" class="lb">pusa</text>
+  <g transform="translate(632.0,892.0) scale(0.300)"><use href="#g_nova"/></g>
+  <text x="650.0" y="956.0" class="lb">nova</text>
+  <g transform="translate(553.4,879.3) scale(0.300)"><use href="#g_kometa"/></g>
+  <text x="558.2" y="941.2" class="lb">kometa</text>
+  <g transform="translate(482.7,842.5) scale(0.300)"><use href="#g_nebula"/></g>
+  <text x="475.6" y="898.2" class="lb">nebula</text>
+  <g transform="translate(427.2,785.4) scale(0.300)"><use href="#g_gala"/></g>
+  <text x="410.8" y="831.5" class="lb">gala</text>
+  <g transform="translate(392.5,713.7) scale(0.300)"><use href="#g_tele"/></g>
+  <text x="370.3" y="747.7" class="lb">tele</text>
+  <g transform="translate(382.1,634.7) scale(0.300)"><use href="#g_meta"/></g>
+  <text x="358.1" y="655.5" class="lb">meta</text>
+  <g transform="translate(397.1,556.5) scale(0.300)"><use href="#g_miko"/></g>
+  <text x="375.6" y="564.1" class="lb">miko</text>
+  <g transform="translate(435.9,486.9) scale(0.300)"><use href="#g_mako"/></g>
+  <text x="421.0" y="482.9" class="lb">mako</text>
+  <g transform="translate(494.6,433.1) scale(0.300)"><use href="#g_enega"/></g>
+  <text x="489.5" y="420.0" class="lb">enega</text>
+  <g transform="translate(567.3,400.5) scale(0.300)"><use href="#g_era"/></g>
+  <text x="574.4" y="381.9" class="lb">era</text>
+  <rect x="585" y="396" width="130" height="20" fill="#0a0e1a"/>
+  <text x="650" y="412" class="rl">天文借词 19</text>
+  <g transform="translate(692.9,303.2) scale(0.34)"><use href="#d2"/></g>
+  <g transform="translate(872.7,394.8) scale(0.34)"><use href="#d3"/></g>
+  <g transform="translate(970.5,571.3) scale(0.34)"><use href="#d4"/></g>
+  <g transform="translate(952.9,772.2) scale(0.34)"><use href="#d5"/></g>
+  <g transform="translate(825.9,929.0) scale(0.34)"><use href="#d6"/></g>
+  <g transform="translate(633.0,988.0) scale(0.34)"><use href="#d7"/></g>
+  <g transform="translate(440.1,929.0) scale(0.34)"><use href="#d8"/></g>
+  <g transform="translate(313.1,772.2) scale(0.34)"><use href="#d9"/></g>
+  <g transform="translate(291.5,578.3) scale(0.2)"><use href="#d1"/></g>
+  <g transform="translate(313.5,578.3) scale(0.2)"><use href="#d0"/></g>
+  <g transform="translate(378.3,401.8) scale(0.2)"><use href="#d1"/></g>
+  <g transform="translate(400.3,401.8) scale(0.2)"><use href="#d0"/></g>
+  <g transform="translate(422.3,401.8) scale(0.2)"><use href="#d0"/></g>
+  <g transform="translate(547.1,310.2) scale(0.2)"><use href="#d1"/></g>
+  <g transform="translate(569.1,310.2) scale(0.2)"><use href="#d0"/></g>
+  <g transform="translate(591.1,310.2) scale(0.2)"><use href="#d0"/></g>
+  <g transform="translate(613.1,310.2) scale(0.2)"><use href="#d0"/></g>
+  <rect x="585" y="301" width="130" height="20" fill="#0a0e1a"/>
+  <text x="650" y="317" class="rl">数词 11</text>
+  <g transform="translate(709.4,209.7) scale(0.283)"><use href="#f_mi"/></g>
+  <g transform="translate(861.3,266.8) scale(0.283)"><use href="#f_tu"/></g>
+  <g transform="translate(982.1,375.1) scale(0.283)"><use href="#f_ta"/></g>
+  <g transform="translate(1055.4,519.9) scale(0.283)"><use href="#f_li"/></g>
+  <g transform="translate(1071.3,681.3) scale(0.283)"><use href="#f_e"/></g>
+  <g transform="translate(1027.6,837.6) scale(0.283)"><use href="#f_la"/></g>
+  <g transform="translate(930.3,967.4) scale(0.283)"><use href="#f_pi"/></g>
+  <g transform="translate(792.5,1053.1) scale(0.283)"><use href="#f_o"/></g>
+  <g transform="translate(633.0,1083.0) scale(0.283)"><use href="#f_en"/></g>
+  <g transform="translate(473.5,1053.1) scale(0.283)"><use href="#f_u"/></g>
+  <g transform="translate(335.7,967.4) scale(0.283)"><use href="#f_no"/></g>
+  <g transform="translate(238.4,837.6) scale(0.283)"><use href="#f_ka"/></g>
+  <g transform="translate(194.7,681.3) scale(0.283)"><use href="#f_wo"/></g>
+  <g transform="translate(210.6,519.9) scale(0.283)"><use href="#f_fo"/></g>
+  <g transform="translate(283.9,375.1) scale(0.283)"><use href="#f_lo"/></g>
+  <g transform="translate(404.7,266.8) scale(0.283)"><use href="#f_ku"/></g>
+  <g transform="translate(556.6,209.7) scale(0.283)"><use href="#f_na"/></g>
+  <rect x="585" y="206" width="130" height="20" fill="#0a0e1a"/>
+  <text x="650" y="222" class="rl">功能词 17</text>
+  <g transform="translate(718.3,104.7) scale(0.283)"><use href="#b_sema"/></g>
+  <g transform="translate(783.0,119.1) scale(0.283)"><use href="#b_ena"/></g>
+  <g transform="translate(845.6,141.2) scale(0.283)"><use href="#b_anu"/></g>
+  <g transform="translate(905.0,170.7) scale(0.283)"><use href="#b_kopo"/></g>
+  <g transform="translate(960.4,207.3) scale(0.283)"><use href="#b_veva"/></g>
+  <g transform="translate(1010.9,250.3) scale(0.283)"><use href="#b_uvo"/></g>
+  <g transform="translate(1055.8,299.1) scale(0.283)"><use href="#b_tena"/></g>
+  <g transform="translate(1094.5,353.0) scale(0.283)"><use href="#b_kela"/></g>
+  <g transform="translate(1126.3,411.3) scale(0.283)"><use href="#b_bena"/></g>
+  <g transform="translate(1150.8,472.9) scale(0.283)"><use href="#b_malu"/></g>
+  <g transform="translate(1167.6,537.1) scale(0.283)"><use href="#b_mola"/></g>
+  <g transform="translate(1176.5,602.9) scale(0.283)"><use href="#b_ala"/></g>
+  <g transform="translate(1177.4,669.2) scale(0.283)"><use href="#b_ni"/></g>
+  <g transform="translate(1170.2,735.2) scale(0.283)"><use href="#b_vega"/></g>
+  <g transform="translate(1155.0,799.7) scale(0.283)"><use href="#b_mira"/></g>
+  <g transform="translate(1132.1,862.0) scale(0.283)"><use href="#b_kefa"/></g>
+  <g transform="translate(1101.7,921.0) scale(0.283)"><use href="#b_lova"/></g>
+  <g transform="translate(1064.5,975.9) scale(0.283)"><use href="#b_dona"/></g>
+  <g transform="translate(1020.8,1025.9) scale(0.283)"><use href="#b_keta"/></g>
+  <g transform="translate(971.4,1070.2) scale(0.283)"><use href="#b_vira"/></g>
+  <g transform="translate(917.0,1108.1) scale(0.283)"><use href="#b_seva"/></g>
+  <g transform="translate(858.4,1139.2) scale(0.283)"><use href="#b_pela"/></g>
+  <g transform="translate(796.4,1162.9) scale(0.283)"><use href="#b_inta"/></g>
+  <g transform="translate(732.0,1178.9) scale(0.283)"><use href="#b_veta"/></g>
+  <g transform="translate(666.2,1187.0) scale(0.283)"><use href="#b_supa"/></g>
+  <g transform="translate(599.8,1187.0) scale(0.283)"><use href="#b_suba"/></g>
+  <g transform="translate(534.0,1178.9) scale(0.283)"><use href="#b_pota"/></g>
+  <g transform="translate(469.6,1162.9) scale(0.283)"><use href="#b_nesa"/></g>
+  <g transform="translate(407.6,1139.2) scale(0.283)"><use href="#b_heva"/></g>
+  <g transform="translate(349.0,1108.1) scale(0.283)"><use href="#b_fela"/></g>
+  <g transform="translate(294.6,1070.2) scale(0.283)"><use href="#b_noma"/></g>
+  <g transform="translate(245.2,1025.9) scale(0.283)"><use href="#b_kosa"/></g>
+  <g transform="translate(201.5,975.9) scale(0.283)"><use href="#b_pala"/></g>
+  <g transform="translate(164.3,921.0) scale(0.283)"><use href="#b_kolo"/></g>
+  <g transform="translate(133.9,862.0) scale(0.283)"><use href="#b_fora"/></g>
+  <g transform="translate(111.0,799.7) scale(0.283)"><use href="#b_paka"/></g>
+  <g transform="translate(95.8,735.2) scale(0.283)"><use href="#b_wela"/></g>
+  <g transform="translate(88.6,669.2) scale(0.283)"><use href="#b_fera"/></g>
+  <g transform="translate(89.5,602.9) scale(0.283)"><use href="#b_sama"/></g>
+  <g transform="translate(98.4,537.1) scale(0.283)"><use href="#b_domo"/></g>
+  <g transform="translate(115.2,472.9) scale(0.283)"><use href="#b_gava"/></g>
+  <g transform="translate(139.7,411.3) scale(0.283)"><use href="#b_sena"/></g>
+  <g transform="translate(171.5,353.0) scale(0.283)"><use href="#b_vola"/></g>
+  <g transform="translate(210.2,299.1) scale(0.283)"><use href="#b_rapa"/></g>
+  <g transform="translate(255.1,250.3) scale(0.283)"><use href="#b_lena"/></g>
+  <g transform="translate(305.6,207.3) scale(0.283)"><use href="#b_dama"/></g>
+  <g transform="translate(361.0,170.7) scale(0.283)"><use href="#b_rufa"/></g>
+  <g transform="translate(420.4,141.2) scale(0.283)"><use href="#b_laja"/></g>
+  <g transform="translate(483.0,119.1) scale(0.283)"><use href="#b_aka"/></g>
+  <g transform="translate(547.7,104.7) scale(0.283)"><use href="#b_koma"/></g>
+  <rect x="585" y="101" width="130" height="20" fill="#0a0e1a"/>
+  <text x="650" y="117" class="rl">自创词 50</text>
+  <text x="46" y="46" class="t">Lumia 语域总览 · 97 个核心词</text>
+  <text x="46" y="70" class="sub">Lexicon by Register　自内向外：天文借词 → 数词 → 功能词 → 自创词</text>
+  <text x="46" y="1220" class="lg">每个节点画的是该词的真实星符。只有天文域加注词形——那是 Lumia 的主场。</text>
+  <text x="46" y="1244" class="lg">天文借词 19 · 数词 11 · 功能词 17 · 自创词 50　　各词释义见 词典.html</text>
+</svg>

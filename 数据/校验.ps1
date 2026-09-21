@@ -186,10 +186,11 @@ if ($constSpecPath -and (Test-Path $constSpecPath)) {
     } catch { BAD ("constellation/spec compare error: " + $_.Exception.Message) }
 } else { BAD "cannot compare constellation params: spec file unavailable" }
 
-# 17. every SVG <use href="#id"> resolves to an id defined in the same file
-#     An undefined reference renders silently as blank -- no other check can see it.
+# 17. SVG sanity: every <use href="#id"> resolves in-file, and no transform was
+#     written with a thousands separator (PowerShell's {0:N1} does that; the
+#     resulting "translate(1,020.8,1,025.9)" is invalid and drops nodes to origin).
 $svgFiles = @(Get-ChildItem -Path $root -Recurse -File -Filter *.svg)
-$dangling = @()
+$dangling = @(); $badTf = @()
 foreach ($f in $svgFiles) {
     $c = [System.IO.File]::ReadAllText($f.FullName)
     $ids  = @([regex]::Matches($c, 'id="([^"]+)"')     | ForEach-Object { $_.Groups[1].Value })
@@ -197,9 +198,38 @@ foreach ($f in $svgFiles) {
     foreach ($u in $uses) {
         if ($ids -notcontains $u) { $dangling += ($f.Name + ' -> #' + $u) }
     }
+    $bt = @([regex]::Matches($c, 'translate\([^)]*,[^)]*,'))
+    if ($bt.Count -gt 0) { $badTf += ($f.Name + ' x' + $bt.Count) }
 }
-if ($dangling.Count -eq 0) { OK ("all SVG <use> refs resolve (" + $svgFiles.Count + " files)") }
-else { BAD ("dangling SVG refs: " + ($dangling -join '; ')) }
+$svgIssues = @()
+if ($dangling.Count -gt 0) { $svgIssues += ('dangling refs: ' + ($dangling -join '; ')) }
+if ($badTf.Count -gt 0)    { $svgIssues += ('thousands separator in transform: ' + ($badTf -join '; ')) }
+if ($svgIssues.Count -eq 0) { OK ("all SVG refs and transforms well-formed (" + $svgFiles.Count + " files)") }
+else { BAD ("SVG issues: " + ($svgIssues -join ' | ')) }
+
+# 18. register overview chart declares the same cat counts as the lexicon
+#     The chart is a generated artifact; its header comment records the counts it drew.
+$WZD = "$([char]0x6587)$([char]0x5B57)"                                    # 文字
+$OVN = "$([char]0x8BED)$([char]0x57DF)$([char]0x603B)$([char]0x89C8)"      # 语域总览
+$ovPath = Join-Path (Join-Path $root $WZD) ($OVN + '.svg')
+if (Test-Path $ovPath) {
+    try {
+        $ov = [System.IO.File]::ReadAllText($ovPath)
+        $m = [regex]::Match($ov, 'counts:\s*astro=(\d+)\s+base=(\d+)\s+func=(\d+)\s+num=(\d+)')
+        $ovBad = @()
+        if (-not $m.Success) { $ovBad += 'counts comment missing' }
+        else {
+            $cats = @('astro', 'base', 'func', 'num')
+            for ($ix = 0; $ix -lt 4; $ix++) {
+                $declared = [int]$m.Groups[$ix + 1].Value
+                $actual = @($lex | Where-Object { $_.cat -eq $cats[$ix] }).Count
+                if ($declared -ne $actual) { $ovBad += ($cats[$ix] + " declared " + $declared + " but lexicon has " + $actual) }
+            }
+        }
+        if ($ovBad.Count -eq 0) { OK "register overview chart matches lexicon counts" }
+        else { BAD ("register overview chart stale: " + ($ovBad -join '; ')) }
+    } catch { BAD ("register overview check error: " + $_.Exception.Message) }
+} else { OK "register overview chart absent (skipped)" }
 
 Write-Output ""
 Write-Output ("== RESULT: PASS " + $script:pass + " / FAIL " + $script:fail + " ==")
