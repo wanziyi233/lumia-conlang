@@ -6,7 +6,7 @@
 作者 / 维护者：**wanziyi233** · Maintainer: [@wanziyi233](https://github.com/wanziyi233)
 
 [![License: CC BY-SA 4.0](https://img.shields.io/badge/License-CC%20BY--SA%204.0-lightgrey.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-v0.9.0-blue.svg)](数据/lumia.json)
+[![Version](https://img.shields.io/badge/version-v0.10.0-blue.svg)](数据/lumia.json)
 [![Validate](https://github.com/wanziyi233/lumia-conlang/actions/workflows/validate.yml/badge.svg)](.github/workflows/validate.yml)
 
 > **komo li mako, mi li miko.**
@@ -20,7 +20,9 @@
 
 | 内容 | 在线查看 | 源文件 |
 | --- | --- | --- |
+| 🚀 **五分钟上手**（新社员从这里开始） | [阅读](https://wanziyi233.github.io/lumia-conlang/上手.html) | `上手.md` |
 | 🔍 **可检索词典**（97 词） | [打开词典](https://wanziyi233.github.io/lumia-conlang/词典.html) | `词典.html` |
+| 📣 社团宣言（Lumia 原文） | [阅读](https://wanziyi233.github.io/lumia-conlang/社团宣言.html) | `社团宣言.md` |
 | ⭐ **星符总表**（文字系统） | [查看星符](https://wanziyi233.github.io/lumia-conlang/文字/符表.svg) | `文字/符表.svg` |
 | 📝 实用语速查 | [阅读](https://wanziyi233.github.io/lumia-conlang/实用语.html) | `实用语.md` |
 | 🔊 音系（发音规则） | [阅读](https://wanziyi233.github.io/lumia-conlang/音系/音系.html) | `音系/音系.md` |
@@ -121,4 +123,4 @@ powershell -File 数据/生成词典.ps1
 
 ---
 
-*This project is a work-in-progress development version (v0.9.0). 本项目为开发版，仍会持续改动。*
+*This project is a work-in-progress development version (v0.10.0). 本项目为开发版，仍会持续改动。*

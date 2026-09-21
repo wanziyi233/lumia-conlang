@@ -4,7 +4,7 @@
     "native": "露米亚",
     "gloss": "光",
     "ipa": "/ˈlu.mi.ɑ/",
-    "version": "0.9.0",
+    "version": "0.10.0",
     "purpose": "面向天文科幻社团的极简人造语（道本语式，娱乐向，偏科天文科幻）",
     "coreWordCount": 97,
     "designDecisions": [
@@ -379,7 +379,9 @@
         "syllabary": { "cell": 30, "chainGap": 42, "rule": "首节坐句轨节点位，后续音节向句轨外侧依次延伸，并以同款较浅连线相接" },
         "rule": "附着物不参与句轨主路径；句轨只连词级节点"
       },
-      "example2": "文字/星座体数字与音节示例.svg"
+      "example2": "文字/星座体数字与音节示例.svg",
+      "vertical": { "rule": "竖排 = 横排版式整体顺时针旋转 90°：句内上→下，句间右→左，上入下出。其余规则不变" },
+      "clustering": { "thresholdWords": 10, "clusterSize": "4-6", "clusterGap": 40, "sentenceGap": 60, "rule": "超过阈值的长句切为子簇；子簇间不画弧轨，靠留白大小区分于句间" }
     },
     "direction": "横写左→右；艺术模式=星座式排布（见 文字/星座体规范.md）"
   },

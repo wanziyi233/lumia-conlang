@@ -174,7 +174,10 @@ if ($constSpecPath -and (Test-Path $constSpecPath)) {
             @{ n = 'cell.numeralAttached'; p = '\u6570\u503C\*{0,2}\s*\|\s*[^\r\n|]*\|\s*[^\r\n|]*\|\s*\*{0,2}' + [string]$const.cell.numeralAttached },
             @{ n = 'cell.syllable';       p = '\u6BCF\u8282\s*cell\s*\*{0,2}' + [string]$const.cell.syllable },
             @{ n = 'syllabary.chainGap';  p = [string]$const.attachments.syllabary.chainGap + 'px' },
-            @{ n = 'numeral.bond.opacity'; p = '\u4E0D\u900F\u660E\u5EA6\s*\*{0,2}' + [regex]::Escape([string]$const.attachments.numeral.bond.opacity) }
+            @{ n = 'numeral.bond.opacity'; p = '\u4E0D\u900F\u660E\u5EA6\s*\*{0,2}' + [regex]::Escape([string]$const.attachments.numeral.bond.opacity) },
+            @{ n = 'clustering.thresholdWords'; p = '\u8D85\u8FC7\s*\*{0,2}' + [string]$const.clustering.thresholdWords + '\*{0,2}\s*\u8BCD' },
+            @{ n = 'clustering.clusterGap'; p = '\u5B50\u7C07\*{0,2}\u95F4\u8DDD\s*' + [string]$const.clustering.clusterGap + 'px' },
+            @{ n = 'clustering.sentenceGap'; p = '\u53E5\u95F4\u7559\u767D\s*\u2265\s*\*{0,2}' + [string]$const.clustering.sentenceGap + 'px' }
         )
         $drift = @($anchors | Where-Object { $specText -notmatch $_.p })
         if ($drift.Count -eq 0) { OK ("constellation params match spec (" + $anchors.Count + " anchors)") }
