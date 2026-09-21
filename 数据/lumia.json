@@ -4,7 +4,7 @@
     "native": "露米亚",
     "gloss": "光",
     "ipa": "/ˈlu.mi.ɑ/",
-    "version": "0.10.0",
+    "version": "0.11.0",
     "purpose": "面向天文科幻社团的极简人造语（道本语式，娱乐向，偏科天文科幻）",
     "coreWordCount": 97,
     "designDecisions": [
@@ -193,6 +193,8 @@
       "情态动词后接动词作宾语，用 e 标记",
       "比较级 mako ku X，最高级 mako ala",
       "序数词 oba + 数词",
+      "第一人称复数：mi mola = 我们（复用既有的 X mola「X 且多」构造，不新造词；含听众时用 mi en tu = 咱们）",
+      "en 兼连分句（表并列）；转折无专门连词，让步用 la 框架（miko la, mi li kefa.）",
       "疑问词复用：ka lo=哪里，ka sema=何时，ka fo=为什么，ka pala=怎样"
     ],
     "particles": {
@@ -201,7 +203,7 @@
       "la": "语境标记 X la Y",
       "pi": "修饰重组",
       "o": "呼格/祈愿/命令",
-      "en": "和",
+      "en": "和；也可连接分句（表并列）",
       "u": "或",
       "no": "否定（前置）",
       "ka": "疑问词",
@@ -211,7 +213,7 @@
       "ku": "用/凭借/和",
       "na": "专名标记"
     },
-    "pronouns": { "mi": "我", "tu": "你", "ta": "他/她/它/他们（无性无数）" },
+    "pronouns": { "mi": "我", "tu": "你", "ta": "他/她/它/他们（无性无数）", "mi mola": "我们（我+多）", "mi en tu": "咱们（含听众）" },
     "tamMetaphor": [
       { "frame": "（无）", "image": "当下/此刻", "meaning": "现在" },
       { "frame": "pela la", "image": "身后/星轨之尾", "meaning": "过去" },
@@ -372,8 +374,10 @@
         "numeral": {
           "identity": "一词双义：实义 ⇒ 主干节点；数值义 ⇒ 卫星",
           "standalone": "作句子成分（主/宾）时 cell 44，坐在句轨上",
-          "satellite": "作修饰语时 cell 28，挂在被修饰星符旁侧，不落句轨（地球—月球关系）",
+          "satellite": "作修饰语时 cell 28，是主干上长出的一个小分叉；方位自由（不限于左侧），斜向最佳",
+          "branch": { "angleMin": 30, "angleMax": 60, "unit": "deg", "against": "外接句轨", "rule": "方位任意；推荐 30–60° 斜角——平行会与句轨混淆，正垂直则呆板。回折处的名词，卫星转外侧即可" },
           "satelliteDistance": "主星 cell/2 + 卫星 cell/2 + 30",
+          "clearance": 6,
           "bond": { "width": 0.8, "opacity": 0.24, "rule": "卫星连线须比句轨更细更淡（句轨 0.9 / 0.34）" }
         },
         "syllabary": { "cell": 30, "chainGap": 42, "rule": "首节坐句轨节点位，后续音节向句轨外侧依次延伸，并以同款较浅连线相接" },
