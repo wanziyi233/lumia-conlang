@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="240 330 680 520" width="1360" height="1040">
+  <!-- 星座生长：komo li mako, mi li miko.　SMIL 动画，浏览器打开即播放并循环 -->
+  <!-- 静态渲染（不跑 SMIL）会显示完成态，便于核对布局 -->
+  <style>
+    .s{fill:none;stroke:#6fd6ff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+    .d{fill:#ffd166;stroke:none}
+    .halo{fill:none;stroke:#6fd6ff;stroke-width:.5;opacity:.13}
+    .track{fill:none;stroke:#6fd6ff;stroke-width:.9;opacity:.34}
+    .node{fill:#9fb4c8;stroke:none}
+    .fall{fill:#9fb4c8;stroke:none;opacity:.75}
+    .t{fill:#e8f0f8;font-family:sans-serif;font-size:20px;font-weight:bold}
+    .sub{fill:#9fb4c8;font-family:sans-serif;font-size:13px}
+    .cap{fill:#cfe0ef;font-family:sans-serif;font-size:15px;font-weight:bold}
+    .capz{fill:#9fb4c8;font-family:sans-serif;font-size:13px}
+  </style>
+  <rect x="240" y="330" width="680" height="520" fill="#0a0e1a"/>
+  <text x="270" y="378" class="t">星座生长</text>
+  <text x="270" y="400" class="sub">一句一星座：词逐一点亮，句轨随即生长</text>
+  <g><circle class="halo" cx="360" cy="700" r="26"/><circle class="halo" cx="425.5" cy="537.7" r="17"/><circle class="halo" cx="516.1" cy="608.5" r="26"/><circle class="halo" cx="646.5" cy="495.1" r="26"/><circle class="halo" cx="578.8" cy="581.8" r="17"/><circle class="halo" cx="773.8" cy="581.8" r="26"/><animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.0222;0.1111;1" dur="9s" repeatCount="indefinite"/></g>
+  <path class="track" d="M369.7 675.9 L419.1 553.5" pathLength="1"><animate attributeName="stroke-dasharray" values="1;1;1;1" dur="9s" repeatCount="indefinite"/><animate attributeName="stroke-dashoffset" values="1;1;0;0" keyTimes="0;0.1111;0.1556;1" dur="9s" repeatCount="indefinite"/></path>
+  <path class="track" d="M438.9 548.2 L495.6 592.5" pathLength="1"><animate attributeName="stroke-dasharray" values="1;1;1;1" dur="9s" repeatCount="indefinite"/><animate attributeName="stroke-dashoffset" values="1;1;0;0" keyTimes="0;0.1889;0.2333;1" dur="9s" repeatCount="indefinite"/></path>
+  <path class="track" d="M520.6 582.9 L547.2 432.2" pathLength="1"><animate attributeName="stroke-dasharray" values="1;1;1;1" dur="9s" repeatCount="indefinite"/><animate attributeName="stroke-dashoffset" values="1;1;0;0" keyTimes="0;0.2667;0.3111;1" dur="9s" repeatCount="indefinite"/></path>
+  <path class="track" d="M553.1 429.7 L625.2 480.2" pathLength="1"><animate attributeName="stroke-dasharray" values="1;1;1;1" dur="9s" repeatCount="indefinite"/><animate attributeName="stroke-dashoffset" values="1;1;0;0" keyTimes="0;0.3333;0.3778;1" dur="9s" repeatCount="indefinite"/></path>
+  <path class="track" d="M630.5 515.6 L589.3 568.4" pathLength="1"><animate attributeName="stroke-dasharray" values="1;1;1;1" dur="9s" repeatCount="indefinite"/><animate attributeName="stroke-dashoffset" values="1;1;0;0" keyTimes="0;0.4111;0.4556;1" dur="9s" repeatCount="indefinite"/></path>
+  <path class="track" d="M595.8 581.8 L747.8 581.8" pathLength="1"><animate attributeName="stroke-dasharray" values="1;1;1;1" dur="9s" repeatCount="indefinite"/><animate attributeName="stroke-dashoffset" values="1;1;0;0" keyTimes="0;0.4889;0.5333;1" dur="9s" repeatCount="indefinite"/></path>
+  <g><circle class="node" cx="548.2" cy="426.3" r="3.5"/><animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.3000;0.3444;1" dur="9s" repeatCount="indefinite"/></g>
+  <g transform="translate(360,700)">
+    <g><animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.0667;0.1111;1" dur="9s" repeatCount="indefinite"/>
+      <g transform="scale(0.42)"><animateTransform attributeName="transform" type="scale" values="0;0;0.42;0.42" keyTimes="0;0.0667;0.1111;1" dur="9s" repeatCount="indefinite"/>
+        <g transform="translate(-60,-60)"><circle class="s" cx="60" cy="60" r="42"/><circle class="d" cx="48" cy="46" r="3"/><circle class="d" cx="72" cy="54" r="3"/><circle class="d" cx="58" cy="74" r="3"/></g>
+      </g></g></g>
+  <g transform="translate(425.5,537.7)">
+    <g><animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.1444;0.1889;1" dur="9s" repeatCount="indefinite"/>
+      <g transform="scale(0.27)"><animateTransform attributeName="transform" type="scale" values="0;0;0.27;0.27" keyTimes="0;0.1444;0.1889;1" dur="9s" repeatCount="indefinite"/>
+        <g transform="translate(-60,-60)"><path class="s" d="M36 60 H84"/></g>
+      </g></g></g>
+  <g transform="translate(516.1,608.5)">
+    <g><animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.2222;0.2667;1" dur="9s" repeatCount="indefinite"/>
+      <g transform="scale(0.42)"><animateTransform attributeName="transform" type="scale" values="0;0;0.42;0.42" keyTimes="0;0.2222;0.2667;1" dur="9s" repeatCount="indefinite"/>
+        <g transform="translate(-60,-60)"><path class="s" d="M48 46 L32 60 L48 74"/><path class="s" d="M72 46 L88 60 L72 74"/></g>
+      </g></g></g>
+  <g transform="translate(646.5,495.1)">
+    <g><animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.3667;0.4111;1" dur="9s" repeatCount="indefinite"/>
+      <g transform="scale(0.42)"><animateTransform attributeName="transform" type="scale" values="0;0;0.42;0.42" keyTimes="0;0.3667;0.4111;1" dur="9s" repeatCount="indefinite"/>
+        <g transform="translate(-60,-60)"><circle class="d" cx="60" cy="60" r="8"/></g>
+      </g></g></g>
+  <g transform="translate(578.8,581.8)">
+    <g><animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.4444;0.4889;1" dur="9s" repeatCount="indefinite"/>
+      <g transform="scale(0.27)"><animateTransform attributeName="transform" type="scale" values="0;0;0.27;0.27" keyTimes="0;0.4444;0.4889;1" dur="9s" repeatCount="indefinite"/>
+        <g transform="translate(-60,-60)"><path class="s" d="M36 60 H84"/></g>
+      </g></g></g>
+  <g transform="translate(773.8,581.8)">
+    <g><animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.5222;0.5667;1" dur="9s" repeatCount="indefinite"/>
+      <g transform="scale(0.42)"><animateTransform attributeName="transform" type="scale" values="0;0;0.42;0.42" keyTimes="0;0.5222;0.5667;1" dur="9s" repeatCount="indefinite"/>
+        <g transform="translate(-60,-60)"><path class="s" d="M32 46 L48 60 L32 74"/><path class="s" d="M88 46 L72 60 L88 74"/></g>
+      </g></g></g>
+  <g><circle class="fall" cx="808" cy="610" r="2.5"/><animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.6000;0.6444;1" dur="9s" repeatCount="indefinite"/></g>
+  <g><text x="270" y="790" class="cap">komo li mako, mi li miko.</text><text x="270" y="814" class="capz">宇宙很大，我很小。</text><animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.6667;0.7333;1" dur="9s" repeatCount="indefinite"/></g>
+</svg>

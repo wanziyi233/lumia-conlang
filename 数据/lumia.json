@@ -4,7 +4,7 @@
     "native": "露米亚",
     "gloss": "光",
     "ipa": "/ˈlu.mi.ɑ/",
-    "version": "0.12.0",
+    "version": "0.13.0",
     "purpose": "面向天文科幻社团的极简人造语（道本语式，娱乐向，偏科天文科幻）",
     "coreWordCount": 97,
     "designDecisions": [

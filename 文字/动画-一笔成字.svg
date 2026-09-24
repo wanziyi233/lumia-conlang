@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 560" width="1240" height="560">
+  <!-- 一笔成字：星符的书写动画（SMIL，浏览器打开即循环）。 -->
+  <!-- 每个 <animate> 都是被动画元素的子元素；笔画以 pathLength="1" 归一化。 -->
+  <style>
+    .s{fill:none;stroke:#6fd6ff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+    .d{fill:#ffd166;stroke:none}
+    .t{fill:#e8f0f8;font-family:sans-serif;font-size:22px;font-weight:bold}
+    .sub{fill:#9fb4c8;font-family:sans-serif;font-size:13px}
+    .lb{fill:#cfe0ef;font-family:sans-serif;font-size:15px;text-anchor:middle}
+    .lg{fill:#9fb4c8;font-family:sans-serif;font-size:13px}
+  </style>
+  <rect width="1240" height="560" fill="#0a0e1a"/>
+  <text x="46" y="52" class="t">一笔成字 · Selagrafi 星符书写</text>
+  <text x="46" y="76" class="sub">Every glyph is drawn in one continuous stroke; the star dot is added last.</text>
+  <g transform="translate(190,190) scale(1.5)">
+      <path class="s" d="M60 60 A8 8 0 0 1 76 60 A16 16 0 0 1 44 60 A24 24 0 0 1 92 60 A32 32 0 0 1 28 60 A40 40 0 0 1 108 60" pathLength="1">
+        <animate attributeName="stroke-dasharray" values="1;1;1;1" dur="8s" repeatCount="indefinite"/>
+        <animate attributeName="stroke-dashoffset" values="1;1;0;0" keyTimes="0;0.0375;0.1750;1" dur="8s" repeatCount="indefinite"/>
+      </path>
+      <g><circle class="d" cx="60" cy="60" r="4"/><animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.1875;0.2250;1" dur="8s" repeatCount="indefinite"/></g>
+  </g>
+  <g><text x="280" y="440" class="lb">lumia 光</text><animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.2250;0.2625;1" dur="8s" repeatCount="indefinite"/></g>
+  <g transform="translate(530,190) scale(1.5)">
+      <path class="s" d="M60 14 C66 40 80 46 106 60 C80 74 66 80 60 106 C54 80 40 74 14 60 C40 46 54 40 60 14 Z" pathLength="1">
+        <animate attributeName="stroke-dasharray" values="1;1;1;1" dur="8s" repeatCount="indefinite"/>
+        <animate attributeName="stroke-dashoffset" values="1;1;0;0" keyTimes="0;0.3375;0.4750;1" dur="8s" repeatCount="indefinite"/>
+      </path>
+      <g><circle class="d" cx="60" cy="60" r="4"/><animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.4875;0.5250;1" dur="8s" repeatCount="indefinite"/></g>
+  </g>
+  <g><text x="620" y="440" class="lb">sela 星</text><animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.5250;0.5625;1" dur="8s" repeatCount="indefinite"/></g>
+  <g transform="translate(870,190) scale(1.5)">
+      <g><circle class="d" cx="44" cy="42" r="6"/><animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.7875;0.8250;1" dur="8s" repeatCount="indefinite"/></g>
+      <path class="s" d="M50 46 C66 72 88 88 112 104" pathLength="1">
+        <animate attributeName="stroke-dasharray" values="1;1;1;1" dur="8s" repeatCount="indefinite"/>
+        <animate attributeName="stroke-dashoffset" values="1;1;0;0" keyTimes="0;0.6375;0.7750;1" dur="8s" repeatCount="indefinite"/>
+      </path>
+  </g>
+  <g><text x="960" y="440" class="lb">kometa 彗星</text><animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.8250;0.8625;1" dur="8s" repeatCount="indefinite"/></g>
+  <text x="46" y="524" class="lg">起笔在左、收笔在右 —— 所以字与字可以顺势连写，一词一轨。</text>
+</svg>

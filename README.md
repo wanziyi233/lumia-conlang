@@ -6,7 +6,7 @@
 作者 / 维护者：**wanziyi233** · Maintainer: [@wanziyi233](https://github.com/wanziyi233)
 
 [![License: CC BY-SA 4.0](https://img.shields.io/badge/License-CC%20BY--SA%204.0-lightgrey.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-v0.12.0-blue.svg)](数据/lumia.json)
+[![Version](https://img.shields.io/badge/version-v0.13.0-blue.svg)](数据/lumia.json)
 [![Validate](https://github.com/wanziyi233/lumia-conlang/actions/workflows/validate.yml/badge.svg)](.github/workflows/validate.yml)
 
 > **komo li mako, mi li miko.**
@@ -25,6 +25,7 @@
 | 🗺️ **语域总览图**（97 词分层） | [查看总览](https://wanziyi233.github.io/lumia-conlang/文字/语域总览.svg) | `文字/语域总览.svg` |
 | 📣 社团宣言（Lumia 原文） | [阅读](https://wanziyi233.github.io/lumia-conlang/社团宣言.html) | `社团宣言.md` |
 | ⭐ **星符总表**（文字系统） | [查看星符](https://wanziyi233.github.io/lumia-conlang/文字/符表.svg) | `文字/符表.svg` |
+| ✨ **动画**：一笔成字 / 星座生长 | [书写](https://wanziyi233.github.io/lumia-conlang/文字/动画-一笔成字.svg) · [星座](https://wanziyi233.github.io/lumia-conlang/文字/动画-星座生长.svg) | `文字/动画-*.svg` |
 | 📝 实用语速查 | [阅读](https://wanziyi233.github.io/lumia-conlang/实用语.html) | `实用语.md` |
 | 🔊 音系（发音规则） | [阅读](https://wanziyi233.github.io/lumia-conlang/音系/音系.html) | `音系/音系.md` |
 | 🧩 语法 | [阅读](https://wanziyi233.github.io/lumia-conlang/语法/语法.html) | `语法/语法.md` |
@@ -124,4 +125,4 @@ powershell -File 数据/生成词典.ps1
 
 ---
 
-*This project is a work-in-progress development version (v0.12.0). 本项目为开发版，仍会持续改动。*
+*This project is a work-in-progress development version (v0.13.0). 本项目为开发版，仍会持续改动。*

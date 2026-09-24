@@ -186,11 +186,17 @@ if ($constSpecPath -and (Test-Path $constSpecPath)) {
     } catch { BAD ("constellation/spec compare error: " + $_.Exception.Message) }
 } else { BAD "cannot compare constellation params: spec file unavailable" }
 
-# 17. SVG sanity: every <use href="#id"> resolves in-file, and no transform was
-#     written with a thousands separator (PowerShell's {0:N1} does that; the
-#     resulting "translate(1,020.8,1,025.9)" is invalid and drops nodes to origin).
+# 17. SVG sanity:
+#     (a) every <use href="#id"> resolves in-file;
+#     (b) no transform carries a thousands separator (PowerShell's {0:N1} writes
+#         "translate(1,020.8,1,025.9)" -- invalid, and nodes collapse to origin);
+#     (c) every <animate> that drives a geometry/paint attribute sits INSIDE a shape
+#         element. A sibling <animate> has no target and fails silently: the stroke
+#         stays hidden forever while everything else animates.
 $svgFiles = @(Get-ChildItem -Path $root -Recurse -File -Filter *.svg)
-$dangling = @(); $badTf = @()
+$dangling = @(); $badTf = @(); $badSmil = @()
+$shapeTags = @('path', 'circle', 'ellipse', 'rect', 'line', 'polyline', 'polygon')
+$shapeAttrs = @('stroke-dashoffset', 'stroke-dasharray', 'd', 'points', 'cx', 'cy', 'r', 'rx', 'ry', 'x1', 'y1', 'x2', 'y2')
 foreach ($f in $svgFiles) {
     $c = [System.IO.File]::ReadAllText($f.FullName)
     $ids  = @([regex]::Matches($c, 'id="([^"]+)"')     | ForEach-Object { $_.Groups[1].Value })
@@ -200,11 +206,26 @@ foreach ($f in $svgFiles) {
     }
     $bt = @([regex]::Matches($c, 'translate\([^)]*,[^)]*,'))
     if ($bt.Count -gt 0) { $badTf += ($f.Name + ' x' + $bt.Count) }
+    if ($c -match '<animate') {
+        try {
+            $dx = New-Object System.Xml.XmlDocument
+            $dx.LoadXml($c)
+            foreach ($an in $dx.SelectNodes('//*[local-name()="animate" or local-name()="animateTransform"]')) {
+                if ($an.GetAttribute('href') -or $an.GetAttribute('xlink:href')) { continue }
+                $at = $an.GetAttribute('attributeName')
+                $pn = $an.ParentNode.LocalName
+                if (($shapeAttrs -contains $at) -and ($shapeTags -notcontains $pn)) {
+                    $badSmil += ($f.Name + ': animate@' + $at + ' sibling of <' + $pn + '>')
+                }
+            }
+        } catch { $badSmil += ($f.Name + ': SMIL parse error') }
+    }
 }
 $svgIssues = @()
 if ($dangling.Count -gt 0) { $svgIssues += ('dangling refs: ' + ($dangling -join '; ')) }
 if ($badTf.Count -gt 0)    { $svgIssues += ('thousands separator in transform: ' + ($badTf -join '; ')) }
-if ($svgIssues.Count -eq 0) { OK ("all SVG refs and transforms well-formed (" + $svgFiles.Count + " files)") }
+if ($badSmil.Count -gt 0)  { $svgIssues += ('untargeted SMIL: ' + ($badSmil -join '; ')) }
+if ($svgIssues.Count -eq 0) { OK ("all SVG refs, transforms and SMIL targets well-formed (" + $svgFiles.Count + " files)") }
 else { BAD ("SVG issues: " + ($svgIssues -join ' | ')) }
 
 # 18. register overview chart declares the same cat counts as the lexicon
