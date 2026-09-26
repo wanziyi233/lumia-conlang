@@ -6,7 +6,7 @@
 作者 / 维护者：**wanziyi233** · Maintainer: [@wanziyi233](https://github.com/wanziyi233)
 
 [![License: CC BY-SA 4.0](https://img.shields.io/badge/License-CC%20BY--SA%204.0-lightgrey.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-v0.13.0-blue.svg)](数据/lumia.json)
+[![Version](https://img.shields.io/badge/version-v0.14.0-blue.svg)](数据/lumia.json)
 [![Validate](https://github.com/wanziyi233/lumia-conlang/actions/workflows/validate.yml/badge.svg)](.github/workflows/validate.yml)
 
 > **komo li mako, mi li miko.**
@@ -56,7 +56,7 @@ It is deliberately "unbalanced": it names stars, planets, Saturn, the universe, 
 | 维度 / Aspect | 设计 / Design |
 | --- | --- |
 | 音系 / Phonology | 英式口音 + 五元音 a e i o u；音节 `(C)V(n)`；16 辅音 |
-| 语法 / Grammar | 道本语框架 + 天体隐喻时态（过去/现在/未来/假设/总是） |
+| 语法 / Grammar | 道本语框架 + 天体隐喻时态（过去/未来/条件/假设/反复/总是，现在时无标记） |
 | 数字 / Numerals | 十进制、一词双义（0=`vaka`、1=`sola`） |
 | 文字 / Script | 表意（星符）+ 表音（80 音节符）+ 数字符 |
 | 数据 / Data | 单一 JSON 数据库 + 一致性校验脚本 |
@@ -67,13 +67,18 @@ It is deliberately "unbalanced": it names stars, planets, Saturn, the universe, 
 人造语尝试/
 ├── LICENSE               CC BY-SA 4.0 许可证
 ├── README.md             本文件（总览）
-├── 词典.html             可检索词典（由 数据/生成词典.ps1 生成）
+├── 上手.md               五分钟上手指南（新社员入口）
 ├── 实用语.md             基础用语速查
+├── 社团宣言.md           社团宣言（Lumia 原文 + 逐词拆解）
+├── 词典.html             可检索词典（由 数据/生成词典.ps1 生成）
+├── CHANGELOG.md          版本变更记录
+├── CONTRIBUTING.md       参与方式与校验说明
 ├── 音系/                 发音与音系规则
 ├── 词典/                 97 个核心词全表
 ├── 语法/                 语法规则
 ├── 数字/                 十进制数词
 ├── 文字/                 星文字形设计 + 各类 SVG 图表
+├── 视频/                 宣传片文案
 ├── 数据/
 │   ├── lumia.json        全系统单一数据库（权威数据源）
 │   ├── 校验.ps1          一致性校验脚本
@@ -101,7 +106,7 @@ It is deliberately "unbalanced": it names stars, planets, Saturn, the universe, 
 需要 PowerShell。**注意命令名不一样**：Windows 自带的是 Windows PowerShell 5.1，命令为 `powershell`；`pwsh` 是 PowerShell 7+ 的命令，Windows 默认**没有**安装（macOS/Linux 需自行安装 [PowerShell](https://github.com/PowerShell/PowerShell)）。
 
 ```bash
-# 一致性体检（24 项检查）
+# 一致性体检（34 项检查）
 powershell -File 数据/校验.ps1
 
 # 改完 数据/lumia.json 后，刷新可检索词典
@@ -125,4 +130,4 @@ powershell -File 数据/生成词典.ps1
 
 ---
 
-*This project is a work-in-progress development version (v0.13.0). 本项目为开发版，仍会持续改动。*
+*This project is a work-in-progress development version (v0.14.0). 本项目为开发版，仍会持续改动。*

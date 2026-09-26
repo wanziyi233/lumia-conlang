@@ -6,6 +6,7 @@
     .v{fill:none;stroke:#6fd6ff;stroke-width:2}
     .halo{fill:none;stroke:#6fd6ff;stroke-width:.5;opacity:.13}
     .track{fill:none;stroke:#6fd6ff;stroke-width:.9;opacity:.34}
+    .close{fill:none;stroke:#6fd6ff;stroke-width:.9;opacity:.16}
     .arc{fill:none;stroke:#6fd6ff;stroke-width:1;opacity:.27;stroke-dasharray:3 6}
     .bond{fill:none;stroke:#6fd6ff;stroke-width:.8;opacity:.24}
     .fall{fill:#9fb4c8;stroke:none;opacity:.75}
@@ -32,7 +33,7 @@
     <g id="oba"><ellipse class="s" cx="60" cy="60" rx="42" ry="14"/><circle class="d" cx="102" cy="60" r="5"/></g>
     <g id="lumia"><path class="s" d="M60 60 A8 8 0 0 1 76 60 A16 16 0 0 1 44 60 A24 24 0 0 1 92 60 A32 32 0 0 1 28 60 A40 40 0 0 1 108 60"/><circle class="d" cx="60" cy="60" r="4"/></g>
     <g id="li"><path class="s" d="M36 60 H84"/></g>
-    <g id="luna"><path class="s" d="M60 18 A42 42 0 1 0 60 102 A34 34 0 1 1 60 18 Z"/></g>
+    <g id="luna"><path class="s" d="M60 18 A42 42 0 0 0 60 102"/></g>
     <g id="na"><circle class="d" cx="60" cy="70" r="6"/><path class="s" d="M40 44 H80"/></g>
 
     <!-- 数字符：100 格，中心 (50,50) -->
@@ -55,6 +56,10 @@
   <path class="track" d="M357.8 295.4 L546.8 140.8 M568.3 144.9 L647.4 287.3"/>
   <path class="track" d="M447.1 580.4 L558.8 452.8 M581.6 452.4 L702.2 581"/>
   <path class="track" d="M417.7 941 L528.4 822.4 M549.8 823.9 L650.8 966.9 M669.4 967 L780 813.8 M800.6 813.3 L893.8 929.7"/>
+
+  <!-- 闭合轨（≤4 词的短句首尾相连，对应句号） -->
+  <path class="close" d="M634 310 L363 310"/>
+  <path class="close" d="M694 600 L456 600"/>
 
   <!-- 星位光晕 -->
   <circle class="halo" cx="340" cy="310" r="23"/><circle class="halo" cx="560" cy="130" r="17"/><circle class="halo" cx="660" cy="310" r="26"/>

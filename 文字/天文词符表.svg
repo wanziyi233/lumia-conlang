@@ -13,7 +13,7 @@
     <g id="g_lumia"><path class="s" d="M60 60 A8 8 0 0 1 76 60 A16 16 0 0 1 44 60 A24 24 0 0 1 92 60 A32 32 0 0 1 28 60 A40 40 0 0 1 108 60"/><circle class="d" cx="60" cy="60" r="4"/></g>
     <g id="g_sela"><path class="s" d="M60 14 C66 40 80 46 106 60 C80 74 66 80 60 106 C54 80 40 74 14 60 C40 46 54 40 60 14 Z"/><circle class="d" cx="60" cy="60" r="4"/></g>
     <g id="g_sola"><path class="s" d="M60 34 A26 26 0 1 1 60 86 A26 26 0 1 1 60 34 Z"/><circle class="d" cx="60" cy="60" r="5"/></g>
-    <g id="g_luna"><path class="s" d="M60 18 A42 42 0 1 0 60 102 A34 34 0 1 1 60 18 Z"/></g>
+    <g id="g_luna"><path class="s" d="M60 18 A42 42 0 0 0 60 102"/></g>
     <g id="g_paneta"><circle class="d" cx="48" cy="60" r="14"/><path class="s" d="M62 66 C 78 58 90 62 102 74"/></g>
     <g id="g_komo"><circle class="s" cx="60" cy="60" r="42"/><circle class="d" cx="48" cy="46" r="3"/><circle class="d" cx="72" cy="54" r="3"/><circle class="d" cx="58" cy="74" r="3"/></g>
     <g id="g_oba"><ellipse class="s" cx="60" cy="60" rx="42" ry="14"/><circle class="d" cx="102" cy="60" r="5"/></g>

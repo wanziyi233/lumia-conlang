@@ -4,7 +4,7 @@
     "native": "露米亚",
     "gloss": "光",
     "ipa": "/ˈlu.mi.ɑ/",
-    "version": "0.13.0",
+    "version": "0.14.0",
     "purpose": "面向天文科幻社团的极简人造语（道本语式，娱乐向，偏科天文科幻）",
     "coreWordCount": 97,
     "designDecisions": [
@@ -16,7 +16,9 @@
       "语法：道本语框架 + 科幻特色（天体隐喻时态）",
       "数字：十进制 + 天文意象；数词一词双义，无一纯数字词（0=vaka，1=sola）",
       "时间：全部复用现有词——一天=oba（圆），一小时=aka（圆上的一段弧），星期=sema na 天体名（七曜）",
-      "偏科：刻意缺少厨房/球类/体育词汇"
+      "偏科：刻意缺少厨房/球类/体育词汇",
+      "文字破例：专名一般以音节串拼写，唯 Satuna（土星，社团主题）另配专属星符（实心圆盘+宽环带）——故天文词符表为 19 符，Satuna 单列于 字形示例/",
+      "字形镜像对：luna（月亮）与 aka（弧）都是半圆，靠开口方向区分——月亮向左、弧向右。这是刻意保留的形近，不要当 bug 去消除"
     ]
   },
   "phonology": {
@@ -46,10 +48,20 @@
         "部分借词为缩合形式，不完全遵循上述规则；如 era（aēr）、sento（centum，按英式读音）、kilo（khilioi）"
       ],
       "examples": [
-        { "source": "stella", "lumia": "sela", "gloss": "星" },
-        { "source": "kosmos", "lumia": "komo", "gloss": "宇宙" },
-        { "source": "planētēs", "lumia": "paneta", "gloss": "行星" },
-        { "source": "Saturnus", "lumia": "Satuna", "gloss": "土星" }
+        { "source": "stella", "lumia": "sela", "gloss": "星", "how": "st→s，去 geminate l" },
+        { "source": "sol", "lumia": "sola", "gloss": "太阳", "how": "+a" },
+        { "source": "luna", "lumia": "luna", "gloss": "月亮", "how": "不变" },
+        { "source": "planētēs", "lumia": "paneta", "gloss": "行星", "how": "pl→p，去词尾" },
+        { "source": "kosmos", "lumia": "komo", "gloss": "宇宙", "how": "删 s" },
+        { "source": "orbis", "lumia": "oba", "gloss": "轨道", "how": "删 r、去 -is" },
+        { "source": "vacuus", "lumia": "vaka", "gloss": "虚空", "how": "缩合" },
+        { "source": "pulsus", "lumia": "pusa", "gloss": "脉冲", "how": "删 l、去 -us" },
+        { "source": "mikros", "lumia": "miko", "gloss": "小", "how": "kr→k" },
+        { "source": "makros", "lumia": "mako", "gloss": "大", "how": "kr→k" },
+        { "source": "energeia", "lumia": "enega", "gloss": "能量", "how": "删 r、缩 ia" },
+        { "source": "aēr", "lumia": "era", "gloss": "大气", "how": "缩合" },
+        { "source": "Saturnus", "lumia": "Satuna", "gloss": "土星", "how": "去 -us" },
+        { "source": "Mercurius", "lumia": "Mekuria", "gloss": "水星", "how": "去 -ius、缩合" }
       ]
     }
   },
@@ -172,7 +184,7 @@
       { "value": 100, "w": "sento", "concrete": "星团/众多" },
       { "value": 1000, "w": "kilo", "concrete": "星海/无量" }
     ],
-    "composition": "大位在前、小位在后直接并置；X deka Y",
+    "composition": "十进制位值并置：大位在前、小位在后，中间不加「和」。十位用 X deka Y，百/千位用 X sento Y / X kilo Y。位值为 0 的位在口语中略去（2025 读 dua kilo dua deka penta，0 百位不读），书写仍按位值横排补零。超过千的位由小幂乘大幂表达：10000 = deka kilo（10 × 1000）。",
     "examples": {
       "11": "deka sola",
       "21": "dua deka sola",
@@ -186,7 +198,7 @@
     "features": [
       "无屈折",
       "内容词一词多类（名/动/形由位置决定）",
-      "修饰语后置",
+      "修饰语后置（唯一例外：数词前置——dua luna 两个月亮、ota aka 八点）",
       "pi 重组修饰",
       "动词并列用逗号/停顿",
       "引语用 e 标记，直接后接引语",
@@ -195,7 +207,11 @@
       "序数词 oba + 数词",
       "第一人称复数：mi mola = 我们（复用既有的 X mola「X 且多」构造，不新造词；含听众时用 mi en tu = 咱们）",
       "en 兼连分句（表并列）；转折无专门连词，让步用 la 框架（miko la, mi li kefa.）",
-      "疑问词复用：ka lo=哪里，ka sema=何时，ka fo=为什么，ka pala=怎样"
+      "疑问词复用：ka lo=哪里，ka sema=何时，ka fo=为什么，ka pala=怎样",
+      "是非问：正反并置 X no X（tu bena no bena? 你好吗？；komo li mako no mako? 宇宙大不大？）",
+      "属格/来源用 fo（lumia fo sola 太阳的光），地点/存在用 lo（ena lo komo 宇宙中的人）；no 只作临时否定，固定反义词另有专词（malu 坏 / dama 暗）",
+      "专名：na + 首字母大写；专名与核心词同形时（luna/Luna、vega/Vega），罗马化靠首字母大写区分，星文中靠「星符（内容词）vs 音节串（专名）」区分",
+      "分数：X fo Y（Y 分之 X），如 sola fo dua = 二分之一"
     ],
     "particles": {
       "li": "谓语标记（主语为 mi/tu 时可省）",
@@ -228,7 +244,7 @@
       { "lumia": "paneta ni li oba e sola.", "zh": "那颗行星绕太阳运行。" },
       { "lumia": "komo li mako, mi li miko.", "zh": "宇宙很大，我很小。" },
       { "lumia": "pela la mi mira e kometa; meta la mi vega wo komo.", "zh": "过去我观彗星，未来我赴宇宙。" },
-      { "lumia": "vaka la, no ena.", "zh": "虚空中，没有人。" },
+      { "lumia": "vaka la, no ena.", "zh": "假想虚空之中，没有人。" },
       { "lumia": "Satuna li paneta ku oba.", "zh": "土星是一颗带环的行星。" },
       { "lumia": "mi vira e dua luna.", "zh": "我有两个月亮 / 一对孪生卫星。" },
       { "lumia": "tia li oba.", "zh": "三体在旋转 / 群在旋转。" },
@@ -258,7 +274,7 @@
       { "w": "lumia", "recipe": "螺旋+点", "gloss": "光" },
       { "w": "sela", "recipe": "一笔四芒", "gloss": "星" },
       { "w": "sola", "recipe": "环+点", "gloss": "太阳" },
-      { "w": "luna", "recipe": "一笔弦月", "gloss": "月亮" },
+      { "w": "luna", "recipe": "一笔半圆", "gloss": "月亮" },
       { "w": "paneta", "recipe": "实心圆盘+漫游弧", "gloss": "行星" },
       { "w": "Satuna", "recipe": "实心圆盘+宽环带", "gloss": "土星" },
       { "w": "komo", "recipe": "大环+内三点", "gloss": "宇宙" },
@@ -345,13 +361,15 @@
     ],
     "syllabary": {
       "count": "16辅音 × 5元音 = 80音节符 + 1个-n尾符",
-      "rule": "辅音定主体形状，元音定定位点位置（a上/e左/i下/o右/u中）",
+      "rule": "辅音定主体形状，元音定定位点位置（a上/e左/i下/o右/u不标点——u 为「无标记」元音）",
       "nCoda": "右下短勾⌐"
     },
     "numeralGlyphs": {
+      "note": "cat=num 的 11 个词（dua…kilo）不作星符，一律写成星数（数字符）；其中 0/1 借用天文词 vaka/sola，写作 d0/d1。故 glyphRecipes 中不含任何数词，这是设计而非遗漏。",
       "0": "开口环（vaka）",
       "1": "环中一点☉（sola）",
       "2-9": "2至9颗星点按3×3布局",
+      "10-1000": "位值横排：deka=10→d1 d0；sento=100→d1 d0 d0；kilo=1000→d1 d0 d0 d0",
       "多位数": "位值横排（如 2025 = 2·0·2·5）",
       "大数": "复合不新造词（10000 = deka kilo）"
     },
@@ -370,7 +388,7 @@
       "haloFormula": "光晕半径 = cell / 2 + 1",
       "cell": { "main": 50, "companion": 32, "numeral": 44, "numeralAttached": 28, "syllable": 30 },
       "attachments": {
-        "note": "数词与专名没有星符：数词用星数、专名用音节符串（均为 100 格）",
+        "note": "数词与专名一般没有星符：数词用星数、专名用音节符串（均为 100 格）。唯一例外是 Satuna（土星）——社团主题词，破例配了专属星符，见 meta.designDecisions 与 script.glyphRecipes。",
         "numeral": {
           "identity": "一词双义：实义 ⇒ 主干节点；数值义 ⇒ 卫星",
           "standalone": "作句子成分（主/宾）时 cell 44，坐在句轨上",
@@ -409,7 +427,7 @@
     { "lumia": "Satuna li paneta ku oba.", "zh": "土星是带环行星。" },
     { "lumia": "komo li mako, mi li miko.", "zh": "宇宙很大，我很小。" },
     { "lumia": "meta la mi vega wo komo.", "zh": "未来我赴宇宙。" },
-    { "lumia": "vaka la, no ena.", "zh": "虚空中没有人。" }
+    { "lumia": "vaka la, no ena.", "zh": "假想虚空之中没有人。" }
   ],
   "time": {
     "note": "时间表达全部复用现有词，不新造：一天 = oba（一个完整循环），一小时 = aka（这个圆上的一段弧）",
@@ -429,6 +447,7 @@
       { "zh": "周五", "lumia": "sema na Venusa", "astro": "Venusa", "ety": "金曜日（金星）" },
       { "zh": "周六", "lumia": "sema na Satuna", "astro": "Satuna", "ety": "土曜日（土星）" }
     ],
-    "weekdayRule": "sema（时间）+ na + 天体名（首字母大写，视作专名）。只取肉眼可见的五颗行星 + 日月，故地球/天王星/海王星不入七曜。"
+    "weekdayRule": "sema（时间）+ na + 天体名（首字母大写，视作专名）。只取肉眼可见的五颗行星 + 日月，故地球/天王星/海王星不入七曜。其中「日」为 Sola、「月」为 Luna，直接借用天文词 sola/luna 的大写形式——故 properNames 只收八大行星，不收日月。",
+    "dayParts": { "note": "时段同样复用 sema（时间）+ 指示词/形容语，不新造词；注意这与 §grammar.tamMetaphor 的 la 框架是两套构造", "now": "sema ni（此时 = 现在）", "past": "sema pela（之前之时 = 过去）", "future": "sema meta（超越之时 = 未来）", "night": "sema dama（漆黑之时 = 夜晚）" }
   }
 }

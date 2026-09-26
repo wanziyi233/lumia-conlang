@@ -16,7 +16,7 @@
   <text x="20" y="88" class="h">一、数字 0–9</text>
 
   <defs>
-    <g id="d0"><path class="s" d="M30 46 A20 20 0 1 1 70 46"/></g>
+    <g id="d0"><path class="s" d="M34.4 41.1 A18 18 0 1 1 65.6 41.1"/></g>
     <g id="d1"><circle class="s" cx="50" cy="50" r="20"/><circle class="d" cx="50" cy="50" r="4.5"/></g>
     <g id="d2"><circle class="d" cx="40" cy="38" r="4.5"/><circle class="d" cx="60" cy="62" r="4.5"/></g>
     <g id="d3"><circle class="d" cx="40" cy="38" r="4.5"/><circle class="d" cx="50" cy="50" r="4.5"/><circle class="d" cx="60" cy="62" r="4.5"/></g>

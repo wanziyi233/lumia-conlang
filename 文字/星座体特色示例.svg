@@ -4,6 +4,7 @@
     .d{fill:#ffd166;stroke:none}
     .halo{fill:none;stroke:#6fd6ff;stroke-width:.5;opacity:.13}
     .track{fill:none;stroke:#6fd6ff;stroke-width:.9;opacity:.34}
+    .close{fill:none;stroke:#6fd6ff;stroke-width:.9;opacity:.16}
     .arc{fill:none;stroke:#6fd6ff;stroke-width:1;opacity:.27;stroke-dasharray:3 6}
     .bond{fill:none;stroke:#6fd6ff;stroke-width:.8;opacity:.24}
     .fall{fill:#9fb4c8;stroke:none;opacity:.75}
@@ -49,6 +50,7 @@
   <!-- 句轨 -->
   <path class="track" d="M380 313.4 L520 196.6 M552.9 202.6 L631.6 340.2 M654.5 346.1 L827.9 238.7"/>
   <path class="track" d="M380 573.4 L520 456.6 M552.9 462.6 L631.6 600.2 M654.5 606.1 L827.9 498.7"/>
+  <path class="close" d="M824.6 490.5 L385.4 584.5"/>
   <path class="track" d="M354.7 908.5 L460.4 754 M482 752 L601.6 871.6 M637.3 870.6 L772.7 719.4 M803 722.5 L891.5 875.3 M914 880.4 L1068.5 774.7"/>
   <path class="track" d="M364.7 1198.5 L470.4 1044 M492 1042 L611.6 1161.6 M647.3 1160.6 L782.7 1009.4 M813 1012.5 L901.5 1165.3 M924 1170.4 L1078.5 1064.7"/>
 
