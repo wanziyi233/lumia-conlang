@@ -4,7 +4,7 @@
     .t{fill:#e8f0f8;font-family:sans-serif;font-size:28px;font-weight:bold}
     .h{fill:#9fb4c8;font-family:sans-serif;font-size:20px;text-anchor:middle}
     .l{fill:#9fb4c8;font-family:sans-serif;font-size:20px;text-anchor:end}
-    .s{fill:none;stroke:#6fd6ff;stroke-width:3;stroke-linecap:round}
+    .s{fill:none;stroke:#6fd6ff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
     .d{fill:#ffd166;stroke:none}
     .v{fill:none;stroke:#6fd6ff;stroke-width:2}
     .n{fill:#7a8fa3;font-family:sans-serif;font-size:18px}

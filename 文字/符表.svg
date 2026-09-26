@@ -39,7 +39,7 @@
     <g id="g_satuna"><ellipse class="s" cx="60" cy="60" rx="47" ry="14" stroke-width="7"/><circle class="d" cx="60" cy="60" r="10"/></g>
     <g id="g_komo"><circle class="s" cx="60" cy="60" r="42"/><circle class="d" cx="48" cy="46" r="3"/><circle class="d" cx="72" cy="54" r="3"/><circle class="d" cx="58" cy="74" r="3"/></g>
     <g id="g_oba"><ellipse class="s" cx="60" cy="60" rx="42" ry="14"/><circle class="d" cx="102" cy="60" r="5"/></g>
-    <g id="g_vaka"><path class="s" d="M20 60 A46 46 0 1 1 100 60"/></g>
+    <g id="g_vaka"><path class="s" d="M20 82.72 A46 46 0 1 1 100 82.72"/></g>
     <g id="g_pusa"><path class="s" d="M8 60 C20 36 28 36 38 60 C48 84 56 84 66 60 C76 36 84 36 94 60 C102 80 110 80 116 60"/></g>
     <g id="g_kometa"><circle class="d" cx="44" cy="42" r="6"/><path class="s" d="M50 46 C66 72 88 88 112 104"/></g>
     <g id="g_gala"><path class="s" d="M60 60 A8 8 0 0 1 76 60 A16 16 0 0 1 44 60 A24 24 0 0 1 92 60 A32 32 0 0 1 28 60 A40 40 0 0 1 108 60"/></g>

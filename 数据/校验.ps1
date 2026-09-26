@@ -279,15 +279,15 @@ else { BAD ("glyph table coverage: " + ($coverBad -join '; ')) }
 
 # 20. the syllabary chart must draw exactly 16 consonants x 5 vowels = 80 cells,
 #     using one base shape per consonant.
-$SY = "$([char]0x97F3)$([char]0x8282)$([char]0x56FE)"                                      # 音节图
-$syPath = Join-Path $wdir ($SY + '.svg')
+$SYL = "$([char]0x97F3)$([char]0x8282)$([char]0x56FE)"                                      # 音节图
+$syPath = Join-Path $wdir ($SYL + '.svg')
 $cv = $j.phonology.consonants.Count
 $vv = $j.phonology.vowels.Count
 if (Test-Path $syPath) {
-    $sy = [System.IO.File]::ReadAllText($syPath)
+    $syText = [System.IO.File]::ReadAllText($syPath)
     $syBad = @()
-    $nc = @([regex]::Matches($sy, '<use\b')).Count
-    $nb = @([regex]::Matches($sy, 'id="c\d+"') | ForEach-Object { $_.Value } | Sort-Object -Unique).Count
+    $nc = @([regex]::Matches($syText, '<use\b')).Count
+    $nb = @([regex]::Matches($syText, 'id="c\d+"') | ForEach-Object { $_.Value } | Sort-Object -Unique).Count
     if ($nc -ne ($cv * $vv)) { $syBad += ('cells ' + $nc + ' != ' + ($cv * $vv)) }
     if ($nb -ne $cv)         { $syBad += ('base shapes ' + $nb + ' != ' + $cv) }
     if ($syBad.Count -eq 0) { OK ("syllabary chart draws " + $cv + 'x' + $vv + ' = ' + ($cv * $vv) + " cells") }
@@ -438,11 +438,11 @@ foreach ($f in $svgFiles) {
     $c = [System.IO.File]::ReadAllText($f.FullName)
     foreach ($dm in [regex]::Matches($c, '\sd="([^"]+)"')) {
         $toks = @([regex]::Matches($dm.Groups[1].Value, '[MmLlHhVvCcSsQqTtAaZz]|-?\d*\.?\d+') | ForEach-Object { $_.Value })
-        $i = 0; $cx = 0.0; $cy = 0.0; $sx = 0.0; $sy = 0.0; $cmd = ''
+        $i = 0; $cx = 0.0; $cy = 0.0; $stX = 0.0; $stY = 0.0; $cmd = ''
         while ($i -lt $toks.Count) {
             if ($toks[$i] -match '^[A-Za-z]$') {
                 $cmd = $toks[$i]; $i++
-                if ($cmd -match '^[Zz]$') { $cx = $sx; $cy = $sy; continue }
+                if ($cmd -match '^[Zz]$') { $cx = $stX; $cy = $stY; continue }
             }
             if (-not $cmd) { $i++; continue }
             $up = $cmd.ToUpper(); $rel = ($cmd -ceq $cmd.ToLower())
@@ -469,7 +469,7 @@ foreach ($f in $svgFiles) {
             elseif ($up -eq 'M') {
                 $x = [double]$toks[$i]; $y = [double]$toks[$i + 1]
                 if ($rel) { $cx = $cx + $x; $cy = $cy + $y } else { $cx = $x; $cy = $y }
-                $sx = $cx; $sy = $cy
+                $stX = $cx; $stY = $cy
             }
             else {
                 $x = [double]$toks[$i + $n - 2]; $y = [double]$toks[$i + $n - 1]
@@ -481,6 +481,188 @@ foreach ($f in $svgFiles) {
 }
 if ($selfArc.Count -eq 0) { OK ("no SVG arc needs silent radius scaling (" + $arcN + " arcs)") }
 else { BAD ("degenerate arc (radius would be auto-scaled): " + (($selfArc | Sort-Object -Unique) -join '; ')) }
+
+# 29. script.glyphs is the single source of truth for glyph GEOMETRY. Every fragment
+#     stored there must appear VERBATIM in the SVG asset that draws it, and the assets
+#     must not carry glyph bodies the database has never heard of. Without this the same
+#     path silently drifts between copies -- which is how 星座示例.svg ended up with a
+#     different radius for mi than every other file (found in the 0.14.0 audit).
+$FT  = "$([char]0x7B26)$([char]0x8868)"                                                    # 符表
+$DGT = "$([char]0x6570)$([char]0x5B57)$([char]0x7B26)$([char]0x8868)"                      # 数字符表
+$gl = $j.script.glyphs
+$glPairs = @()
+foreach ($w in @($lex | Where-Object { $_.cat -eq 'astro' } | ForEach-Object { $_.w })) { $glPairs += @{ prop = 'word';  key = $w; file = $TH;  id = ('g_' + $w) } }
+foreach ($w in @($lex | Where-Object { $_.cat -eq 'func'  } | ForEach-Object { $_.w })) { $glPairs += @{ prop = 'word';  key = $w; file = $FU;  id = ('f_' + $w) } }
+foreach ($w in @($lex | Where-Object { $_.cat -eq 'base'  } | ForEach-Object { $_.w })) { $glPairs += @{ prop = 'word';  key = $w; file = $BA;  id = ('b_' + $w) } }
+$glPairs += @{ prop = 'word';  key = 'Satuna'; file = $FT;  id = 'g_satuna' }
+foreach ($d in @($gl.digit.PSObject.Properties.Name))                                   { $glPairs += @{ prop = 'digit'; key = $d; file = $DGT; id = ('d' + $d) } }
+foreach ($b in @($gl.syllabary.bases.PSObject.Properties.Name))                         { $glPairs += @{ prop = 'bases'; key = $b; file = $SYL; id = $b } }
+
+$glBad = @(); $glN = 0
+foreach ($p in $glPairs) {
+    $store = $gl.PSObject.Properties[$p.prop].Value
+    if ($p.prop -eq 'bases') { $store = $gl.syllabary.bases }
+    $db = $store.PSObject.Properties[$p.key]
+    if (-not $db) { $glBad += ('database missing ' + $p.prop + '/' + $p.key); continue }
+    $asset = Join-Path $wdir ($p.file + '.svg')
+    if (-not (Test-Path $asset)) { $glBad += ('asset missing ' + $p.file); continue }
+    $c = [System.IO.File]::ReadAllText($asset)
+    $m = [regex]::Match($c, '<g id="' + [regex]::Escape($p.id) + '">(.*?)</g>', [System.Text.RegularExpressions.RegexOptions]::Singleline)
+    if (-not $m.Success) { $glBad += ('asset missing #' + $p.id); continue }
+    if ($m.Groups[1].Value.Trim() -ne $db.Value) { $glBad += ('drift in ' + $p.id) }
+    $glN++
+}
+#     The css block is part of the same contract: the classes the database declares must be
+#     byte-identical to the ones the assets use, otherwise a glyph drawn from the database
+#     looks subtly different from the same glyph printed in the chart.
+function GetCssRule($file, $cls) {
+    $p = Join-Path $wdir $file
+    if (-not (Test-Path $p)) { return $null }
+    $c = [System.IO.File]::ReadAllText($p)
+    $m = [regex]::Match($c, '\.' + $cls + '\{[^}]*\}')
+    if ($m.Success) { return $m.Value }
+    return $null
+}
+$dbS = ([regex]::Match($gl.css, '\.s\{[^}]*\}')).Value
+$dbD = ([regex]::Match($gl.css, '\.d\{[^}]*\}')).Value
+$dbV = ([regex]::Match($gl.css, '\.v\{[^}]*\}')).Value
+$cssChecks = @(
+    @{ f = ($TH + '.svg');  cls = 's'; want = $dbS },
+    @{ f = ($FU + '.svg');  cls = 's'; want = $dbS },
+    @{ f = ($BA + '.svg');  cls = 's'; want = $dbS },
+    @{ f = ($DGT + '.svg'); cls = 's'; want = $dbS },
+    @{ f = ($SYL + '.svg'); cls = 's'; want = $dbS },
+    @{ f = ($TH + '.svg');  cls = 'd'; want = $dbD },
+    @{ f = ($DGT + '.svg'); cls = 'd'; want = $dbD },
+    @{ f = ($SYL + '.svg'); cls = 'v'; want = $dbV }
+)
+foreach ($cc in $cssChecks) {
+    $got = GetCssRule $cc.f $cc.cls
+    if ($null -eq $got) { $glBad += ('css .' + $cc.cls + ' missing in ' + $cc.f) }
+    elseif ($got -ne $cc.want) { $glBad += ('css .' + $cc.cls + ' differs in ' + $cc.f) }
+}
+
+#     Box containment: every fragment must stay inside its declared canvas. Arc extrema MUST
+#     be derived from the SVG endpoint -> centre parameterisation (spec F.6.5), never from the
+#     literal coordinate numbers. That is exactly how vaka's ring poked ~8.7 units above its own
+#     120 box while still looking perfectly plausible in the large charts.
+function GetFragExtent($frag) {
+    $xs = @(); $ys = @()
+    $TWO = [Math]::PI * 2
+    $add = { param($x, $y) $script:exs += $x; $script:eys += $y }
+    foreach ($m in [regex]::Matches($frag, '<circle[^>]*cx="(-?[\d.]+)"[^>]*cy="(-?[\d.]+)"[^>]*r="([\d.]+)"')) {
+        $x = [double]$m.Groups[1].Value; $y = [double]$m.Groups[2].Value; $p = [double]$m.Groups[3].Value + 2
+        $xs += ($x - $p); $xs += ($x + $p); $ys += ($y - $p); $ys += ($y + $p)
+    }
+    foreach ($m in [regex]::Matches($frag, '<ellipse[^>]*cx="(-?[\d.]+)"[^>]*cy="(-?[\d.]+)"[^>]*rx="([\d.]+)"[^>]*ry="([\d.]+)"')) {
+        $x = [double]$m.Groups[1].Value; $y = [double]$m.Groups[2].Value
+        $a = [double]$m.Groups[3].Value + 5; $b = [double]$m.Groups[4].Value + 5
+        $xs += ($x - $a); $xs += ($x + $a); $ys += ($y - $b); $ys += ($y + $b)
+    }
+    foreach ($dm in [regex]::Matches($frag, 'd="([^"]+)"')) {
+        $toks = @([regex]::Matches($dm.Groups[1].Value, '[MmLlHhVvCcSsQqTtAaZz]|-?\d*\.?\d+') | ForEach-Object { $_.Value })
+        $i = 0; $cx = 0.0; $cy = 0.0; $sx = 0.0; $sy = 0.0; $cmd = ''
+        $ar = @{ M = 2; L = 2; H = 1; V = 1; C = 6; S = 4; Q = 4; T = 2; A = 7 }
+        while ($i -lt $toks.Count) {
+            if ($toks[$i] -match '^[A-Za-z]$') {
+                $cmd = $toks[$i]; $i++
+                if ($cmd -match '^[Zz]$') { $cx = $sx; $cy = $sy; continue }
+            }
+            if (-not $cmd) { $i++; continue }
+            $up = $cmd.ToUpper(); $rel = ($cmd -ceq $cmd.ToLower())
+            if (-not $ar.ContainsKey($up)) { $i++; continue }
+            $n = $ar[$up]
+            if (($i + $n) -gt $toks.Count) { break }
+            if ($up -eq 'A') {
+                $r0 = [double]$toks[$i]
+                $fa = [int][double]$toks[$i + 3]; $fs = [int][double]$toks[$i + 4]
+                $x = [double]$toks[$i + 5]; $y = [double]$toks[$i + 6]
+                if ($rel) { $x += $cx; $y += $cy }
+                $dd = [Math]::Sqrt((($x - $cx) * ($x - $cx)) + (($y - $cy) * ($y - $cy)))
+                if ($dd -gt 0.0001) {
+                    $r = $r0; if ($r -lt ($dd / 2)) { $r = $dd / 2 }
+                    $h = [Math]::Sqrt([Math]::Max(0, ($r * $r) - (($dd / 2) * ($dd / 2))))
+                    $x1p = ($cx - $x) / 2; $y1p = ($cy - $y) / 2
+                    $f = 0.0; if (($dd / 2) -gt 0.0001) { $f = $h / ($dd / 2) }
+                    $ox = $f * $y1p; $oy = $f * (-$x1p)
+                    if ($fa -eq $fs) { $ox = -$ox; $oy = -$oy }
+                    $ocx = $ox + (($cx + $x) / 2); $ocy = $oy + (($cy + $y) / 2)
+                    $a1 = [Math]::Atan2($cy - $ocy, $cx - $ocx)
+                    $dth = ([Math]::Atan2($y - $ocy, $x - $ocx) - $a1) % $TWO
+                    if ($dth -lt 0) { $dth += $TWO }
+                    if (($fs -eq 0) -and ($dth -gt 0)) { $dth -= $TWO }
+                    if (($fs -eq 1) -and ($dth -lt 0)) { $dth += $TWO }
+                    $qt = @(0.0, 1.5707963267948966, 3.1415926535897931, 4.7123889803846898)
+                    foreach ($q in $qt) {
+                        $t = ($q - $a1) % $TWO
+                        if ($t -lt 0) { $t += $TWO }
+                        $inside = $false
+                        if ($dth -ge 0) { if ($t -le ($dth + 0.000001)) { $inside = $true } }
+                        else { if (($TWO - $t) -le ((-$dth) + 0.000001)) { $inside = $true } }
+                        if ($inside) {
+                            $xs += ($ocx + $r * [Math]::Cos($q)); $ys += ($ocy + $r * [Math]::Sin($q))
+                        }
+                    }
+                }
+                $xs += $cx; $xs += $x; $ys += $cy; $ys += $y
+                $cx = $x; $cy = $y
+            }
+            elseif ($up -eq 'H') {
+                $x = [double]$toks[$i]; if ($rel) { $cx += $x } else { $cx = $x }
+                $xs += $cx; $ys += $cy
+            }
+            elseif ($up -eq 'V') {
+                $y = [double]$toks[$i]; if ($rel) { $cy += $y } else { $cy = $y }
+                $xs += $cx; $ys += $cy
+            }
+            elseif ($up -eq 'M') {
+                $x = [double]$toks[$i]; $y = [double]$toks[$i + 1]
+                if ($rel) { $cx += $x; $cy += $y } else { $cx = $x; $cy = $y }
+                $sx = $cx; $sy = $cy
+                $xs += $cx; $ys += $cy
+            }
+            else {
+                for ($k = 0; $k -lt $n; $k += 2) {
+                    $x = [double]$toks[$i + $k]; $y = [double]$toks[$i + $k + 1]
+                    if ($rel) { $xs += ($cx + $x); $ys += ($cy + $y) } else { $xs += $x; $ys += $y }
+                }
+                $x = [double]$toks[$i + $n - 2]; $y = [double]$toks[$i + $n - 1]
+                if ($rel) { $cx += $x; $cy += $y } else { $cx = $x; $cy = $y }
+            }
+            $i += $n
+        }
+    }
+    if ($xs.Count -eq 0) { return @{ minx = 0; miny = 0; maxx = 0; maxy = 0 } }
+    return @{
+        minx = ($xs | Measure-Object -Minimum).Minimum
+        miny = ($ys | Measure-Object -Minimum).Minimum
+        maxx = ($xs | Measure-Object -Maximum).Maximum
+        maxy = ($ys | Measure-Object -Maximum).Maximum
+    }
+}
+$boxChecks = @(
+    @{ g = $gl.word; b = [double]$gl.box.word },
+    @{ g = $gl.digit; b = [double]$gl.box.digit },
+    @{ g = $gl.syllabary.bases; b = [double]$gl.box.syllable }
+)
+foreach ($bc in $boxChecks) {
+    foreach ($k in @($bc.g.PSObject.Properties.Name)) {
+        $e = GetFragExtent $bc.g.PSObject.Properties[$k].Value
+        if (($e.minx -lt -0.5) -or ($e.miny -lt -0.5) -or ($e.maxx -gt ($bc.b + 0.5)) -or ($e.maxy -gt ($bc.b + 0.5))) {
+            $glBad += ($k + ' escapes box ' + $bc.b + ' [' + [Math]::Round($e.minx, 1) + ',' + [Math]::Round($e.miny, 1) + ' .. ' + [Math]::Round($e.maxx, 1) + ',' + [Math]::Round($e.maxy, 1) + ']')
+        }
+    }
+}
+
+$glExpectWord  = @($glPairs | Where-Object { $_.prop -eq 'word'  } | ForEach-Object { $_.key })
+$glExpectDigit = @($glPairs | Where-Object { $_.prop -eq 'digit' } | ForEach-Object { $_.key })
+$glExpectBase  = @($glPairs | Where-Object { $_.prop -eq 'bases' } | ForEach-Object { $_.key })
+foreach ($x in @($gl.word.PSObject.Properties.Name           | Where-Object { $glExpectWord  -notcontains $_ })) { $glBad += ('database has unknown word glyph '  + $x) }
+foreach ($x in @($gl.digit.PSObject.Properties.Name          | Where-Object { $glExpectDigit -notcontains $_ })) { $glBad += ('database has unknown digit glyph ' + $x) }
+foreach ($x in @($gl.syllabary.bases.PSObject.Properties.Name | Where-Object { $glExpectBase  -notcontains $_ })) { $glBad += ('database has unknown syllable base ' + $x) }
+if ($glN -ne $glPairs.Count) { $glBad += ('checked ' + $glN + ' of ' + $glPairs.Count + ' glyphs') }
+if ($glBad.Count -eq 0) { OK ("database glyph geometry and styles match the SVG assets (" + $glN + " glyphs)") }
+else { BAD ("glyph geometry drift: " + (($glBad | Sort-Object -Unique) -join '; ')) }
 
 Write-Output ""
 Write-Output ("== RESULT: PASS " + $script:pass + " / FAIL " + $script:fail + " ==")

@@ -21,7 +21,7 @@
     <g id="g_oba"><ellipse class="s" cx="60" cy="60" rx="42" ry="14"/><circle class="d" cx="102" cy="60" r="5"/></g>
     <g id="g_mako"><path class="s" d="M48 46 L32 60 L48 74"/><path class="s" d="M72 46 L88 60 L72 74"/></g>
     <g id="g_enega"><path class="s" d="M20 70 L44 28 L58 50 L74 26 L100 64"/></g>
-    <g id="g_vaka"><path class="s" d="M20 60 A46 46 0 1 1 100 60"/></g>
+    <g id="g_vaka"><path class="s" d="M20 82.72 A46 46 0 1 1 100 82.72"/></g>
     <g id="g_gala"><path class="s" d="M60 60 A8 8 0 0 1 76 60 A16 16 0 0 1 44 60 A24 24 0 0 1 92 60 A32 32 0 0 1 28 60 A40 40 0 0 1 108 60"/></g>
     <g id="g_nebula"><path class="s" d="M18 58 C34 44 46 72 62 58 C76 46 86 66 102 54"/><circle class="d" cx="46" cy="42" r="3"/><circle class="d" cx="74" cy="66" r="3"/><circle class="d" cx="56" cy="76" r="3"/></g>
     <g id="g_kometa"><circle class="d" cx="44" cy="42" r="6"/><path class="s" d="M50 46 C66 72 88 88 112 104"/></g>
