@@ -41,8 +41,8 @@
     <g id="num3"><circle class="d" cx="40" cy="38" r="4.5"/><circle class="d" cx="50" cy="50" r="4.5"/><circle class="d" cx="60" cy="62" r="4.5"/></g>
 
     <!-- 音节符：100 格　辅音主体形 + 元音定位点（空心圈） -->
-    <g id="ve"><path class="y" d="M44 78 C44 60 58 56 58 42"/><circle class="d" cx="51" cy="58" r="3.5"/><circle class="v" cx="16" cy="50" r="4"/></g>
-    <g id="ga"><path class="y" d="M38 78 L64 34"/><circle class="d" cx="51" cy="56" r="3.5"/><circle class="v" cx="50" cy="18" r="4"/></g>
+    <g id="ve"><path class="s" d="M44 78 C44 60 58 56 58 42"/><circle class="d" cx="51" cy="58" r="3.5"/><circle class="v" cx="16" cy="50" r="4"/></g>
+    <g id="ga"><path class="s" d="M38 78 L64 34"/><circle class="d" cx="51" cy="56" r="3.5"/><circle class="v" cx="50" cy="18" r="4"/></g>
   </defs>
 
   <rect width="1120" height="1140" fill="#0a0e1a"/>

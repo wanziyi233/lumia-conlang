@@ -6,7 +6,7 @@
 作者 / 维护者：**wanziyi233** · Maintainer: [@wanziyi233](https://github.com/wanziyi233)
 
 [![License: CC BY-SA 4.0](https://img.shields.io/badge/License-CC%20BY--SA%204.0-lightgrey.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-v0.15.0-blue.svg)](数据/lumia.json)
+[![Version](https://img.shields.io/badge/version-v0.16.0-blue.svg)](数据/lumia.json)
 [![Validate](https://github.com/wanziyi233/lumia-conlang/actions/workflows/validate.yml/badge.svg)](.github/workflows/validate.yml)
 
 > **komo li mako, mi li miko.**
@@ -21,7 +21,7 @@
 | 内容 | 在线查看 | 源文件 |
 | --- | --- | --- |
 | 🚀 **五分钟上手**（新社员从这里开始） | [阅读](https://wanziyi233.github.io/lumia-conlang/上手.html) | `上手.md` |
-| 🔍 **可检索词典**（97 词） | [打开词典](https://wanziyi233.github.io/lumia-conlang/词典.html) | `词典.html` |
+| 🔍 **可检索词典**（97 词） | [打开词典](https://wanziyi233.github.io/lumia-conlang/工具/词典.html) | `工具/词典.html` |
 | 🗺️ **语域总览图**（97 词分层） | [查看总览](https://wanziyi233.github.io/lumia-conlang/文字/语域总览.svg) | `文字/语域总览.svg` |
 | 📣 社团宣言（Lumia 原文） | [阅读](https://wanziyi233.github.io/lumia-conlang/社团宣言.html) | `社团宣言.md` |
 | ⭐ **星符总表**（文字系统） | [查看星符](https://wanziyi233.github.io/lumia-conlang/文字/符表.svg) | `文字/符表.svg` |
@@ -33,6 +33,7 @@
 | 🔢 数字 | [阅读](https://wanziyi233.github.io/lumia-conlang/数字/数字.html) | `数字/数字.md` |
 | ✍️ 文字设计说明 | [阅读](https://wanziyi233.github.io/lumia-conlang/文字/文字.html) | `文字/文字.md` |
 | 🌌 **星座体**（艺术排布） | [规范](https://wanziyi233.github.io/lumia-conlang/文字/星座体规范.html) · [示例](https://wanziyi233.github.io/lumia-conlang/文字/星座体示例.svg) | `文字/星座体规范.md` |
+| 🛠️ **星座图生成器**（自己造句出图） | [打开工具](https://wanziyi233.github.io/lumia-conlang/工具/星座图生成器.html) | `工具/星座图生成器.html` |
 
 > **关于图片**：GitHub 的仓库文件预览有时无法显示 SVG（在本机装了网络加速工具时尤其常见）。
 > **本站点（github.io）不受此影响**，所有星符图表均正常显示。
@@ -70,7 +71,6 @@ It is deliberately "unbalanced": it names stars, planets, Saturn, the universe, 
 ├── 上手.md               五分钟上手指南（新社员入口）
 ├── 实用语.md             基础用语速查
 ├── 社团宣言.md           社团宣言（Lumia 原文 + 逐词拆解）
-├── 词典.html             可检索词典（由 数据/生成词典.ps1 生成）
 ├── CHANGELOG.md          版本变更记录
 ├── CONTRIBUTING.md       参与方式与校验说明
 ├── 音系/                 发音与音系规则
@@ -78,20 +78,28 @@ It is deliberately "unbalanced": it names stars, planets, Saturn, the universe, 
 ├── 语法/                 语法规则
 ├── 数字/                 十进制数词
 ├── 文字/                 星文字形设计 + 各类 SVG 图表
-├── 视频/                 宣传片文案
+├── 工具/                 浏览器里打开就能用的两样东西
+│   ├── 词典.html          可检索词典（由 数据/生成词典.ps1 生成）
+│   ├── 星座图生成器.html  输入 Lumia 句子，即时生成星座图 SVG
+│   ├── 星座图引擎.js      解析 + 排布 + 输出 SVG
+│   └── 星座数据.js        由 数据/生成星座图.ps1 从数据库生成
 ├── 数据/
 │   ├── lumia.json        全系统单一数据库（权威数据源）
-│   ├── 校验.ps1          一致性校验脚本
-│   ├── 生成词典.ps1      词典生成脚本
-│   └── dict-template.html 词典 HTML 模板
+│   ├── 校验.ps1          一致性校验脚本（36 项）
+│   ├── 生成词典.ps1      生成 工具/词典.html
+│   ├── 生成星座图.ps1    生成 工具/星座数据.js
+│   ├── dict-template.html 词典 HTML 模板
+│   └── README.md         本目录说明与 JSON 结构
 └── .github/workflows/    CI：每次提交自动运行校验
 ```
 
 ## 快速开始 · Quick Start
 
-- 想查词？打开 **[在线词典](https://wanziyi233.github.io/lumia-conlang/词典.html)**（可检索全部 97 词）。
+- 想查词？打开 **[在线词典](https://wanziyi233.github.io/lumia-conlang/工具/词典.html)**（可检索全部 97 词）。
 - 想系统了解？按这个顺序读：**[实用语速查](https://wanziyi233.github.io/lumia-conlang/实用语.html)** → **[音系](https://wanziyi233.github.io/lumia-conlang/音系/音系.html)** → **[语法](https://wanziyi233.github.io/lumia-conlang/语法/语法.html)** → **[文字](https://wanziyi233.github.io/lumia-conlang/文字/文字.html)**。
 - 想看星符？直接开 **[星符总表](https://wanziyi233.github.io/lumia-conlang/文字/符表.svg)**。
+- 想自己造句看星座图？打开 **[星座图生成器](https://wanziyi233.github.io/lumia-conlang/工具/星座图生成器.html)**——
+  输入罗马字 Lumia（纯 ASCII，**不需要输入法**），即时出图并可下载 SVG。
 - 示例句 / Example：
 
 | Lumia | 中文 / English |
@@ -106,11 +114,14 @@ It is deliberately "unbalanced": it names stars, planets, Saturn, the universe, 
 需要 PowerShell。**注意命令名不一样**：Windows 自带的是 Windows PowerShell 5.1，命令为 `powershell`；`pwsh` 是 PowerShell 7+ 的命令，Windows 默认**没有**安装（macOS/Linux 需自行安装 [PowerShell](https://github.com/PowerShell/PowerShell)）。
 
 ```bash
-# 一致性体检（35 项检查）
+# 一致性体检（36 项检查）
 powershell -File 数据/校验.ps1
 
 # 改完 数据/lumia.json 后，刷新可检索词典
 powershell -File 数据/生成词典.ps1
+
+# 改完 数据/lumia.json 后，刷新星座图生成器的数据
+powershell -File 数据/生成星座图.ps1
 ```
 
 > macOS / Linux 用户请把上面的 `powershell` 换成 `pwsh`。
@@ -130,4 +141,4 @@ powershell -File 数据/生成词典.ps1
 
 ---
 
-*This project is a work-in-progress development version (v0.15.0). 本项目为开发版，仍会持续改动。*
+*This project is a work-in-progress development version (v0.16.0). 本项目为开发版，仍会持续改动。*

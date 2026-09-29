@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>Lumia 星座图生成器 · Selagrafi Constellation</title>
+<style>
+  :root { --bg:#05070d; --panel:#0a0e1a; --line:#1e2a3d; --fg:#e8f0f8; --dim:#9fb4c8; --accent:#6fd6ff; --gold:#ffd166; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg);
+         font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif; }
+  header { padding:18px 24px 12px; border-bottom:1px solid var(--line); }
+  h1 { margin:0; font-size:19px; letter-spacing:.02em; }
+  header p { margin:6px 0 0; color:var(--dim); font-size:13px; }
+  .wrap { display:flex; gap:0; height:calc(100vh - 78px); }
+  .left { width:380px; min-width:300px; padding:16px 18px; border-right:1px solid var(--line);
+          display:flex; flex-direction:column; gap:12px; overflow:auto; }
+  .right { flex:1; position:relative; overflow:auto; padding:24px; display:flex;
+           align-items:flex-start; justify-content:center; background:
+           radial-gradient(circle at 30% 20%, #0d1424 0%, var(--bg) 60%); }
+  textarea { width:100%; height:110px; background:var(--panel); color:var(--fg);
+             border:1px solid var(--line); border-radius:6px; padding:10px 12px;
+             font-family:ui-monospace, Consolas, monospace; font-size:14px; line-height:1.6; resize:vertical; }
+  textarea:focus { outline:none; border-color:var(--accent); }
+  .row { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--dim); }
+  label.chk { display:flex; align-items:center; gap:6px; cursor:pointer; user-select:none; }
+  button { background:var(--panel); color:var(--fg); border:1px solid var(--line);
+           border-radius:6px; padding:8px 14px; font-size:13px; cursor:pointer; font-family:inherit; }
+  button:hover { border-color:var(--accent); color:var(--accent); }
+  .examples { display:flex; flex-wrap:wrap; gap:6px; }
+  .examples button { padding:5px 9px; font-size:12px; color:var(--dim); }
+  .warn { color:#ffb4a8; font-size:12px; line-height:1.6; }
+  .hint { color:var(--dim); font-size:12px; line-height:1.7; }
+  .hint code { background:var(--panel); padding:1px 5px; border-radius:3px; color:var(--fg); }
+  #stage svg { max-width:100%; height:auto; }
+  .empty { color:var(--dim); font-size:14px; }
+  hr { border:none; border-top:1px solid var(--line); margin:2px 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Lumia 星座图生成器</h1>
+  <p>输入罗马字转写的 Lumia 句子（<b>纯 ASCII，不需要输入法</b>），即时生成星座体 SVG。</p>
+</header>
+
+<div class="wrap">
+  <div class="left">
+    <textarea id="input" spellcheck="false">komo li mako, mi li miko.</textarea>
+
+    <div class="row">
+      <button id="gen">生成 ⏎</button>
+      <button id="dl">下载 SVG</button>
+      <label class="chk"><input type="checkbox" id="labels"> 显示词形</label>
+    </div>
+    <div class="row">
+      <label class="chk"><input type="checkbox" id="auto" checked> 自动更新（每打完一个词）</label>
+    </div>
+    <div class="row">
+      <label class="chk"><input type="checkbox" id="vert"> 竖排（整体转 90°，句内自上而下）</label>
+    </div>
+
+    <div class="examples" id="examples"></div>
+
+    <hr>
+    <div id="warn" class="warn"></div>
+    <div id="breakdown" class="hint"></div>
+    <hr>
+    <div class="hint">
+      <b>可用词</b>共 <span id="nwords"></span> 个，按 <code>词典/词典.md</code> 拼写即可。<br>
+      数词前置（<code>dua luna</code> 两个月亮）；专名写 <code>na Vega</code>，会自动拼成音节串；<br>
+      短句（≤4 词）自动闭合成图形，长句排成折线弧。<br>
+      排版是<b>确定性</b>的——同一句话每次生成都一样。
+    </div>
+  </div>
+
+  <div class="right">
+    <div id="stage"><div class="empty">在上方输入 Lumia 句子…</div></div>
+  </div>
+</div>
+
+<script src="星座数据.js"></script>
+<script src="星座图引擎.js"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var input = $("input"), stage = $("stage"), warn = $("warn"), bd = $("breakdown");
+
+  var EXAMPLES = [
+    "sela li lumia.",
+    "komo li mako, mi li miko.",
+    "Satuna li paneta ku oba.",
+    "dua luna li oba.",
+    "sela na Vega li lumia.",
+    "pela la mi mira e kometa.",
+    "meta la mi vega wo komo.",
+    "mi mola li mira e sela."
+  ];
+
+  $("nwords").textContent = Object.keys(LUMIA.words).length;
+
+  EXAMPLES.forEach(function (s) {
+    var b = document.createElement("button");
+    b.textContent = s;
+    b.onclick = function () { input.value = s; update(); };
+    $("examples").appendChild(b);
+  });
+
+  var lastSvg = "";
+
+  function update() {
+    var text = input.value;
+    var res;
+    try {
+      res = Selagrafi.render(text, { labels: $("labels").checked, vertical: $("vert").checked });
+    } catch (e) {
+      stage.innerHTML = '<div class="empty">渲染出错：' + e.message + "</div>";
+      return;
+    }
+    lastSvg = res.svg;
+    if (!res.svg) {
+      stage.innerHTML = '<div class="empty">' + (res.warnings.join("；") || "没有可解析的句子") + "</div>";
+    } else {
+      stage.innerHTML = res.svg;
+    }
+
+    warn.textContent = res.warnings.length ? "⚠ " + res.warnings.join("；") : "";
+
+    // 逐句拆解
+    var lines = [];
+    Selagrafi.splitSentences(text).forEach(function (s, i) {
+      var an = Selagrafi.analyze(s);
+      var parts = an.nodes.map(function (nd) {
+        var t = nd.tok, kind = nd.chain ? "音节串首节" : (nd.companion ? "伴星" : "主星");
+        var sat = (nd.attach || []).filter(function (a) { return a.kind === "satellite"; });
+        var extra = sat.length ? "（+" + sat.map(function (a) { return a.tok.w; }).join(",") + " 卫星）" : "";
+        return "<code>" + t.w + "</code>" + (t.zh ? "·" + t.zh : "") + " <span style='opacity:.6'>[" + kind + extra + "]</span>";
+      });
+      lines.push("<b>第 " + (i + 1) + " 句</b> " + (an.closed ? "（≤4 词，闭合）" : "（长句，开放）") + "<br>" + parts.join("<br>"));
+    });
+    bd.innerHTML = lines.join("<hr>");
+  }
+
+  $("dl").onclick = function () {
+    if (!lastSvg) return;
+    var blob = new Blob([lastSvg], { type: "image/svg+xml" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "lumia-constellation.svg";
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+  };
+
+  input.addEventListener("input", function (e) {
+    // 关闭开关时不自动更新，交给回车或「生成」按钮。
+    if (!$("auto").checked) return;
+    // 打开开关时也**不是每敲一个字母就重画**——只在输入了空格/标点（即写完一个词）时更新。
+    if (e.inputType && e.inputType.indexOf("insertFromPaste") === 0) { update(); return; }
+    if (e.data && /[\s,.!?;:]/.test(e.data)) update();
+  });
+  input.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); update(); }
+  });
+  $("gen").onclick = update;
+  $("labels").addEventListener("change", update);
+  $("vert").addEventListener("change", update);
+  $("auto").addEventListener("change", function () { if (this.checked) update(); });
+  update();
+})();
+</script>
+</body>
+</html>

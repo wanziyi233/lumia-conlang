@@ -13,7 +13,7 @@ $root = if ($PSScriptRoot) { Split-Path -Parent $PSScriptRoot } else { (Get-Loca
 $jsonPath   = Join-Path (Join-Path $root $SJ) 'lumia.json'
 $dictMd     = Join-Path (Join-Path $root $CD) ($CD + '.md')
 $dataReadme = Join-Path (Join-Path $root $SJ) 'README.md'
-$dictHtml   = Join-Path $root ($CD + '.html')
+$dictHtml   = Join-Path (Join-Path $root "$([char]0x5DE5)$([char]0x5177)") ($CD + '.html')
 
 Write-Output "== Lumia consistency check =="
 Write-Output ("root: " + $root)
@@ -286,7 +286,7 @@ $vv = $j.phonology.vowels.Count
 if (Test-Path $syPath) {
     $syText = [System.IO.File]::ReadAllText($syPath)
     $syBad = @()
-    $nc = @([regex]::Matches($syText, '<use\b')).Count
+    $nc = @([regex]::Matches($syText, '<use[^>]*href="#c\d+"')).Count
     $nb = @([regex]::Matches($syText, 'id="c\d+"') | ForEach-Object { $_.Value } | Sort-Object -Unique).Count
     if ($nc -ne ($cv * $vv)) { $syBad += ('cells ' + $nc + ' != ' + ($cv * $vv)) }
     if ($nb -ne $cv)         { $syBad += ('base shapes ' + $nb + ' != ' + $cv) }
@@ -497,21 +497,47 @@ foreach ($w in @($lex | Where-Object { $_.cat -eq 'base'  } | ForEach-Object { $
 $glPairs += @{ prop = 'word';  key = 'Satuna'; file = $FT;  id = 'g_satuna' }
 foreach ($d in @($gl.digit.PSObject.Properties.Name))                                   { $glPairs += @{ prop = 'digit'; key = $d; file = $DGT; id = ('d' + $d) } }
 foreach ($b in @($gl.syllabary.bases.PSObject.Properties.Name))                         { $glPairs += @{ prop = 'bases'; key = $b; file = $SYL; id = $b } }
+$glPairs += @{ prop = 'coda'; key = 'coda'; file = $SYL; id = 'coda' }
+foreach ($pr in @($j.script.primitives))                                                 { $glPairs += @{ prop = 'prim'; key = [string]$pr.lumia; file = $FT; id = ('prim_' + $pr.lumia) } }
 
 $glBad = @(); $glN = 0
 foreach ($p in $glPairs) {
-    $store = $gl.PSObject.Properties[$p.prop].Value
-    if ($p.prop -eq 'bases') { $store = $gl.syllabary.bases }
-    $db = $store.PSObject.Properties[$p.key]
-    if (-not $db) { $glBad += ('database missing ' + $p.prop + '/' + $p.key); continue }
+    $dbVal = $null
+    if ($p.prop -eq 'bases') { $dbVal = $gl.syllabary.bases.PSObject.Properties[$p.key].Value }
+    elseif ($p.prop -eq 'coda') { $dbVal = $gl.syllabary.coda }
+    elseif ($p.prop -eq 'prim') {
+        $pr = @($j.script.primitives | Where-Object { [string]$_.lumia -eq $p.key }) | Select-Object -First 1
+        if ($pr) { $dbVal = $pr.glyph }
+    }
+    else {
+        $store = $gl.PSObject.Properties[$p.prop].Value
+        $prop = $store.PSObject.Properties[$p.key]
+        if ($prop) { $dbVal = $prop.Value }
+    }
+    if ($null -eq $dbVal) { $glBad += ('database missing ' + $p.prop + '/' + $p.key); continue }
     $asset = Join-Path $wdir ($p.file + '.svg')
     if (-not (Test-Path $asset)) { $glBad += ('asset missing ' + $p.file); continue }
     $c = [System.IO.File]::ReadAllText($asset)
     $m = [regex]::Match($c, '<g id="' + [regex]::Escape($p.id) + '">(.*?)</g>', [System.Text.RegularExpressions.RegexOptions]::Singleline)
     if (-not $m.Success) { $glBad += ('asset missing #' + $p.id); continue }
-    if ($m.Groups[1].Value.Trim() -ne $db.Value) { $glBad += ('drift in ' + $p.id) }
+    if ($m.Groups[1].Value.Trim() -ne $dbVal) { $glBad += ('drift in ' + $p.id) }
     $glN++
+    # 语域总览.svg 自带一整套字形副本（g_*/f_*/b_*/d*）。它也必须是同一份几何——
+    # 0.15.0 修 d0 时就漏了它，直到下一次审计才发现。
+    if (($p.file -eq $TH) -or ($p.file -eq $FU) -or ($p.file -eq $BA) -or ($p.file -eq $DGT)) {
+        $ovPath = Join-Path $wdir ($OVN + '.svg')
+        if (Test-Path $ovPath) {
+            $ovc = [System.IO.File]::ReadAllText($ovPath)
+            $ovm = [regex]::Match($ovc, '<g id="' + [regex]::Escape($p.id) + '">(.*?)</g>', [System.Text.RegularExpressions.RegexOptions]::Singleline)
+            if ($ovm.Success -and ($ovm.Groups[1].Value.Trim() -ne $dbVal)) { $glBad += ('drift in ' + $OVN + '.svg #' + $p.id) }
+        }
+    }
 }
+#     baseOrder must agree with the declared consonant inventory -- c0..c15 map onto it
+#     positionally, and that mapping was previously only implicit.
+$bo = @($gl.syllabary.baseOrder)
+$co = @($j.phonology.consonants)
+if ($bo.Count -ne $co.Count -or (Compare-Object $bo $co)) { $glBad += 'baseOrder != phonology.consonants' }
 #     The css block is part of the same contract: the classes the database declares must be
 #     byte-identical to the ones the assets use, otherwise a glyph drawn from the database
 #     looks subtly different from the same glyph printed in the chart.
@@ -653,6 +679,58 @@ foreach ($bc in $boxChecks) {
         }
     }
 }
+# 笔形基元也有画布（box.primitive），同样不能越界
+foreach ($pr in @($j.script.primitives)) {
+    if (-not $pr.glyph) { continue }
+    $e = GetFragExtent $pr.glyph
+    $pb = [double]$gl.box.primitive
+    if (($e.minx -lt -0.5) -or ($e.miny -lt -0.5) -or ($e.maxx -gt ($pb + 0.5)) -or ($e.maxy -gt ($pb + 0.5))) {
+        $glBad += ('primitive ' + $pr.lumia + ' escapes box ' + $pb)
+    }
+}
+# 音节图每行的辅音标签必须与 baseOrder 同序——否则换两行也不会被发现
+if (Test-Path (Join-Path $wdir ($SYL + '.svg'))) {
+    $syt = [System.IO.File]::ReadAllText((Join-Path $wdir ($SYL + '.svg')))
+    $labs = @([regex]::Matches($syt, '<text[^>]*class="l"[^>]*>([a-z])\s') | ForEach-Object { $_.Groups[1].Value })
+    if ($labs.Count -ne $bo.Count) { $glBad += ('syllabary rows ' + $labs.Count + ' != baseOrder ' + $bo.Count) }
+    elseif ((Compare-Object $labs $bo)) { $glBad += 'syllabary row labels != baseOrder' }
+}
+# 每个借词都必须带来源（词典.md 里有，数据库里也必须有）
+$JIE = [string][char]0x501F                                                              # 借
+foreach ($e2 in @($lex | Where-Object { $_.ety -eq $JIE })) {
+    if (-not $e2.src) { $glBad += ('borrowed word without src: ' + $e2.w) }
+}
+# 星座体样式必须来自数据库，否则「单发 lumia.json 就能画出全部图形」不成立
+if (-not $j.script.constellation.css) { $glBad += 'constellation.css missing' }
+# lexicon[].posAll 必须与 词典.md 的词类栏一致（该栏形如 `名·太阳；形·唯一的；数·一`），
+# 否则「词性」在数据库与人类可读词典之间就会悄悄分叉。
+$POSTAGS = '[\u4EE3\u52A9\u8FDE\u4ECB\u540D\u52A8\u5F62\u6570\u7591\u53F9]'
+$DIC = $dictMd
+if (Test-Path $DIC) {
+    $dicTags = @{}
+    foreach ($dl in [System.IO.File]::ReadAllLines($DIC)) {
+        $dm = [regex]::Match($dl, '^\|\s*\d+\s*\|\s*(\S+)\s*\|[^|]*\|\s*([^|]+?)\s*\|')
+        if (-not $dm.Success) { continue }
+        # 词类栏形如 `形/名·双、对、成双；数·二`：按 ；分段，取每段 `·` 之前的部分，再按 / 拆开
+        $tags = @()
+        foreach ($seg in @($dm.Groups[2].Value -split [string][char]0xFF1B)) {
+            $head = @($seg -split [string][char]0x00B7)[0]
+            foreach ($t in @($head -split '/')) {
+                $tt = $t.Trim()
+                if ($tt -match ('^' + $POSTAGS + '$')) { $tags += $tt }
+            }
+        }
+        if ($tags.Count) { $dicTags[$dm.Groups[1].Value] = $tags }
+    }
+    foreach ($e3 in $lex) {
+        $want = @($dicTags[[string]$e3.w])
+        if (-not $want.Count) { continue }
+        $have = if ($e3.posAll) { @([string]$e3.posAll -split '/') } else { @([string]$e3.pos) }
+        if (($want -join '/') -ne ($have -join '/')) {
+            $glBad += ('pos mismatch for ' + $e3.w + ': dict=' + ($want -join '/') + ' db=' + ($have -join '/'))
+        }
+    }
+}
 
 $glExpectWord  = @($glPairs | Where-Object { $_.prop -eq 'word'  } | ForEach-Object { $_.key })
 $glExpectDigit = @($glPairs | Where-Object { $_.prop -eq 'digit' } | ForEach-Object { $_.key })
@@ -663,6 +741,33 @@ foreach ($x in @($gl.syllabary.bases.PSObject.Properties.Name | Where-Object { $
 if ($glN -ne $glPairs.Count) { $glBad += ('checked ' + $glN + ' of ' + $glPairs.Count + ' glyphs') }
 if ($glBad.Count -eq 0) { OK ("database glyph geometry and styles match the SVG assets (" + $glN + " glyphs)") }
 else { BAD ("glyph geometry drift: " + (($glBad | Sort-Object -Unique) -join '; ')) }
+
+# 30. the constellation tool ships a GENERATED data file. It must stay in step with the
+#     database, or the page silently draws yesterday's glyphs.
+$GJ2 = "$([char]0x5DE5)$([char]0x5177)"                                                    # 工具
+$JQ2 = "$([char]0x661F)$([char]0x5EA7)$([char]0x6570)$([char]0x636E)"                      # 星座数据
+$toolData = Join-Path (Join-Path $root $GJ2) ($JQ2 + '.js')
+if (Test-Path $toolData) {
+    try {
+        $td = [System.IO.File]::ReadAllText($toolData)
+        $tm = [regex]::Match($td, 'globalThis\.LUMIA\s*=\s*(\{.*\});', [System.Text.RegularExpressions.RegexOptions]::Singleline)
+        if (-not $tm.Success) { BAD "constellation tool data is not a LUMIA payload" }
+        else {
+            $tl = $tm.Groups[1].Value | ConvertFrom-Json
+            $tBad = @()
+            if ($tl.version -ne $j.meta.version) { $tBad += ('version ' + $tl.version + ' != ' + $j.meta.version) }
+            $tn = @($tl.words.PSObject.Properties).Count
+            if ($tn -ne $lex.Count) { $tBad += ('words ' + $tn + ' != ' + $lex.Count) }
+            $tg = @($tl.glyphs.word.PSObject.Properties).Count
+            $dg = @($gl.word.PSObject.Properties).Count
+            if ($tg -ne $dg) { $tBad += ('glyphs.word ' + $tg + ' != ' + $dg) }
+            $tdig = @($tl.glyphs.digit.PSObject.Properties).Count
+            if ($tdig -ne @($gl.digit.PSObject.Properties).Count) { $tBad += ('glyphs.digit ' + $tdig) }
+            if ($tBad.Count -eq 0) { OK ("constellation tool data matches the database (" + $tn + " words, " + $tg + " glyphs)") }
+            else { BAD ("constellation tool data stale: " + ($tBad -join '; ')) }
+        }
+    } catch { BAD ("constellation tool data check error: " + $_.Exception.Message) }
+} else { BAD "constellation tool data missing" }
 
 Write-Output ""
 Write-Output ("== RESULT: PASS " + $script:pass + " / FAIL " + $script:fail + " ==")

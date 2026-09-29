@@ -14,23 +14,30 @@
   <!-- Section 1: primitives -->
   <text x="20" y="85" class="h">一、六基元</text>
 
-  <g transform="translate(20,100)"><circle class="s" cx="45" cy="45" r="26"/></g>
+  <g transform="translate(20,100)"><use href="#prim_oba"/></g>
   <text x="65" y="205" class="pl">环 · oba</text>
-  <g transform="translate(130,100)"><path class="s" d="M20 50 A25 25 0 0 1 70 50"/></g>
+  <g transform="translate(130,100)"><use href="#prim_aka"/></g>
   <text x="175" y="205" class="pl">弧 · aka</text>
-  <g transform="translate(240,100)"><path class="s" d="M45 45 A7 7 0 0 1 59 45 A14 14 0 0 1 31 45 A21 21 0 0 1 66 45"/></g>
+  <g transform="translate(240,100)"><use href="#prim_gala"/></g>
   <text x="285" y="205" class="pl">螺旋 · gala</text>
-  <g transform="translate(350,100)"><path class="s" d="M12 45 C20 28 28 28 34 45 C40 62 48 62 54 45 C60 28 68 28 76 45"/></g>
+  <g transform="translate(350,100)"><use href="#prim_pusa"/></g>
   <text x="395" y="205" class="pl">波 · pusa</text>
-  <g transform="translate(460,100)"><circle class="d" cx="24" cy="36" r="6"/><path class="s" d="M30 39 C44 52 60 60 74 70"/></g>
+  <g transform="translate(460,100)"><use href="#prim_koma"/></g>
   <text x="505" y="205" class="pl">尾 · koma</text>
-  <g transform="translate(570,100)"><circle class="d" cx="45" cy="45" r="9"/></g>
+  <g transform="translate(570,100)"><use href="#prim_mi"/></g>
   <text x="615" y="205" class="pl">点 · mi</text>
 
   <!-- Section 2: glyphs -->
   <text x="20" y="260" class="h">二、星符（示例）</text>
 
   <defs>
+    <!-- 六基元（几何真源在 数据/lumia.json 的 script.primitives[].glyph） -->
+    <g id="prim_oba"><circle class="s" cx="45" cy="45" r="26"/></g>
+    <g id="prim_aka"><path class="s" d="M20 50 A25 25 0 0 1 70 50"/></g>
+    <g id="prim_gala"><path class="s" d="M45 45 A7 7 0 0 1 59 45 A14 14 0 0 1 31 45 A21 21 0 0 1 66 45"/></g>
+    <g id="prim_pusa"><path class="s" d="M12 45 C20 28 28 28 34 45 C40 62 48 62 54 45 C60 28 68 28 76 45"/></g>
+    <g id="prim_koma"><circle class="d" cx="24" cy="36" r="6"/><path class="s" d="M30 39 C44 52 60 60 74 70"/></g>
+    <g id="prim_mi"><circle class="d" cx="45" cy="45" r="9"/></g>
     <g id="g_lumia"><path class="s" d="M60 60 A8 8 0 0 1 76 60 A16 16 0 0 1 44 60 A24 24 0 0 1 92 60 A32 32 0 0 1 28 60 A40 40 0 0 1 108 60"/><circle class="d" cx="60" cy="60" r="4"/></g>
     <g id="g_sela"><path class="s" d="M60 14 C66 40 80 46 106 60 C80 74 66 80 60 106 C54 80 40 74 14 60 C40 46 54 40 60 14 Z"/><circle class="d" cx="60" cy="60" r="4"/></g>
     <g id="g_sola"><path class="s" d="M60 34 A26 26 0 1 1 60 86 A26 26 0 1 1 60 34 Z"/><circle class="d" cx="60" cy="60" r="5"/></g>

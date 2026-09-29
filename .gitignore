@@ -19,3 +19,6 @@ Desktop.ini
 node_modules/
 dist/
 build/
+
+# 宣传片等与语言本体无关的制作物（保留在本地，不随仓库分发）
+视频/

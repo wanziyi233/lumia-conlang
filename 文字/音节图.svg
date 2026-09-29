@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 1840" width="640" height="1840">
-  <rect width="640" height="1840" fill="#0a0e1a"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 1960" width="640" height="1960">
+  <rect width="640" height="1960" fill="#0a0e1a"/>
   <style>
     .t{fill:#e8f0f8;font-family:sans-serif;font-size:28px;font-weight:bold}
     .h{fill:#9fb4c8;font-family:sans-serif;font-size:20px;text-anchor:middle}
@@ -37,6 +37,8 @@
     <g id="c13"><path class="s" d="M40 74 Q40 56 54 56 Q66 56 66 66"/></g>
     <g id="c14"><path class="s" d="M32 66 Q40 48 48 66 Q56 48 64 66"/></g>
     <g id="c15"><path class="s" d="M50 34 Q62 48 52 64 L66 78"/></g>
+    <!-- -n 尾符：音节以 n 收尾时，在右下角叠这一短勾 -->
+    <g id="coda"><path class="s" d="M88 82 H102 V96"/></g>
   </defs>
 
   <!-- row 0 p -->
@@ -119,8 +121,15 @@
   <use href="#c15" x="120" y="1630"/><use href="#c15" x="220" y="1630"/><use href="#c15" x="320" y="1630"/><use href="#c15" x="420" y="1630"/><use href="#c15" x="520" y="1630"/>
   <circle class="v" cx="170" cy="1648" r="4"/><circle class="v" cx="236" cy="1680" r="4"/><circle class="v" cx="370" cy="1712" r="4"/><circle class="v" cx="504" cy="1680" r="4"/>
 
+  <!-- 例：-n 尾符。基形在此内联，以免混入上方 16x5 的格子计数；尾符仍走 #coda 定义 -->
+  <text x="108" y="1788" class="l">例 -n 尾</text>
+  <g transform="translate(120,1730)"><path class="s" d="M50 78 V34"/><circle class="v" cx="50" cy="18" r="4"/></g>
+  <text x="212" y="1795" class="n">pa</text>
+  <g transform="translate(300,1730)"><path class="s" d="M50 78 V34"/><circle class="v" cx="50" cy="18" r="4"/><use href="#coda"/></g>
+  <text x="392" y="1795" class="n">pan（右下的短勾即 -n 尾）</text>
+
   <!-- legend -->
-  <text x="20" y="1760" class="n">· 元音定位点：a＝上 · e＝左 · i＝下 · o＝右 · u＝无点（空心圈＝元音位置）</text>
-  <text x="20" y="1790" class="n">· 浊音 b d g v ＝ 主体形上加一颗实心点</text>
-  <text x="20" y="1820" class="n">· -n 尾 ＝ 音节符右下加一短勾 ⌐</text>
+  <text x="20" y="1870" class="n">· 元音定位点：a＝上 · e＝左 · i＝下 · o＝右 · u＝无点（空心圈＝元音位置）</text>
+  <text x="20" y="1900" class="n">· 浊音 b d g v ＝ 主体形上加一颗实心点</text>
+  <text x="20" y="1930" class="n">· -n 尾 ＝ 音节符右下加一短勾 ⌐（见上方示例）</text>
 </svg>

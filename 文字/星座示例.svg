@@ -16,7 +16,7 @@
     <g id="komo"><circle class="s" cx="60" cy="60" r="42"/><circle class="d" cx="48" cy="46" r="3"/><circle class="d" cx="72" cy="54" r="3"/><circle class="d" cx="58" cy="74" r="3"/></g>
     <g id="li"><path class="s" d="M36 60 H84"/></g>
     <g id="mako"><path class="s" d="M48 46 L32 60 L48 74"/><path class="s" d="M72 46 L88 60 L72 74"/></g>
-    <g id="mi"><circle class="d" cx="60" cy="60" r="9"/></g>
+    <g id="mi"><circle class="d" cx="60" cy="60" r="8"/></g>
     <g id="miko"><path class="s" d="M32 46 L48 60 L32 74"/><path class="s" d="M88 46 L72 60 L88 74"/></g>
   </defs>
 

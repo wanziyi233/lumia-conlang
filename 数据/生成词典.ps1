@@ -3,10 +3,13 @@
 $ErrorActionPreference = 'Stop'
 $SJ = "$([char]0x6570)$([char]0x636E)"   # data folder (shu ju)
 $CD = "$([char]0x8BCD)$([char]0x5178)"   # dictionary (ci dian)
+$GJ = "$([char]0x5DE5)$([char]0x5177)"   # tools folder (gong ju)
 $root = if ($PSScriptRoot) { Split-Path -Parent $PSScriptRoot } else { (Get-Location).Path }
 $jsonPath = Join-Path (Join-Path $root $SJ) 'lumia.json'
 $tplPath  = Join-Path (Join-Path $root $SJ) 'dict-template.html'
-$outPath  = Join-Path $root ($CD + '.html')
+$outDir   = Join-Path $root $GJ
+if (-not (Test-Path $outDir)) { New-Item -ItemType Directory -Path $outDir | Out-Null }
+$outPath  = Join-Path $outDir ($CD + '.html')
 
 $j = [System.IO.File]::ReadAllText($jsonPath) | ConvertFrom-Json
 $compact = $j | ConvertTo-Json -Depth 20 -Compress

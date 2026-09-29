@@ -7,6 +7,10 @@
 | 文件 | 内容 |
 | --- | --- |
 | `lumia.json` | **单一总数据库**：音系 + 97 词词典 + 数字 + 语法 + 文字（**含全部字形几何**）+ 专名 + 常用语 + 时间表达，一文件掌握全系统 |
+| `校验.ps1` | 一致性校验脚本（36 项）。可执行代码保持纯 ASCII，中文路径用码点拼出 |
+| `生成词典.ps1` | 由 `lumia.json` 生成 `工具/词典.html`（可检索词典） |
+| `生成星座图.ps1` | 由 `lumia.json` 生成 `工具/星座数据.js`（星座图生成器的数据） |
+| `dict-template.html` | `工具/词典.html` 的模板 |
 
 ## JSON 结构（顶层键）
 
@@ -26,12 +30,13 @@
 
 - **lexicon 的 `cat` 取值**：`func` 功能词 · `astro` 天文科幻借词 · `num` 数词 · `base` 基础自创词。
 - 此 JSON 是权威数据源；`词典.md`、`数字.md` 等 Markdown 是人类可读版本，二者应保持同步。
-- 版本号随设计变更递增（当前 `0.15.0`）。
+- 版本号随设计变更递增（当前 `0.16.0`）。
 
 ## 自包含：字形几何
 
-`script.glyphs` 存放**全部字形的几何**（87 个词符 + 10 个数字符 + 16 个音节基形），
-每条都是可直接嵌入 SVG 的片段。所以**单发这一个文件，对方就能画出全部字形**——
+`script.glyphs` 存放**全部 120 个图形的几何**——87 个词符 + 10 个数字符 + 16 个音节基形
++ 1 个 `-n` 尾符 + 6 个笔形基元（基元的几何在 `script.primitives[].glyph` 里）。
+每条都是可直接嵌入 SVG 的片段。所以**单发这一个文件，对方就能画出全部图形**——
 
 ```xml
 <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
@@ -40,9 +45,13 @@
 </svg>
 ```
 
-- 词符：`box.word` = 120；数字符：`box.digit` = 100
-- 音节符：取 `syllabary.bases` 里对应的基形，再按 `syllabary.vowelAnchor` 放一个半径
-  `syllabary.vowelRingRadius` 的空心圆（`u` 的锚点是 `null`，即不标点）
+- 词符：`box.word` = 120；音节基形：`box.syllable` = 120
+- 数字符：`box.digit` = 100；笔形基元：`box.primitive` = 90
+- 音节符：`syllabary.bases` 的 `c0`..`c15` **依次**对应 `syllabary.baseOrder`
+  （= `phonology.consonants`，校验会比对两者）；再按 `syllabary.vowelAnchor` 放一个半径
+  `syllabary.vowelRingRadius` 的空心圆（`u` 的锚点是 `null`，即不标点）；
+  音节以 `n` 收尾时再叠上 `syllabary.coda`
 - 完整示例见 `script.glyphs.usage`
 
-校验第 29 项会**逐字比对**数据库与 SVG 资产，任一侧改动而另一侧没跟上都会 FAIL。
+校验第 29 项会**逐字比对**数据库与 SVG 资产（词符/数字符/音节基形/尾符/基元，共 120 个），
+任一侧改动而另一侧没跟上都会 FAIL。
