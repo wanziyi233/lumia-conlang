@@ -43,21 +43,64 @@
 
   /* ---------- 词法 / 句法 ---------- */
 
-  function splitSentences(text) {
-    return text.split(/[.!?;。！？；\n]+/)
-      .map(function (s) { return s.trim(); })
-      .filter(function (s) { return s.length > 0; });
+  // 切句。除文本外还**保留句末标点** —— `?` 与 `!` 在星座体里有形制含义
+  //（见 文字/星座体规范.md §五：问号可闭合成环、叹号整座放大），丢掉它们就没法实现。
+  function splitSentencesEx(text) {
+    var out = [], cur = "";
+    for (var i = 0; i < text.length; i++) {
+      var ch = text.charAt(i);
+      if (".!?。！？".indexOf(ch) >= 0) {
+        var t = cur.trim();
+        if (t) out.push({ text: t, mark: ch });
+        cur = "";
+      } else if (";；\n".indexOf(ch) >= 0) {
+        var t2 = cur.trim();
+        if (t2) out.push({ text: t2, mark: "" });
+        cur = "";
+      } else {
+        cur += ch;
+      }
+    }
+    var last = cur.trim();
+    if (last) out.push({ text: last, mark: "" });
+    return out;
   }
 
+  function splitSentences(text) {
+    return splitSentencesEx(text).map(function (s) { return s.text; });
+  }
+
+  function isComma(ch) { return ch === "," || ch === "\uFF0C" || ch === "\u3001" || ch === ";" || ch === "\uFF1B"; }
+
   // 切词，同时记住逗号出现在第几个词之后（用于在句轨上嵌「节点星」，见规范 §五）。
+  //
+  // 旧实现的正则只认 `[A-Za-z]+` 与逗号，于是任何别的字符都**一声不响地消失**：
+  // 实测 `2025 li lumia.` 画出来只剩两个节点、零警告；最糟的是 `lumia123 li luna.`
+  // 里的 `lumia123` 被悄悄当成 `lumia` 画了出去 —— 用户看到的是一个他没写的词。
+  // 现在：任何既不是字母、也不是逗号的片段都如实收进 dropped；且字母与杂字
+  // **紧贴**时（`lumia123`）整体放弃，因为那多半不是用户想写的词，画出去比不画更糟。
+  // 句末标点（`.!?。！？`）不在扫描范围内 —— 它们是分隔符，由 splitSentencesEx 处理，
+  // 出现在这里只说明调用方直接传了原始文本（如生成器页直接调 analyze），一律忽略。
   function tokenize(sentence) {
-    var words = [], commaAfter = {};
-    var re = /([A-Za-z]+)|([,，、;；])/g, m;
+    var words = [], commaAfter = {}, dropped = [], prev = null;
+    var re = /[A-Za-z]+|[\uFF0C,\u3001;\uFF1B]|[^\sA-Za-z\uFF0C,\u3001;\uFF1B.!?\u3002\uFF01\uFF1F]+/g, m;
     while ((m = re.exec(sentence)) !== null) {
-      if (m[1]) words.push(m[1]);
-      else if (m[2]) commaAfter[words.length] = true;
+      var t = m[0], start = m.index, end = start + t.length;
+      var kind = /^[A-Za-z]+$/.test(t) ? "w" : (isComma(t.charAt(0)) ? "c" : "x");
+      if (prev && prev.end === start && kind !== "c" && prev.kind !== "c" &&
+          (kind === "x" || prev.kind === "x")) {
+        var merged = prev.text + t;
+        if (kind === "x") { words.pop(); dropped.push(merged); }
+        else { dropped[dropped.length - 1] = merged; }
+        prev = { kind: "x", end: end, text: merged };
+        continue;
+      }
+      if (kind === "w") words.push(t);
+      else if (kind === "c") commaAfter[words.length] = true;
+      else dropped.push(t);
+      prev = { kind: kind, end: end, text: t };
     }
-    return { words: words, commaAfter: commaAfter };
+    return { words: words, commaAfter: commaAfter, dropped: dropped };
   }
 
   function info(w) {
@@ -162,7 +205,7 @@
     // 否则「komo li mako kaka kiki koko」会被算成 3 个词而错误地闭合。
     var wordCount = toks.length;
     return {
-      sentence: sentence, nodes: nodes, skipped: skipped,
+      sentence: sentence, nodes: nodes, skipped: skipped, dropped: tk.dropped,
       unknown: toks.filter(function (x) { return !x.known; }).map(function (x) { return x.w; }),
       wordCount: wordCount,
       closed: wordCount > 0 && wordCount <= C.closure.maxWords
@@ -472,14 +515,18 @@
 
   function render(input, opts) {
     opts = opts || {};
-    var sentences = splitSentences(input);
+    var sentences = splitSentencesEx(input);
     if (!sentences.length) return { svg: "", warnings: ["没有可解析的句子"] };
 
     var warnings = [], figures = [];
 
-    sentences.forEach(function (s, si) {
+    sentences.forEach(function (se, si) {
+      var s = se.text;
       var an = analyze(s);
       var alien = an.unknown.filter(function (w) { return an.skipped.indexOf(w) < 0; });
+      if (an.dropped.length) warnings.push("第 " + (si + 1) + " 句忽略了无法解析的字符 " +
+        an.dropped.join("\u3001") + "\uFF1ALumia \u53EA\u7528 a\u2013z \u62FC\u5199\uFF0C\u6570\u5B57\u5199\u6210\u6570\u8BCD" +
+        "\uFF082025 = dua kilo dua deka penta\uFF09\uFF0C\u6807\u70B9\u7528 . , ? !");
       if (alien.length) warnings.push("第 " + (si + 1) + " 句用音节符拼写了词典外的词：" + alien.join(", "));
       if (an.skipped.length) warnings.push("第 " + (si + 1) + " 句放弃了 " + an.skipped.join(", ") +
         "（不符合 Lumia 音节规律，或超过 4 个音节）");
@@ -494,7 +541,29 @@
       var rng = makeRng(s + "#" + si);
       var pts = placeNodes(an, rng);
       var atts = placeAttachments(an, pts, rng);
-      figures.push({ an: an, pts: pts, atts: atts, breaks: clusterBreaks(an) });
+      var breaks = clusterBreaks(an);
+      // 问号（规范 §五）：星座首尾**可**闭合成环，强调「未定」——
+      // 于是把「只闭合短句」放宽到问句。但过长句子会先被分簇，
+      // 闭合轨会横跨子簇、连出错误的线，故有分簇时仍不闭合。
+      if (se.mark === "?" && !Object.keys(breaks).length) an.closed = true;
+      an.mark = se.mark;
+      // 叹号 / 祈愿（规范 §五）：`o` 起首的整座星座半径放大 1.15 倍（见下方 BOOST）。
+      var boost = se.mark === "!" || /^\s*o\b/i.test(s);
+      figures.push({ an: an, pts: pts, atts: atts, breaks: breaks, boost: boost });
+    });
+
+    // 叹号 / 祈愿（规范 §五）：`o` 起首的整座星座**半径**放大 1.15 倍。只放大版式半径
+    //（节点与附件的坐标），字形与光晕仍按数据库的 cell —— 那些尺寸是「可读性」参数，
+    // 跟着缩放会破坏 cell 的语义（cell 是星座体布局的格，不是 SVG 画布尺寸）。
+    var BOOST = 1.15;
+    figures.forEach(function (f) {
+      if (!f.boost || !f.pts.length) return;
+      var cx = 0, cy = 0;
+      f.pts.forEach(function (p) { cx += p.x; cy += p.y; });
+      cx /= f.pts.length; cy /= f.pts.length;
+      var k = function (p) { p.x = cx + (p.x - cx) * BOOST; p.y = cy + (p.y - cy) * BOOST; };
+      f.pts.forEach(k);
+      f.atts.forEach(function (a) { k(a); k(a.from); });
     });
 
     var all = [];
@@ -709,7 +778,7 @@
 
   function renderTrack(input, opts) {
     opts = opts || {};
-    var sentences = splitSentences(input);
+    var sentences = splitSentencesEx(input);
     if (!sentences.length) return { svg: "", warnings: ["没有可解析的句子"] };
 
     var T = D.track || {};
@@ -726,9 +795,13 @@
     function flush() { if (cur.length) { lines.push(cur); cur = []; curW = 0; } }
 
     for (var s = 0; s < sentences.length; s++) {
-      var tk = tokenize(sentences[s]);
+      var tk = tokenize(sentences[s].text);
       var toks = tk.words.map(info);
       var cells = [], ps = [];
+      // 与星座体同一条规矩：不认识的字符如实报告，不静默吞掉（见 tokenize 注释）。
+      if (tk.dropped.length) warnings.push("第 " + (s + 1) + " 句忽略了无法解析的字符 " +
+        tk.dropped.join("\u3001") + "\uFF1ALumia \u53EA\u7528 a\u2013z \u62FC\u5199\uFF0C\u6570\u5B57\u5199\u6210\u6570\u8BCD" +
+        "\uFF082025 = dua kilo dua deka penta\uFF09\uFF0C\u6807\u70B9\u7528 . , ? !");
       for (var i = 0; i < toks.length; i++) {
         var c = trackFrags(toks[i]);
         if (c) {
@@ -752,7 +825,7 @@
         cur.push(cells[k]);
       }
       flush();
-      parts.push({ sentence: sentences[s], words: ps });
+      parts.push({ sentence: sentences[s].text, words: ps });
     }
     if (!lines.length) return { svg: "", warnings: warnings.concat(["没有可画的节点"]) };
 

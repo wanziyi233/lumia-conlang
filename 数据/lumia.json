@@ -524,7 +524,7 @@
       "backtrackLimit": 120,
       "spatialAllocation": "按词数分配；目标为每节点的平均占地面积大致相等",
       "interSentence": { "mode": "弧轨（虚线弧）", "dasharray": "3 6", "opacity": 0.27 },
-      "css": ".halo{fill:none;stroke:#6fd6ff;stroke-width:.5;opacity:.13}.track{fill:none;stroke:#6fd6ff;stroke-width:.9;opacity:.34}.close{fill:none;stroke:#6fd6ff;stroke-width:.9;opacity:.16}.arc{fill:none;stroke:#6fd6ff;stroke-width:1;opacity:.27;stroke-dasharray:3 6}.bond{fill:none;stroke:#6fd6ff;stroke-width:.8;opacity:.24}.fall{fill:#9fb4c8;stroke:none;opacity:.75}.lb{fill:#9fb4c8;font-family:sans-serif;font-size:12px;text-anchor:middle}.ttl{fill:#e8f0f8;font-family:sans-serif;font-size:17px;font-weight:bold}",
+      "css": ".halo{fill:none;stroke:#6fd6ff;stroke-width:.5;opacity:.13}.track{fill:none;stroke:#6fd6ff;stroke-width:.9;opacity:.34}.close{fill:none;stroke:#6fd6ff;stroke-width:.9;opacity:.16}.arc{fill:none;stroke:#6fd6ff;stroke-width:1;opacity:.27;stroke-dasharray:3 6}.bond{fill:none;stroke:#6fd6ff;stroke-width:.8;opacity:.24}.node{fill:#9fb4c8;stroke:none}.fall{fill:#9fb4c8;stroke:none;opacity:.75}.lb{fill:#9fb4c8;font-family:sans-serif;font-size:12px;text-anchor:middle}.ttl{fill:#e8f0f8;font-family:sans-serif;font-size:17px;font-weight:bold}",
       "haloFormula": "光晕半径 = cell / 2 + 1",
       "cell": { "main": 50, "companion": 32, "numeral": 44, "numeralAttached": 28, "syllable": 30 },
       "attachments": {

@@ -819,6 +819,32 @@ if (Test-Path $toolData) {
     } catch { BAD ("track data check error: " + $_.Exception.Message) }
 } else { BAD "track data check skipped: tool data missing" }
 
+# 33. every CSS class the engine emits must actually be defined in the database
+#     stylesheets. The comma node-star emits class="node", yet constellation.css
+#     never defined .node -- so the browser fell back to the SVG default fill
+#     (black on the near-black #0a0e1a background) and the star was invisible.
+#     The geometry checks compare paths, not stylesheets, so nothing noticed.
+#     Same silent-failure family as the emptied constellation.css payload.
+$YQ = "$([char]0x661F)$([char]0x5EA7)$([char]0x56FE)$([char]0x5F15)$([char]0x64CE)"          # engine
+$engPath = Join-Path (Join-Path $root $GJ2) ($YQ + '.js')
+if (Test-Path $engPath) {
+    try {
+        $engSrc = [System.IO.File]::ReadAllText($engPath)
+        $allCss = [string]$gl.css + [string]$const.css + [string]$trk.css
+        $names = @()
+        foreach ($m in [regex]::Matches($engSrc, 'class="([A-Za-z][A-Za-z0-9_-]*)"')) {
+            if ($names -notcontains $m.Groups[1].Value) { $names += $m.Groups[1].Value }
+        }
+        $miss = @()
+        foreach ($n in $names) {
+            if ($allCss -notmatch ('\.' + [regex]::Escape($n) + '\s*[\{,]')) { $miss += ('.' + $n) }
+        }
+        if ($names.Count -eq 0) { BAD "engine source scan found no CSS classes" }
+        elseif ($miss.Count -eq 0) { OK ("every engine CSS class is defined in the database (" + ($names -join ', ') + ")") }
+        else { BAD ("engine CSS classes undefined in the database: " + ($miss -join ', ')) }
+    } catch { BAD ("engine stylesheet check error: " + $_.Exception.Message) }
+} else { BAD "engine stylesheet check skipped: engine source missing" }
+
 Write-Output ""
 Write-Output ("== RESULT: PASS " + $script:pass + " / FAIL " + $script:fail + " ==")
 if ($script:fail -gt 0) { exit 1 } else { exit 0 }
