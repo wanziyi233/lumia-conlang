@@ -825,6 +825,10 @@ if (Test-Path $toolData) {
 #     (black on the near-black #0a0e1a background) and the star was invisible.
 #     The geometry checks compare paths, not stylesheets, so nothing noticed.
 #     Same silent-failure family as the emptied constellation.css payload.
+#     NOTE: paths are emitted through drawable("track", d), so scanning only for
+#     class="..." would silently stop covering bond/track/close/strut the moment
+#     that refactor landed -- a check that quietly stops checking is worse than
+#     no check. Both spellings are scanned.
 $YQ = "$([char]0x661F)$([char]0x5EA7)$([char]0x56FE)$([char]0x5F15)$([char]0x64CE)"          # engine
 $engPath = Join-Path (Join-Path $root $GJ2) ($YQ + '.js')
 if (Test-Path $engPath) {
@@ -832,8 +836,11 @@ if (Test-Path $engPath) {
         $engSrc = [System.IO.File]::ReadAllText($engPath)
         $allCss = [string]$gl.css + [string]$const.css + [string]$trk.css
         $names = @()
-        foreach ($m in [regex]::Matches($engSrc, 'class="([A-Za-z][A-Za-z0-9_-]*)"')) {
-            if ($names -notcontains $m.Groups[1].Value) { $names += $m.Groups[1].Value }
+        $clsRe = 'class="([A-Za-z][A-Za-z0-9_-]*)"|drawable\("([A-Za-z][A-Za-z0-9_-]*)"'
+        foreach ($m in [regex]::Matches($engSrc, $clsRe)) {
+            $nm = $m.Groups[1].Value
+            if (-not $nm) { $nm = $m.Groups[2].Value }
+            if ($names -notcontains $nm) { $names += $nm }
         }
         $miss = @()
         foreach ($n in $names) {
@@ -844,6 +851,91 @@ if (Test-Path $engPath) {
         else { BAD ("engine CSS classes undefined in the database: " + ($miss -join ', ')) }
     } catch { BAD ("engine stylesheet check error: " + $_.Exception.Message) }
 } else { BAD "engine stylesheet check skipped: engine source missing" }
+
+# 34. animation parameters must agree with the stylesheets they animate.
+#     arcFlow.shift is the dash period: if it drifts from the sum of .arc's
+#     stroke-dasharray, the dashed arc visibly jumps once per loop.
+#     nodeBreath.from is the resting opacity: if it drifts from .halo's opacity,
+#     turning animation on makes every halo jump at t=0.
+#     Both are the same silent-mismatch family as check 33 (the missing .node).
+$animCfg = $const.animation
+if (-not $animCfg) { BAD "script.constellation.animation missing" }
+else {
+    try {
+        $badA = @()
+        foreach ($k in @('spec','rule','arcFlow','nodeBreath','trackDraw')) {
+            if (-not $animCfg.PSObject.Properties[$k]) { $badA += ('missing ' + $k) }
+        }
+        if ($badA.Count -eq 0) {
+            $cssA = [string]$const.css
+            $arcM = [regex]::Match($cssA, '\.arc\{[^}]*stroke-dasharray:\s*([0-9][0-9. ]*)')
+            $haloM = [regex]::Match($cssA, '\.halo\{[^}]*opacity:\s*([0-9.]+)')
+            if (-not $arcM.Success) { $badA += '.arc has no stroke-dasharray' }
+            if (-not $haloM.Success) { $badA += '.halo has no opacity' }
+            if ($arcM.Success) {
+                $sum = 0.0
+                $parts = $arcM.Groups[1].Value.Trim() -split '\s+'
+                foreach ($pv in $parts) { $sum += [double]$pv }
+                $shift = [double]$animCfg.arcFlow.shift
+                if (($shift - $sum) -gt 0.0001 -or ($sum - $shift) -gt 0.0001) {
+                    $badA += ('arcFlow.shift ' + $shift + ' <> .arc dasharray sum ' + $sum)
+                }
+            }
+            if ($haloM.Success) {
+                $of = [double]$haloM.Groups[1].Value
+                $nf = [double]$animCfg.nodeBreath.from
+                if (($nf - $of) -gt 0.0001 -or ($of - $nf) -gt 0.0001) {
+                    $badA += ('nodeBreath.from ' + $nf + ' <> .halo opacity ' + $of)
+                }
+            }
+            foreach ($pk in @('arcFlow','nodeBreath','trackDraw')) {
+                if ([double]$animCfg.$pk.dur -le 0) { $badA += ($pk + '.dur must be positive') }
+            }
+            $sp = [double]$animCfg.trackDraw.span
+            $wd = [double]$animCfg.trackDraw.width
+            if ($sp -le 0 -or $sp -gt 1) { $badA += 'trackDraw.span must be in (0,1]' }
+            if ($wd -le 0 -or $wd -gt 1) { $badA += 'trackDraw.width must be in (0,1]' }
+            if (($sp + $wd) -gt 1) { $badA += 'trackDraw span+width exceeds 1, last segment never finishes' }
+        }
+        if ($badA.Count -eq 0) {
+            OK ("animation parameters agree with the stylesheets (arc period " + $animCfg.arcFlow.shift +
+                ", halo opacity " + $animCfg.nodeBreath.from + ", dur " + $animCfg.trackDraw.dur + "s)")
+        } else { BAD ("animation parameter mismatch: " + ($badA -join '; ')) }
+    } catch { BAD ("animation parameter check error: " + $_.Exception.Message) }
+}
+
+# 35. the generated data file must carry the same animation block as the database.
+#     The engine reads these numbers at runtime from the payload, so if the
+#     generator ever drops them animation silently degrades to static output.
+if (Test-Path $toolData) {
+    try {
+        $tdA = [System.IO.File]::ReadAllText($toolData)
+        $tmA = [regex]::Match($tdA, 'globalThis\.LUMIA\s*=\s*(\{.*\});', [System.Text.RegularExpressions.RegexOptions]::Singleline)
+        if (-not $tmA.Success) { BAD "animation data is not a LUMIA payload" }
+        else {
+            $tlA = $tmA.Groups[1].Value | ConvertFrom-Json
+            $badB = @()
+            $da = $tlA.constellation.animation
+            if (-not $da) { $badB += 'animation absent from generated data' }
+            elseif (-not $animCfg) { }
+            else {
+                foreach ($pk in @('arcFlow','nodeBreath','trackDraw')) {
+                    foreach ($k in @('dur')) {
+                        if ([string]$da.$pk.$k -ne [string]$animCfg.$pk.$k) { $badB += ($pk + '.' + $k + '=' + $da.$pk.$k) }
+                    }
+                }
+                foreach ($pair in @(@('arcFlow','shift'), @('nodeBreath','from'), @('nodeBreath','to'),
+                                    @('nodeBreath','stagger'), @('trackDraw','span'), @('trackDraw','width'))) {
+                    if ([string]$da.$($pair[0]).$($pair[1]) -ne [string]$animCfg.$($pair[0]).$($pair[1])) {
+                        $badB += ($pair[0] + '.' + $pair[1] + '=' + $da.$($pair[0]).$($pair[1]))
+                    }
+                }
+            }
+            if ($badB.Count -eq 0) { OK "generated data carries the same animation parameters as the database" }
+            else { BAD ("animation data mismatch: " + ($badB -join '; ')) }
+        }
+    } catch { BAD ("animation data check error: " + $_.Exception.Message) }
+}
 
 Write-Output ""
 Write-Output ("== RESULT: PASS " + $script:pass + " / FAIL " + $script:fail + " ==")

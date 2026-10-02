@@ -543,7 +543,14 @@
       },
       "example2": "文字/星座体数字与音节示例.svg",
       "vertical": { "rule": "竖排 = 横排版式整体顺时针旋转 90°：句内上→下，句间右→左，上入下出。其余规则不变" },
-      "clustering": { "thresholdWords": 10, "clusterSize": "4-6", "clusterGap": 40, "sentenceGap": 60, "rule": "超过阈值的长句切为子簇；子簇间不画弧轨，靠留白大小区分于句间" }
+      "clustering": { "thresholdWords": 10, "clusterSize": "4-6", "clusterGap": 40, "sentenceGap": 60, "rule": "超过阈值的长句切为子簇；子簇间不画弧轨，靠留白大小区分于句间" },
+      "animation": {
+        "spec": "文字/星座体规范.md",
+        "rule": "开启动画时向图形注入 SMIL <animate>；关闭时不输出任何动画元素，得到与静态模式**逐字节相同**的 SVG。所有数值取自本段，引擎不硬编码。",
+        "arcFlow": { "dur": 3.2, "shift": 9, "rule": "句间弧轨的虚线沿线流动。shift 必须等于 .arc 的 stroke-dasharray 之和（一个完整周期）——否则每轮循环结束时纹样会跳一下；校验会强制这条" },
+        "nodeBreath": { "dur": 4.5, "from": 0.13, "to": 0.26, "stagger": 0.25, "rule": "光晕明暗呼吸，按节点序号错开相位。from 必须等于 .halo 的 opacity，这样「动画」与「静止」的外观起点一致" },
+        "trackDraw": { "dur": 1.6, "span": 0.75, "width": 0.25, "rule": "句轨、闭合轨与卫星连线逐段生长：span 是各段起点的散布比例，width 是单段自身生长所占的时长比例。初始状态即「已画好」，动画从 t=0 把 dashoffset 拉回 0 —— 不支持 SMIL 的渲染器会看到完整图形，不会看到空图" }
+      }
     },
     "track": {
       "name": "星轨体",

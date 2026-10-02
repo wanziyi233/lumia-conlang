@@ -14,9 +14,21 @@
   .wrap { display:flex; gap:0; height:calc(100vh - 78px); }
   .left { width:380px; min-width:300px; padding:16px 18px; border-right:1px solid var(--line);
           display:flex; flex-direction:column; gap:12px; overflow:auto; }
-  .right { flex:1; position:relative; overflow:auto; padding:24px; display:flex;
-           align-items:flex-start; justify-content:center; background:
+  .right { flex:1; position:relative; overflow:hidden; background:
            radial-gradient(circle at 30% 20%, #0d1424 0%, var(--bg) 60%); }
+  #viewport { position:absolute; inset:0; overflow:hidden; cursor:grab; touch-action:none; }
+  #viewport.drag { cursor:grabbing; }
+  #stage { position:absolute; left:0; top:0; transform-origin:0 0; }
+  #stage svg { display:block; }
+  #stage .empty { padding:24px; }
+  #tip { position:absolute; pointer-events:none; display:none; z-index:5;
+         background:rgba(10,14,26,.95); border:1px solid var(--line); border-radius:5px;
+         padding:3px 8px; font-size:12px; color:var(--fg); white-space:nowrap; }
+  #zoombar { position:absolute; right:14px; bottom:14px; display:flex; gap:6px;
+             align-items:center; z-index:5; }
+  #zoombar button { padding:4px 10px; font-size:12px; }
+  #zoomLbl { color:var(--dim); font-size:12px; min-width:48px; text-align:center;
+             font-variant-numeric:tabular-nums; }
   textarea { width:100%; height:110px; background:var(--panel); color:var(--fg);
              border:1px solid var(--line); border-radius:6px; padding:10px 12px;
              font-family:ui-monospace, Consolas, monospace; font-size:14px; line-height:1.6; resize:vertical; }
@@ -31,7 +43,6 @@
   .warn { color:#ffb4a8; font-size:12px; line-height:1.6; }
   .hint { color:var(--dim); font-size:12px; line-height:1.7; }
   .hint code { background:var(--panel); padding:1px 5px; border-radius:3px; color:var(--fg); }
-  #stage svg { max-width:100%; height:auto; }
   .empty { color:var(--dim); font-size:14px; }
   hr { border:none; border-top:1px solid var(--line); margin:2px 0; }
 </style>
@@ -55,9 +66,13 @@
       <button id="gen">生成 ⏎</button>
       <button id="dl">下载 SVG</button>
       <label class="chk"><input type="checkbox" id="labels"> 显示词形</label>
+      <label class="chk"><input type="checkbox" id="anim"> 动画</label>
     </div>
     <div class="row">
       <label class="chk"><input type="checkbox" id="auto" checked> 自动更新（每打完一个词）</label>
+    </div>
+    <div class="row">
+      <span class="hint">动画 = 弧轨流动 · 句轨逐段生长 · 光晕呼吸；关掉即静止。</span>
     </div>
     <div class="row" id="vertRow">
       <label class="chk"><input type="checkbox" id="vert"> 竖排（整体转 90°，句内自上而下）</label>
@@ -74,12 +89,24 @@
       数词前置（<code>dua luna</code> 两个月亮）；专名写 <code>na Vega</code>，会自动拼成音节串。<br>
       <b>星座体</b>：一句话摆成一个星座；短句（≤4 词）自动闭合，长句排成折线弧，多句之间用弧轨相连。<br>
       <b>星轨体</b>：横排逐词、连成一条轨道；超宽自动折行，逗号画成轨道上的节点星，竖排不适用。<br>
-      两种排布<b>共用同一套星符</b>，排版都是<b>确定性</b>的——同一句话每次生成都一样。
+      两种排布<b>共用同一套星符</b>，排版都是<b>确定性</b>的——同一句话每次生成都一样。<br>
+      <b>交互</b>：滚轮以光标为锚点缩放，按住拖拽平移，「适应 / 1:1」复位；鼠标悬停在星上会显示词与释义。<br>
+      <b>动画</b>：勾选后弧轨流动、轨道逐段生长、光晕呼吸；不勾就是静止的，输出与加动画之前完全一致。
     </div>
   </div>
 
   <div class="right">
-    <div id="stage"><div class="empty">在上方输入 Lumia 句子…</div></div>
+    <div id="viewport">
+      <div id="stage"><div class="empty">在上方输入 Lumia 句子…</div></div>
+    </div>
+    <div id="tip"></div>
+    <div id="zoombar">
+      <button id="zoomOut" title="缩小">−</button>
+      <span id="zoomLbl">100%</span>
+      <button id="zoomIn" title="放大">＋</button>
+      <button id="fit" title="缩放到刚好装下">适应</button>
+      <button id="reset" title="回到 1:1">1:1</button>
+    </div>
   </div>
 </div>
 
@@ -89,6 +116,8 @@
 (function () {
   var $ = function (id) { return document.getElementById(id); };
   var input = $("input"), stage = $("stage"), warn = $("warn"), bd = $("breakdown");
+  var viewport = $("viewport"), tip = $("tip");
+  var layout = [];
 
   var EXAMPLES = [
     "sela li lumia.",
@@ -111,8 +140,116 @@
   });
 
   var lastSvg = "", lastName = "lumia-constellation.svg";
+  var firstPaint = true;
+  var tx = 0, ty = 0, k = 1;
 
   function isTrack() { return $("mTrack").checked; }
+
+  /* ---------- 缩放 / 平移 ---------- */
+  // 变换只加在 #stage 这个包裹层上，**不动 SVG 内容**：
+  // 下载下来的 .svg 仍是原始尺寸，不会把当前的缩放比例带进文件。
+
+  function applyT() {
+    stage.style.transform = "translate(" + tx + "px," + ty + "px) scale(" + k + ")";
+    $("zoomLbl").textContent = Math.round(k * 100) + "%";
+  }
+
+  function fit(pad) {
+    var svg = stage.querySelector("svg");
+    if (!svg) { tx = 0; ty = 0; k = 1; applyT(); return; }
+    var b = viewport.getBoundingClientRect();
+    var w = parseFloat(svg.getAttribute("width")) || 1;
+    var h = parseFloat(svg.getAttribute("height")) || 1;
+    pad = pad == null ? 40 : pad;
+    k = Math.min((b.width - pad * 2) / w, (b.height - pad * 2) / h, 4);
+    if (!(k > 0.02)) k = 1;
+    tx = (b.width - w * k) / 2;
+    ty = (b.height - h * k) / 2;
+    applyT();
+  }
+
+  // 以光标为锚点缩放：光标下的那个点保持不动。这是「放大以后好用」的关键。
+  function zoomAt(cx, cy, f) {
+    var b = viewport.getBoundingClientRect();
+    var px = cx - b.left, py = cy - b.top;
+    var k2 = Math.max(0.15, Math.min(12, k * f));
+    var r = k2 / k;
+    tx = px - (px - tx) * r;
+    ty = py - (py - ty) * r;
+    k = k2;
+    applyT();
+  }
+
+  viewport.addEventListener("wheel", function (e) {
+    e.preventDefault();
+    var d = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY;
+    zoomAt(e.clientX, e.clientY, Math.pow(1.0016, -d));
+  }, { passive: false });
+
+  var drag = null;
+  viewport.addEventListener("pointerdown", function (e) {
+    if (e.button !== 0) return;
+    drag = { x: e.clientX, y: e.clientY, tx: tx, ty: ty };
+    viewport.classList.add("drag");
+    try { viewport.setPointerCapture(e.pointerId); } catch (err) {}
+  });
+  viewport.addEventListener("pointermove", function (e) {
+    if (drag) {
+      tx = drag.tx + (e.clientX - drag.x);
+      ty = drag.ty + (e.clientY - drag.y);
+      applyT();
+      return;
+    }
+    hover(e);
+  });
+  function endDrag() { if (drag) { drag = null; viewport.classList.remove("drag"); } }
+  viewport.addEventListener("pointerup", endDrag);
+  viewport.addEventListener("pointercancel", endDrag);
+  viewport.addEventListener("pointerleave", function () { clearHl(); });
+
+  $("zoomIn").onclick = function () { var b = viewport.getBoundingClientRect(); zoomAt(b.left + b.width / 2, b.top + b.height / 2, 1.25); };
+  $("zoomOut").onclick = function () { var b = viewport.getBoundingClientRect(); zoomAt(b.left + b.width / 2, b.top + b.height / 2, 1 / 1.25); };
+  $("fit").onclick = function () { fit(); };
+  $("reset").onclick = function () { k = 1; tx = 20; ty = 20; applyT(); };
+
+  /* ---------- 悬停：认出这是哪个词 ---------- */
+  // 坐标由引擎随 render 一起返回（res.layout），**不解析 SVG、不依赖元素顺序**——
+  // 那种耦合在以后改版式时会静默失效。
+
+  var hl = null;
+  function clearHl() {
+    if (hl && hl.parentNode) hl.parentNode.removeChild(hl);
+    hl = null;
+    tip.style.display = "none";
+  }
+
+  function hover(e) {
+    var svg = stage.querySelector("svg");
+    if (!svg || !layout.length) { clearHl(); return; }
+    var r = svg.getBoundingClientRect(), vb = svg.viewBox.baseVal;
+    if (!r.width || !r.height) { clearHl(); return; }
+    var x = (e.clientX - r.left) / r.width * vb.width + vb.x;
+    var y = (e.clientY - r.top) / r.height * vb.height + vb.y;
+    var best = null, bestD = Infinity;
+    for (var i = 0; i < layout.length; i++) {
+      var it = layout[i];
+      var d = Math.sqrt((it.x - x) * (it.x - x) + (it.y - y) * (it.y - y));
+      var reach = Math.max(it.r + 12, 18);
+      if (d < reach && d < bestD) { bestD = d; best = it; }
+    }
+    if (!best) { clearHl(); return; }
+    clearHl();
+    hl = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    hl.setAttribute("cx", best.x); hl.setAttribute("cy", best.y);
+    hl.setAttribute("r", best.r + 7);
+    hl.setAttribute("fill", "#ffd166"); hl.setAttribute("opacity", ".16");
+    svg.appendChild(hl);
+    tip.textContent = best.w + (best.zh ? " · " + best.zh : "") + (best.sat ? "（卫星／音节）" : "");
+    tip.style.display = "block";
+    var bb = viewport.getBoundingClientRect();
+    tip.style.left = Math.min(e.clientX - bb.left + 14, bb.width - 8) + "px";
+    tip.style.top = (e.clientY - bb.top + 14) + "px";
+  }
 
   function update() {
     var text = input.value;
@@ -120,21 +257,28 @@
     $("vert").disabled = track;
     $("vertRow").style.opacity = track ? ".45" : "1";
 
+    var animate = $("anim").checked;
     var res;
     try {
       res = track
-        ? Selagrafi.renderTrack(text, { labels: $("labels").checked })
-        : Selagrafi.render(text, { labels: $("labels").checked, vertical: $("vert").checked });
+        ? Selagrafi.renderTrack(text, { labels: $("labels").checked, animate: animate })
+        : Selagrafi.render(text, { labels: $("labels").checked, vertical: $("vert").checked, animate: animate });
     } catch (e) {
       stage.innerHTML = '<div class="empty">渲染出错：' + e.message + "</div>";
       return;
     }
     lastSvg = res.svg;
     lastName = track ? "lumia-track.svg" : "lumia-constellation.svg";
+    clearHl();
+    layout = res.layout || [];
     if (!res.svg) {
       stage.innerHTML = '<div class="empty">' + (res.warnings.join("；") || "没有可解析的句子") + "</div>";
+      tx = 0; ty = 0; k = 1; applyT();
     } else {
       stage.innerHTML = res.svg;
+      // 首次出图自动缩放到刚好装下；之后**保留用户当前的缩放与平移**，
+      // 免得用户放大盯着某个词的时候，一改输入就被弹回原样。
+      if (firstPaint) { firstPaint = false; fit(); } else { applyT(); }
     }
 
     warn.textContent = res.warnings.length ? "⚠ " + res.warnings.join("；") : "";
@@ -187,6 +331,7 @@
   });
   $("gen").onclick = update;
   $("labels").addEventListener("change", update);
+  $("anim").addEventListener("change", update);
   $("vert").addEventListener("change", update);
   $("mConst").addEventListener("change", update);
   $("mTrack").addEventListener("change", update);

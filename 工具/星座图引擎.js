@@ -489,6 +489,82 @@
 
   function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
 
+  /* ---------- 动画（SMIL）----------
+   * 数据库 script.constellation.animation 只存**参数**，这里按参数生成 <animate> 元素。
+   * opts.animate 关闭时 AN 为 null，**一个动画元素都不输出**，产出与加动画之前逐字节相同
+   * （有回归测试守着这一点——「有时更喜欢静止的」必须是真的静止，不是「看起来静止」）。
+   */
+  var AN = null;          // 本次渲染的动画参数；null = 静止模式
+  var drawList = null;    // 本次渲染里要「逐段生长」的路径，见 drawable()
+  var haloIdx = 0;        // 光晕序号，用来把呼吸相位错开
+
+  function animArc() {
+    if (!AN) return "";
+    return '<animate attributeName="stroke-dashoffset" from="0" to="-' + AN.arcFlow.shift +
+           '" dur="' + AN.arcFlow.dur + 's" repeatCount="indefinite"/>';
+  }
+
+  function animBreath(i) {
+    if (!AN) return "";
+    var b = AN.nodeBreath;
+    return '<animate attributeName="opacity" values="' + b.from + ";" + b.to + ";" + b.from +
+           '" dur="' + b.dur + 's" begin="-' + r2(i * b.stagger) + 's" repeatCount="indefinite"/>';
+  }
+
+  // 「逐段生长」的路径先登记、后组装：每段的起止时刻取决于**总段数**，
+  // 而总段数要等整个图形走完才知道，所以先放占位符，最后统一替换。
+  function drawable(cls, d) {
+    if (!AN) return '<path class="' + cls + '" d="' + d + '"/>';
+    drawList.push({ cls: cls, d: d });
+    return "\u0001" + (drawList.length - 1) + "\u0001";
+  }
+
+  // 估算路径长度。引擎目前只产出两种路径：线段（M…L…）与三次贝塞尔（M…C…）。
+  function approxLen(d) {
+    var n = (d.match(/-?[0-9.]+/g) || []).map(Number);
+    if (d.indexOf("C") >= 0 && n.length >= 8) {
+      var p0x = n[0], p0y = n[1], p1x = n[2], p1y = n[3],
+          p2x = n[4], p2y = n[5], p3x = n[6], p3y = n[7];
+      var L = 0, px = p0x, py = p0y;
+      for (var i = 1; i <= 16; i++) {
+        var t = i / 16, m = 1 - t;
+        var x = m * m * m * p0x + 3 * m * m * t * p1x + 3 * m * t * t * p2x + t * t * t * p3x;
+        var y = m * m * m * p0y + 3 * m * m * t * p1y + 3 * m * t * t * p2y + t * t * t * p3y;
+        L += hypot(x - px, y - py); px = x; py = y;
+      }
+      return L;
+    }
+    if (n.length >= 4) return hypot(n[2] - n[0], n[3] - n[1]);
+    return 0;
+  }
+
+  // 生长动画。要点：**不要**用 pathLength="1" 做归一化再配 stroke-dasharray="1"——
+  // librsvg（以及不少转换器）不认 pathLength，却照常执行 dasharray，
+  // 于是整条轨道被画成 1 用户单位的短虚线，看上去是断的（实测墨迹少了约 27%）。
+  // 改用**真实长度**当 dasharray，并把它作为静态属性写上去：
+  //   · 不认识 SMIL 的渲染器：dashoffset 默认 0 → 整条线完整画好；
+  //   · 认识 SMIL 的浏览器：t=0 时 dashoffset=L（隐形），随后按 keyTimes 收回到 0，逐段生长。
+  function finalizeDraw(svg) {
+    if (!AN || !drawList.length) return svg;
+    var n = drawList.length, td = AN.trackDraw;
+    return svg.replace(/\u0001(\d+)\u0001/g, function (_, k) {
+      var it = drawList[+k];
+      // 略放大，宁长勿短——短了会在末端留一截永远画不到。
+      var L = r2(approxLen(it.d) * 1.05 + 2);
+      var k0 = n > 1 ? (+k / n) * td.span : 0;
+      var k1 = Math.min(0.999, k0 + td.width);
+      return '<path class="' + it.cls + '" d="' + it.d + '" stroke-dasharray="' + L +
+             '"><animate attributeName="stroke-dashoffset" values="' + L + ";" + L + ';0" keyTimes="0;' +
+             r2(k0) + ";" + r2(k1) + '" dur="' + td.dur + 's" fill="freeze"/></path>';
+    });
+  }
+
+  // 光晕呼吸：动画时把 <animate> 作为子元素塞进去，自闭合标签要展开成开闭对。
+  function haloCircle(x, y, r) {
+    var head = '<circle class="halo" cx="' + r2(x) + '" cy="' + r2(y) + '" r="' + r2(r) + '"';
+    return AN ? head + ">" + animBreath(haloIdx++) + "</circle>" : head + "/>";
+  }
+
   function syllableFrag(syl) {
     if (!syl) return null;
     var v = null;
@@ -519,6 +595,8 @@
     if (!sentences.length) return { svg: "", warnings: ["没有可解析的句子"] };
 
     var warnings = [], figures = [];
+    AN = opts.animate ? (C.animation || null) : null;
+    drawList = []; haloIdx = 0;
 
     sentences.forEach(function (se, si) {
       var s = se.text;
@@ -614,7 +692,7 @@
     var ox = pad - minX, oy = pad + head - minY;
 
     var body = ['<rect width="' + r2(W) + '" height="' + r2(H) + '" fill="#0a0e1a"/>'];
-    var arcPaths = [], figEnds = [];
+    var arcPaths = [], figEnds = [], layout = [];
 
     figures.forEach(function (f) {
       var pts = f.pts.map(function (p) { return { x: p.x + ox, y: p.y + oy }; });
@@ -645,6 +723,21 @@
       }
       var an = f.an;
 
+      // 悬停交互需要「哪个词落在哪个坐标」。这里把**最终坐标**一并返回，
+      // 页面就不必去解析 SVG 文档或依赖元素出现的顺序——
+      // 那种耦合在以后改版式（加一种附件、调整绘制次序）时会悄悄失效，而且不报错。
+      if (pts.length) {
+        an.nodes.forEach(function (nd, ni) {
+          if (nd.junction) return;
+          layout.push({ w: nd.tok.w, zh: nd.tok.zh, x: pts[ni].x, y: pts[ni].y, r: nd.halo });
+        });
+        atts.forEach(function (a) {
+          // 卫星附件有 tok；音节串附件只有 syl，没有词形可言——不要假设 tok 一定存在。
+          layout.push({ w: a.tok ? a.tok.w : (a.syl || ""), zh: a.tok ? a.tok.zh : "",
+                        x: a.x, y: a.y, r: a.halo, sat: true });
+        });
+      }
+
       if (pts.length) {
         figEnds.push({ first: pts[0], last: pts[pts.length - 1],
                        firstHalo: an.nodes[0].halo, lastHalo: an.nodes[an.nodes.length - 1].halo });
@@ -655,19 +748,19 @@
         var L = hypot(a.x - a.from.x, a.y - a.from.y);
         if (L < 1) return;
         var ux = (a.x - a.from.x) / L, uy = (a.y - a.from.y) / L;
-        body.push('<path class="bond" d="M' + r2(a.from.x + ux * a.fromHalo) + " " + r2(a.from.y + uy * a.fromHalo) +
-                  " L" + r2(a.x - ux * a.halo) + " " + r2(a.y - uy * a.halo) + '"/>');
+        body.push(drawable("bond", "M" + r2(a.from.x + ux * a.fromHalo) + " " + r2(a.from.y + uy * a.fromHalo) +
+                  " L" + r2(a.x - ux * a.halo) + " " + r2(a.y - uy * a.halo)));
       });
 
       for (var i = 0; i + 1 < pts.length; i++) {
         if (f.breaks[i]) continue;                 // 子簇之间不连线
         var d = trackSeg(pts[i], pts[i + 1], an.nodes[i].halo, an.nodes[i + 1].halo);
-        if (d) body.push('<path class="track" d="' + d + '"/>');
+        if (d) body.push(drawable("track", d));
       }
       if (an.closed && pts.length >= 3) {
         var last = pts.length - 1;
         var dc = trackSeg(pts[last], pts[0], an.nodes[last].halo, an.nodes[0].halo);
-        if (dc) body.push('<path class="close" d="' + dc + '"/>');
+        if (dc) body.push(drawable("close", dc));
       }
 
       // 逗号处的节点星（规范 §五）：嵌在句轨上，小点，不构成词 —— 与「落星」（悬在轨外）区分
@@ -675,11 +768,11 @@
         if (nd.junction) {
           body.push('<circle class="node" cx="' + r2(pts[i].x) + '" cy="' + r2(pts[i].y) + '" r="3.5"/>');
         } else {
-          body.push('<circle class="halo" cx="' + r2(pts[i].x) + '" cy="' + r2(pts[i].y) + '" r="' + r2(nd.halo) + '"/>');
+          body.push(haloCircle(pts[i].x, pts[i].y, nd.halo));
         }
       });
       atts.forEach(function (a) {
-        body.push('<circle class="halo" cx="' + r2(a.x) + '" cy="' + r2(a.y) + '" r="' + r2(a.halo) + '"/>');
+        body.push(haloCircle(a.x, a.y, a.halo));
       });
 
       an.nodes.forEach(function (nd, i) {
@@ -727,20 +820,22 @@
       var ax1 = A.x + ux2 * (figEnds[q].lastHalo + 8), ay1 = A.y + uy2 * (figEnds[q].lastHalo + 8);
       var ax2 = B.x - ux2 * (figEnds[q + 1].firstHalo + 8), ay2 = B.y - uy2 * (figEnds[q + 1].firstHalo + 8);
       var perpX = -uy2, perpY = ux2, bow = Math.max(40, dL * 0.22);
-      arcPaths.push('<path class="arc" d="M' + r2(ax1) + " " + r2(ay1) +
+      var arcD = "M" + r2(ax1) + " " + r2(ay1) +
         " C" + r2(ax1 + ux2 * dL * 0.3 + perpX * bow) + " " + r2(ay1 + uy2 * dL * 0.3 + perpY * bow) +
         "," + r2(ax2 - ux2 * dL * 0.3 + perpX * bow) + " " + r2(ay2 - uy2 * dL * 0.3 + perpY * bow) +
-        "," + r2(ax2) + " " + r2(ay2) + '"/>');
+        "," + r2(ax2) + " " + r2(ay2);
+      arcPaths.push(AN ? '<path class="arc" d="' + arcD + '">' + animArc() + "</path>"
+                       : '<path class="arc" d="' + arcD + '"/>');
     }
 
     if (opts.title) body.push('<text class="ttl" x="26" y="34">' + esc(opts.title) + "</text>");
 
-    var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + r2(W) + " " + r2(H) +
+    var svg = finalizeDraw('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + r2(W) + " " + r2(H) +
       '" width="' + r2(W) + '" height="' + r2(H) + '">' +
       "<style>" + G.css + D.extraCss + "</style>" +
-      body[0] + arcPaths.join("") + body.slice(1).join("") + "</svg>";
+      body[0] + arcPaths.join("") + body.slice(1).join("") + "</svg>");
 
-    return { svg: svg, warnings: warnings };
+    return { svg: svg, warnings: warnings, layout: layout };
   }
 
   /* ---------- 星轨体（辅助书写规范）---------- */
@@ -781,6 +876,9 @@
     var sentences = splitSentencesEx(input);
     if (!sentences.length) return { svg: "", warnings: ["没有可解析的句子"] };
 
+    AN = opts.animate ? (C.animation || null) : null;
+    drawList = []; haloIdx = 0;
+
     var T = D.track || {};
     var CELL = T.cell || 56;
     var GAP = T.gap != null ? T.gap : 34;
@@ -807,7 +905,7 @@
         if (c) {
           var n = c.frag.length;
           cells.push({ frag: c.frag, box: c.box, n: n,
-            w: CELL * (1 + (n - 1) * TRACK_CHAIN_STEP), label: toks[i].w });
+            w: CELL * (1 + (n - 1) * TRACK_CHAIN_STEP), label: toks[i].w, zh: toks[i].zh });
           ps.push({ w: toks[i].w, zh: toks[i].zh, kind: c.kind });
         } else {
           warnings.push("第 " + (s + 1) + " 句放弃了 " + toks[i].w + "（没有星符，也拼不出音节）");
@@ -840,6 +938,7 @@
     var H = top + (lines.length - 1) * LH + CELL + M * 1.5;
 
     var body = ['<rect width="' + r2(W) + '" height="' + r2(H) + '" fill="#0a0e1a"/>'];
+    var layout = [];
     if (opts.title) body.push('<text class="ttl" x="' + M + '" y="34">' + esc(opts.title) + "</text>");
 
     for (var q = 0; q < lines.length; q++) {
@@ -848,28 +947,30 @@
         var cc = ln[p];
         if (cc.joint) {
           body.push('<circle class="joint" cx="' + r2(x + cc.w / 2) + '" cy="' + r2(y) + '" r="3.5"/>');
+          layout.push({ w: "\uFF0C", zh: "", x: x + cc.w / 2, y: y, r: cc.w / 2 });
         } else {
           for (var f2 = 0; f2 < cc.n; f2++) {
             body.push(glyphGroup(cc.frag[f2], x + CELL / 2 + f2 * STEP, y, CELL, cc.box, null));
           }
+          layout.push({ w: cc.label, zh: cc.zh, x: x + cc.w / 2, y: y, r: cc.w / 2 });
           if (opts.labels) {
             body.push('<text class="lb" x="' + r2(x + cc.w / 2) + '" y="' + r2(y + CELL / 2 + 20) + '">' + esc(cc.label) + "</text>");
           }
         }
         var ex = x + cc.w;
         if (p < ln.length - 1) {
-          body.push('<path class="strut" d="M' + r2(ex) + " " + r2(y) + " L" + r2(ex + GAP) + " " + r2(y) + '"/>');
+          body.push(drawable("strut", "M" + r2(ex) + " " + r2(y) + " L" + r2(ex + GAP) + " " + r2(y)));
         }
         x = ex + GAP;
       }
     }
 
-    var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + r2(W) + " " + r2(H) +
+    var svg = finalizeDraw('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + r2(W) + " " + r2(H) +
       '" width="' + r2(W) + '" height="' + r2(H) + '">' +
       "<style>" + G.css + D.extraCss + (T.css || "") + "</style>" +
-      body.join("") + "</svg>";
+      body.join("") + "</svg>");
 
-    return { svg: svg, warnings: warnings, parts: parts };
+    return { svg: svg, warnings: warnings, parts: parts, layout: layout };
   }
 
   root.Selagrafi = { render: render, renderTrack: renderTrack, analyze: analyze, splitSentences: splitSentences, splitSyllables: splitSyllables };
