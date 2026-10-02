@@ -6,14 +6,21 @@
 <style>
   :root { --bg:#05070d; --panel:#0a0e1a; --line:#1e2a3d; --fg:#e8f0f8; --dim:#9fb4c8; --accent:#6fd6ff; --gold:#ffd166; }
   * { box-sizing: border-box; }
-  body { margin:0; background:var(--bg); color:var(--fg);
+  html, body { height:100%; }
+  body { margin:0; background:var(--bg); color:var(--fg); overflow:hidden;
+         display:flex; flex-direction:column;
          font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif; }
-  header { padding:18px 24px 12px; border-bottom:1px solid var(--line); }
+  /* header 高度随字体与窗口宽度浮动，别再拿它去减一个写死的 78px——
+     一旦 header 实际比 78px 高，整页就多出一截，左栏跟着被压。 */
+  header { flex:0 0 auto; padding:18px 24px 12px; border-bottom:1px solid var(--line); }
   h1 { margin:0; font-size:19px; letter-spacing:.02em; }
   header p { margin:6px 0 0; color:var(--dim); font-size:13px; }
-  .wrap { display:flex; gap:0; height:calc(100vh - 78px); }
+  .wrap { flex:1 1 auto; min-height:0; display:flex; gap:0; }
   .left { width:380px; min-width:300px; padding:16px 18px; border-right:1px solid var(--line);
           display:flex; flex-direction:column; gap:12px; overflow:auto; }
+  /* 左栏是 flex 列，子项默认 flex-shrink:1 —— 内容一多，占位最大的 textarea
+     就被压扁到几乎看不见（窗口越矮越严重）。禁止收缩，改成整栏滚动。 */
+  .left > * { flex:0 0 auto; }
   .right { flex:1; position:relative; overflow:hidden; background:
            radial-gradient(circle at 30% 20%, #0d1424 0%, var(--bg) 60%); }
   #viewport { position:absolute; inset:0; overflow:hidden; cursor:grab; touch-action:none; }
@@ -29,7 +36,7 @@
   #zoombar button { padding:4px 10px; font-size:12px; }
   #zoomLbl { color:var(--dim); font-size:12px; min-width:48px; text-align:center;
              font-variant-numeric:tabular-nums; }
-  textarea { width:100%; height:110px; background:var(--panel); color:var(--fg);
+  textarea { width:100%; height:110px; min-height:110px; background:var(--panel); color:var(--fg);
              border:1px solid var(--line); border-radius:6px; padding:10px 12px;
              font-family:ui-monospace, Consolas, monospace; font-size:14px; line-height:1.6; resize:vertical; }
   textarea:focus { outline:none; border-color:var(--accent); }
@@ -55,7 +62,7 @@
 
 <div class="wrap">
   <div class="left">
-    <textarea id="input" spellcheck="false">komo li mako, mi li miko.</textarea>
+    <textarea id="input" spellcheck="false">sela li lumia. mi vira e dua luna.</textarea>
 
     <div class="row">
       <label class="chk"><input type="radio" name="mode" id="mConst" checked> 星座体（主）</label>
@@ -72,8 +79,7 @@
       <label class="chk"><input type="checkbox" id="auto" checked> 自动更新（每打完一个词）</label>
     </div>
     <div class="row">
-      <span class="hint">动画 = 弧轨流动 · 句轨逐段生长 · 光晕呼吸；关掉即静止。</span>
-    </div>
+      <span class="hint">动画 = 弧轨流动 · 句轨逐段生长 · 光晕呼吸；关掉即静止。</span>    </div>
     <div class="row" id="vertRow">
       <label class="chk"><input type="checkbox" id="vert"> 竖排（整体转 90°，句内自上而下）</label>
     </div>
@@ -91,7 +97,8 @@
       <b>星轨体</b>：横排逐词、连成一条轨道；超宽自动折行，逗号画成轨道上的节点星，竖排不适用。<br>
       两种排布<b>共用同一套星符</b>，排版都是<b>确定性</b>的——同一句话每次生成都一样。<br>
       <b>交互</b>：滚轮以光标为锚点缩放，按住拖拽平移，「适应 / 1:1」复位；鼠标悬停在星上会显示词与释义。<br>
-      <b>动画</b>：勾选后弧轨流动、轨道逐段生长、光晕呼吸；不勾就是静止的，输出与加动画之前完全一致。
+      <b>动画</b>：勾选后轨道<b>逐段生长</b>、光晕呼吸、<b>弧轨流动</b>；不勾就是静止的，输出与加动画之前完全一致。
+      <b>弧轨流动要有 2 句以上才看得到</b>（弧轨连的是上一句末星与下一句首星），单句只有生长与呼吸。
     </div>
   </div>
 
@@ -251,6 +258,22 @@
     tip.style.top = (e.clientY - bb.top + 14) + "px";
   }
 
+  /* ---------- 重新起跑一次性动画 ---------- */
+  // SMIL 的 begin 缺省是 0s，即「文档时间轴的第 0 秒」。单独打开 SVG 时文档刚开始，
+  // 没问题；但页面是**加载完之后**才把 SVG 插进 DOM 的——插入那一刻 begin="0s" 早已
+  // 成为过去，一次性动画一出现就已经播完并冻结（fill="freeze"），现象就是「勾了动画
+  // 跟静止一模一样」。所以这里按引擎写在 <animate data-begin> 上的时刻重新起跑。
+  // repeatCount="indefinite" 的弧轨流动与光晕呼吸不受此影响，它们一直在跑。
+  function restartAnim() {
+    var svg = stage.querySelector("svg");
+    if (!svg) return;
+    var list = svg.querySelectorAll("animate[data-begin]");
+    for (var i = 0; i < list.length; i++) {
+      var d = parseFloat(list[i].getAttribute("data-begin")) || 0;
+      try { list[i].beginElementAt(d); } catch (err) { /* 老浏览器没有这个 API，忽略 */ }
+    }
+  }
+
   function update() {
     var text = input.value;
     var track = isTrack();
@@ -276,6 +299,7 @@
       tx = 0; ty = 0; k = 1; applyT();
     } else {
       stage.innerHTML = res.svg;
+      restartAnim();
       // 首次出图自动缩放到刚好装下；之后**保留用户当前的缩放与平移**，
       // 免得用户放大盯着某个词的时候，一改输入就被弹回原样。
       if (firstPaint) { firstPaint = false; fit(); } else { applyT(); }

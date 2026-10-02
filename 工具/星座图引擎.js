@@ -571,6 +571,13 @@
   // 改用**真实长度**当 dasharray，并把它作为静态属性写上去：
   //   · 不认识 SMIL 的渲染器：dashoffset 默认 0 → 整条线完整画好；
   //   · 认识 SMIL 的浏览器：t=0 时 dashoffset=L（隐形），随后按 keyTimes 收回到 0，逐段生长。
+  //
+  // data-begin 是给**页面**用的（SMIL 不认识它，纯属附加信息）：
+  // 一次性动画的 begin 缺省是 0s，即「文档时间轴的第 0 秒」。单独打开 SVG 时文档刚开始，
+  // 没问题；可是生成器是页面加载完之后才把 SVG 插进 DOM 的，那一刻 begin="0s" 早已成为过去，
+  // 动画一出现就已经播完并冻结 —— 现象就是「开了动画跟静止一样」。
+  // 于是页面在插入后按 data-begin 调 beginElementAt() 重新起跑。
+  // 呼吸与弧轨是 repeatCount="indefinite"，不受影响，故不加这个属性。
   function finalizeDraw(svg) {
     if (!AN || !drawList.length) return svg;
     var n = drawList.length, td = AN.trackDraw;
@@ -582,7 +589,8 @@
       var k1 = Math.min(0.999, k0 + td.width);
       return '<path class="' + it.cls + '" d="' + it.d + '" stroke-dasharray="' + L +
              '"><animate attributeName="stroke-dashoffset" values="' + L + ";" + L + ';0" keyTimes="0;' +
-             r2(k0) + ";" + r2(k1) + '" dur="' + td.dur + 's" fill="freeze"/></path>';
+             r2(k0) + ";" + r2(k1) + '" dur="' + td.dur + 's" fill="freeze" data-begin="' +
+             r2(k0 * td.dur) + '"/></path>';
     });
   }
 
