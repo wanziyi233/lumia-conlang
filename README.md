@@ -32,8 +32,8 @@
 | 📚 词典全表 | [阅读](https://wanziyi233.github.io/lumia-conlang/词典/词典.html) | `词典/词典.md` |
 | 🔢 数字 | [阅读](https://wanziyi233.github.io/lumia-conlang/数字/数字.html) | `数字/数字.md` |
 | ✍️ 文字设计说明 | [阅读](https://wanziyi233.github.io/lumia-conlang/文字/文字.html) | `文字/文字.md` |
-| 🌌 **星座体**（艺术排布） | [规范](https://wanziyi233.github.io/lumia-conlang/文字/星座体规范.html) · [示例](https://wanziyi233.github.io/lumia-conlang/文字/星座体示例.svg) | `文字/星座体规范.md` |
-| 🛠️ **星座图生成器**（自己造句出图） | [打开工具](https://wanziyi233.github.io/lumia-conlang/工具/星座图生成器.html) | `工具/星座图生成器.html` |
+| 🌌 **星座体**（主书写规范） | [规范](https://wanziyi233.github.io/lumia-conlang/文字/星座体规范.html) · [示例](https://wanziyi233.github.io/lumia-conlang/文字/星座体示例.svg) | `文字/星座体规范.md` |
+| 🛠️ **文字生成器**（星座体 / 星轨体） | [打开工具](https://wanziyi233.github.io/lumia-conlang/工具/星座图生成器.html) | `工具/星座图生成器.html` |
 
 > **关于图片**：GitHub 的仓库文件预览有时无法显示 SVG（在本机装了网络加速工具时尤其常见）。
 > **本站点（github.io）不受此影响**，所有星符图表均正常显示。
@@ -50,7 +50,7 @@ It is deliberately "unbalanced": it names stars, planets, Saturn, the universe, 
 
 - 语言名 / Name：**Lumia**（/ˈlu.mi.ɑ/，露米亚），本义就是「光」/ *light*。
 - 核心词汇 / Core words：**97 个**（极简）。
-- 文字 / Script：**Selagrafi（星文）**——星轨体一笔连写 + 星座体艺术排布，表意 + 表音混合。
+- 文字 / Script：**Selagrafi（星文）**——**星座体**为主书写规范（一句话摆成一个星座），横排连写的**星轨体**为辅；表意 + 表音混合。
 
 ## 特性 · Features
 
@@ -80,12 +80,12 @@ It is deliberately "unbalanced": it names stars, planets, Saturn, the universe, 
 ├── 文字/                 星文字形设计 + 各类 SVG 图表
 ├── 工具/                 浏览器里打开就能用的两样东西
 │   ├── 词典.html          可检索词典（由 数据/生成词典.ps1 生成）
-│   ├── 星座图生成器.html  输入 Lumia 句子，即时生成星座图 SVG
-│   ├── 星座图引擎.js      解析 + 排布 + 输出 SVG
+│   ├── 星座图生成器.html  输入 Lumia 句子，即时生成星座体 / 星轨体 SVG
+│   ├── 星座图引擎.js      解析 + 排布 + 输出 SVG（render = 星座体，renderTrack = 星轨体）
 │   └── 星座数据.js        由 数据/生成星座图.ps1 从数据库生成
 ├── 数据/
 │   ├── lumia.json        全系统单一数据库（权威数据源）
-│   ├── 校验.ps1          一致性校验脚本（36 项）
+│   ├── 校验.ps1          一致性校验脚本（38 项）
 │   ├── 生成词典.ps1      生成 工具/词典.html
 │   ├── 生成星座图.ps1    生成 工具/星座数据.js
 │   ├── dict-template.html 词典 HTML 模板
@@ -98,8 +98,8 @@ It is deliberately "unbalanced": it names stars, planets, Saturn, the universe, 
 - 想查词？打开 **[在线词典](https://wanziyi233.github.io/lumia-conlang/工具/词典.html)**（可检索全部 97 词）。
 - 想系统了解？按这个顺序读：**[实用语速查](https://wanziyi233.github.io/lumia-conlang/实用语.html)** → **[音系](https://wanziyi233.github.io/lumia-conlang/音系/音系.html)** → **[语法](https://wanziyi233.github.io/lumia-conlang/语法/语法.html)** → **[文字](https://wanziyi233.github.io/lumia-conlang/文字/文字.html)**。
 - 想看星符？直接开 **[星符总表](https://wanziyi233.github.io/lumia-conlang/文字/符表.svg)**。
-- 想自己造句看星座图？打开 **[星座图生成器](https://wanziyi233.github.io/lumia-conlang/工具/星座图生成器.html)**——
-  输入罗马字 Lumia（纯 ASCII，**不需要输入法**），即时出图并可下载 SVG。
+- 想自己造句出图？打开 **[文字生成器](https://wanziyi233.github.io/lumia-conlang/工具/星座图生成器.html)**——
+  输入罗马字 Lumia（纯 ASCII，**不需要输入法**），可在 **星座体（主）** 与 **星轨体（辅）** 两种排布间切换，即时出图并可下载 SVG。
 - 示例句 / Example：
 
 | Lumia | 中文 / English |
@@ -114,7 +114,7 @@ It is deliberately "unbalanced": it names stars, planets, Saturn, the universe, 
 需要 PowerShell。**注意命令名不一样**：Windows 自带的是 Windows PowerShell 5.1，命令为 `powershell`；`pwsh` 是 PowerShell 7+ 的命令，Windows 默认**没有**安装（macOS/Linux 需自行安装 [PowerShell](https://github.com/PowerShell/PowerShell)）。
 
 ```bash
-# 一致性体检（36 项检查）
+# 一致性体检（38 项检查）
 powershell -File 数据/校验.ps1
 
 # 改完 数据/lumia.json 后，刷新可检索词典

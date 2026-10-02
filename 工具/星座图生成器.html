@@ -38,13 +38,18 @@
 </head>
 <body>
 <header>
-  <h1>Lumia 星座图生成器</h1>
-  <p>输入罗马字转写的 Lumia 句子（<b>纯 ASCII，不需要输入法</b>），即时生成星座体 SVG。</p>
+  <h1>Lumia 文字生成器 · Selagrafi</h1>
+  <p>输入罗马字转写的 Lumia 句子（<b>纯 ASCII，不需要输入法</b>），即时生成 <b>星座体</b>（主）或 <b>星轨体</b>（辅）SVG。</p>
 </header>
 
 <div class="wrap">
   <div class="left">
     <textarea id="input" spellcheck="false">komo li mako, mi li miko.</textarea>
+
+    <div class="row">
+      <label class="chk"><input type="radio" name="mode" id="mConst" checked> 星座体（主）</label>
+      <label class="chk"><input type="radio" name="mode" id="mTrack"> 星轨体（辅）</label>
+    </div>
 
     <div class="row">
       <button id="gen">生成 ⏎</button>
@@ -54,7 +59,7 @@
     <div class="row">
       <label class="chk"><input type="checkbox" id="auto" checked> 自动更新（每打完一个词）</label>
     </div>
-    <div class="row">
+    <div class="row" id="vertRow">
       <label class="chk"><input type="checkbox" id="vert"> 竖排（整体转 90°，句内自上而下）</label>
     </div>
 
@@ -66,9 +71,10 @@
     <hr>
     <div class="hint">
       <b>可用词</b>共 <span id="nwords"></span> 个，按 <code>词典/词典.md</code> 拼写即可。<br>
-      数词前置（<code>dua luna</code> 两个月亮）；专名写 <code>na Vega</code>，会自动拼成音节串；<br>
-      短句（≤4 词）自动闭合成图形，长句排成折线弧。<br>
-      排版是<b>确定性</b>的——同一句话每次生成都一样。
+      数词前置（<code>dua luna</code> 两个月亮）；专名写 <code>na Vega</code>，会自动拼成音节串。<br>
+      <b>星座体</b>：一句话摆成一个星座；短句（≤4 词）自动闭合，长句排成折线弧，多句之间用弧轨相连。<br>
+      <b>星轨体</b>：横排逐词、连成一条轨道；超宽自动折行，逗号画成轨道上的节点星，竖排不适用。<br>
+      两种排布<b>共用同一套星符</b>，排版都是<b>确定性</b>的——同一句话每次生成都一样。
     </div>
   </div>
 
@@ -104,18 +110,27 @@
     $("examples").appendChild(b);
   });
 
-  var lastSvg = "";
+  var lastSvg = "", lastName = "lumia-constellation.svg";
+
+  function isTrack() { return $("mTrack").checked; }
 
   function update() {
     var text = input.value;
+    var track = isTrack();
+    $("vert").disabled = track;
+    $("vertRow").style.opacity = track ? ".45" : "1";
+
     var res;
     try {
-      res = Selagrafi.render(text, { labels: $("labels").checked, vertical: $("vert").checked });
+      res = track
+        ? Selagrafi.renderTrack(text, { labels: $("labels").checked })
+        : Selagrafi.render(text, { labels: $("labels").checked, vertical: $("vert").checked });
     } catch (e) {
       stage.innerHTML = '<div class="empty">渲染出错：' + e.message + "</div>";
       return;
     }
     lastSvg = res.svg;
+    lastName = track ? "lumia-track.svg" : "lumia-constellation.svg";
     if (!res.svg) {
       stage.innerHTML = '<div class="empty">' + (res.warnings.join("；") || "没有可解析的句子") + "</div>";
     } else {
@@ -126,17 +141,28 @@
 
     // 逐句拆解
     var lines = [];
-    Selagrafi.splitSentences(text).forEach(function (s, i) {
-      var an = Selagrafi.analyze(s);
-      var parts = an.nodes.map(function (nd) {
-        var t = nd.tok, kind = nd.chain ? "音节串首节" : (nd.companion ? "伴星" : "主星");
-        var sat = (nd.attach || []).filter(function (a) { return a.kind === "satellite"; });
-        var extra = sat.length ? "（+" + sat.map(function (a) { return a.tok.w; }).join(",") + " 卫星）" : "";
-        return "<code>" + t.w + "</code>" + (t.zh ? "·" + t.zh : "") + " <span style='opacity:.6'>[" + kind + extra + "]</span>";
+    if (track) {
+      (res.parts || []).forEach(function (p, i) {
+        var items = p.words.map(function (w) {
+          return "<code>" + w.w + "</code>" + (w.zh ? "·" + w.zh : "") +
+                 " <span style='opacity:.6'>[" + w.kind + "]</span>";
+        });
+        lines.push("<b>第 " + (i + 1) + " 句</b>（" + p.words.length + " 格）<br>" + items.join("<br>"));
       });
-      lines.push("<b>第 " + (i + 1) + " 句</b> " + (an.closed ? "（≤4 词，闭合）" : "（长句，开放）") + "<br>" + parts.join("<br>"));
-    });
-    bd.innerHTML = lines.join("<hr>");
+      bd.innerHTML = lines.join("<hr>") || "没有可拆解的句子";
+    } else {
+      Selagrafi.splitSentences(text).forEach(function (s, i) {
+        var an = Selagrafi.analyze(s);
+        var parts = an.nodes.map(function (nd) {
+          var t = nd.tok, kind = nd.chain ? "音节串首节" : (nd.companion ? "伴星" : "主星");
+          var sat = (nd.attach || []).filter(function (a) { return a.kind === "satellite"; });
+          var extra = sat.length ? "（+" + sat.map(function (a) { return a.tok.w; }).join(",") + " 卫星）" : "";
+          return "<code>" + t.w + "</code>" + (t.zh ? "·" + t.zh : "") + " <span style='opacity:.6'>[" + kind + extra + "]</span>";
+        });
+        lines.push("<b>第 " + (i + 1) + " 句</b> " + (an.closed ? "（≤4 词，闭合）" : "（长句，开放）") + "<br>" + parts.join("<br>"));
+      });
+      bd.innerHTML = lines.join("<hr>");
+    }
   }
 
   $("dl").onclick = function () {
@@ -144,7 +170,7 @@
     var blob = new Blob([lastSvg], { type: "image/svg+xml" });
     var a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = "lumia-constellation.svg";
+    a.download = lastName;
     a.click();
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
   };
@@ -162,6 +188,8 @@
   $("gen").onclick = update;
   $("labels").addEventListener("change", update);
   $("vert").addEventListener("change", update);
+  $("mConst").addEventListener("change", update);
+  $("mTrack").addEventListener("change", update);
   $("auto").addEventListener("change", function () { if (this.checked) update(); });
   update();
 })();

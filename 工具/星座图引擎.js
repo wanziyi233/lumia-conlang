@@ -407,6 +407,9 @@
     // 专名里只有 Satuna 破例有专属星符，必须优先用它；
     // 其余专名一律走音节串，**绝不**回退到同形的核心词（Vega 不能画成 vega 去/移动）。
     if (G.word[tok.w]) return G.word[tok.w];
+    // 首字母大写 ⇒ 专名。词典词全是小写，所以这里必须在小写回退**之前**拦下，
+    // 否则 Vega / Luna 这类与小写核心词同形的专名会被画成那个核心词。
+    if (/^[A-Z]/.test(tok.w)) return null;
     if (tok.proper) return null;
     return G.word[tok.lower] || null;
   }
@@ -671,5 +674,130 @@
     return { svg: svg, warnings: warnings };
   }
 
-  root.Selagrafi = { render: render, analyze: analyze, splitSentences: splitSentences, splitSyllables: splitSyllables };
+  /* ---------- 星轨体（辅助书写规范）---------- */
+
+  // 与星座体**共用同一套星符**、同一套附件规则，区别只在排布：
+  // 星座体把一句话摆成一个星座；星轨体把同一串星符横排连成一条轨道——
+  // 每符一笔成字、有固定起笔点（左）与收笔点（右），前字收笔接后字起笔。
+  // 参数取自 script.track，样式类 .strut/.joint 同样定义在数据库里。
+
+  var TRACK_CHAIN_STEP = 0.72;   // 格内并排的步长（相对格宽）
+
+  function trackFrags(tok) {
+    var g = glyphOf(tok);
+    if (g) return { frag: [g], box: BOX_WORD, kind: "星符" };
+    // 数词：一位数是一个数字符，多位数按位值横排（同数字符表的写法）
+    var nv = -1;
+    for (var i = 0; i < D.digits.length; i++) if (D.digits[i].w === tok.lower) nv = D.digits[i].value;
+    for (var j = 0; j < D.powers.length; j++) if (D.powers[j].w === tok.lower) nv = D.powers[j].value;
+    if (nv >= 0) {
+      var row = digitFragRow(nv);
+      if (row) return { frag: row, box: BOX_DIGIT, kind: "数字符" };
+    }
+    // 专名与词典外的词：音节串
+    var syls = tok.proper ? splitSyllables(tok.lower) : syllabifyAlien(tok.lower);
+    if (syls) {
+      var fs = [];
+      for (var k = 0; k < syls.length; k++) {
+        var f = syllableFrag(syls[k]);
+        if (f) fs.push(f);
+      }
+      if (fs.length) return { frag: fs, box: BOX_SYL, kind: "音节串" };
+    }
+    return null;
+  }
+
+  function renderTrack(input, opts) {
+    opts = opts || {};
+    var sentences = splitSentences(input);
+    if (!sentences.length) return { svg: "", warnings: ["没有可解析的句子"] };
+
+    var T = D.track || {};
+    var CELL = T.cell || 56;
+    var GAP = T.gap != null ? T.gap : 34;
+    var LH = T.lineHeight || Math.round(CELL * 1.86);
+    var MAXW = T.maxWidth || 1180;
+    var M = T.margin || 44;
+    var STEP = CELL * TRACK_CHAIN_STEP;
+    var warnings = [];
+
+    // 逐句建格，句间强制换行；行内超宽再折行（先左后右、先上后下）
+    var lines = [], cur = [], curW = 0, parts = [];
+    function flush() { if (cur.length) { lines.push(cur); cur = []; curW = 0; } }
+
+    for (var s = 0; s < sentences.length; s++) {
+      var tk = tokenize(sentences[s]);
+      var toks = tk.words.map(info);
+      var cells = [], ps = [];
+      for (var i = 0; i < toks.length; i++) {
+        var c = trackFrags(toks[i]);
+        if (c) {
+          var n = c.frag.length;
+          cells.push({ frag: c.frag, box: c.box, n: n,
+            w: CELL * (1 + (n - 1) * TRACK_CHAIN_STEP), label: toks[i].w });
+          ps.push({ w: toks[i].w, zh: toks[i].zh, kind: c.kind });
+        } else {
+          warnings.push("第 " + (s + 1) + " 句放弃了 " + toks[i].w + "（没有星符，也拼不出音节）");
+          ps.push({ w: toks[i].w, kind: "放弃" });
+        }
+        // 逗号 -> 轨道上的节点星（与星座体的节点星同义）
+        if (tk.commaAfter[i + 1]) cells.push({ joint: true, w: Math.round(CELL * 0.4) });
+      }
+      if (!cells.length) continue;
+      flush();                                   // 句间换行
+      for (var k = 0; k < cells.length; k++) {
+        var need = cells[k].w + (cur.length ? GAP : 0);
+        if (cur.length && curW + need > MAXW) flush();
+        curW += cells[k].w + (cur.length ? GAP : 0);
+        cur.push(cells[k]);
+      }
+      flush();
+      parts.push({ sentence: sentences[s], words: ps });
+    }
+    if (!lines.length) return { svg: "", warnings: warnings.concat(["没有可画的节点"]) };
+
+    var contentW = 0;
+    for (var li = 0; li < lines.length; li++) {
+      var lw = 0;
+      for (var m2 = 0; m2 < lines[li].length; m2++) lw += lines[li][m2].w + (m2 ? GAP : 0);
+      if (lw > contentW) contentW = lw;
+    }
+    var top = opts.title ? 64 : M;
+    var W = contentW + M * 2;
+    var H = top + (lines.length - 1) * LH + CELL + M * 1.5;
+
+    var body = ['<rect width="' + r2(W) + '" height="' + r2(H) + '" fill="#0a0e1a"/>'];
+    if (opts.title) body.push('<text class="ttl" x="' + M + '" y="34">' + esc(opts.title) + "</text>");
+
+    for (var q = 0; q < lines.length; q++) {
+      var y = top + q * LH + CELL / 2, x = M, ln = lines[q];
+      for (var p = 0; p < ln.length; p++) {
+        var cc = ln[p];
+        if (cc.joint) {
+          body.push('<circle class="joint" cx="' + r2(x + cc.w / 2) + '" cy="' + r2(y) + '" r="3.5"/>');
+        } else {
+          for (var f2 = 0; f2 < cc.n; f2++) {
+            body.push(glyphGroup(cc.frag[f2], x + CELL / 2 + f2 * STEP, y, CELL, cc.box, null));
+          }
+          if (opts.labels) {
+            body.push('<text class="lb" x="' + r2(x + cc.w / 2) + '" y="' + r2(y + CELL / 2 + 20) + '">' + esc(cc.label) + "</text>");
+          }
+        }
+        var ex = x + cc.w;
+        if (p < ln.length - 1) {
+          body.push('<path class="strut" d="M' + r2(ex) + " " + r2(y) + " L" + r2(ex + GAP) + " " + r2(y) + '"/>');
+        }
+        x = ex + GAP;
+      }
+    }
+
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + r2(W) + " " + r2(H) +
+      '" width="' + r2(W) + '" height="' + r2(H) + '">' +
+      "<style>" + G.css + D.extraCss + (T.css || "") + "</style>" +
+      body.join("") + "</svg>";
+
+    return { svg: svg, warnings: warnings, parts: parts };
+  }
+
+  root.Selagrafi = { render: render, renderTrack: renderTrack, analyze: analyze, splitSentences: splitSentences, splitSyllables: splitSyllables };
 })(typeof globalThis !== "undefined" ? globalThis : this);

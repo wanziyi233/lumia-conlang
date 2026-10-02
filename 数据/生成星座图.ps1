@@ -44,6 +44,7 @@ $payload = [ordered]@{
     words         = $words
     properNames   = $pn
     constellation = $j.script.constellation
+    track         = $j.script.track
     glyphs        = $j.script.glyphs
     digits        = $j.numerals.digits
     powers        = $j.numerals.powers

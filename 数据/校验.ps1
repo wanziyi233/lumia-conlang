@@ -769,6 +769,56 @@ if (Test-Path $toolData) {
     } catch { BAD ("constellation tool data check error: " + $_.Exception.Message) }
 } else { BAD "constellation tool data missing" }
 
+# 31. script.track: the auxiliary line-script layout must be complete and positive,
+#     otherwise renderTrack() collapses a line or leaves no room for the labels.
+$trk = $j.script.track
+if ($trk) {
+    $needTrk = @('name','spec','rule','cell','gap','lineHeight','maxWidth','margin','css')
+    $goneTrk = @($needTrk | Where-Object { -not $trk.PSObject.Properties[$_] })
+    $numBad = @()
+    foreach ($k in @('cell','gap','lineHeight','maxWidth','margin')) {
+        $v = 0
+        try { $v = [double]$trk.$k } catch { $v = 0 }
+        if ($v -le 0) { $numBad += $k }
+    }
+    if (([double]$trk.lineHeight) -lt ([double]$trk.cell)) { $numBad += 'lineHeight<cell' }
+    if ($goneTrk.Count -eq 0 -and $numBad.Count -eq 0) {
+        OK ("script.track complete (cell " + $trk.cell + ", gap " + $trk.gap + ", lineHeight " + $trk.lineHeight + ")")
+    } else {
+        $trkBad = @()
+        if ($goneTrk.Count) { $trkBad += ('missing ' + ($goneTrk -join ',')) }
+        if ($numBad.Count)  { $trkBad += ('bad ' + ($numBad -join ',')) }
+        BAD ("script.track invalid: " + ($trkBad -join '; '))
+    }
+} else { BAD "script.track missing" }
+
+# 32. the track layout and its styles must survive the JSON -> JS payload trip
+#     (same bug class that once silently emptied constellation.css), and the
+#     classes renderTrack() emits must actually be defined.
+if (Test-Path $toolData) {
+    try {
+        $td2 = [System.IO.File]::ReadAllText($toolData)
+        $tm2 = [regex]::Match($td2, 'globalThis\.LUMIA\s*=\s*(\{.*\});', [System.Text.RegularExpressions.RegexOptions]::Singleline)
+        if (-not $tm2.Success) { BAD "track data is not a LUMIA payload" }
+        else {
+            $tl2 = $tm2.Groups[1].Value | ConvertFrom-Json
+            $t2 = @()
+            if (-not $tl2.track) { $t2 += 'track missing' }
+            else {
+                foreach ($k in @('cell','gap','lineHeight','maxWidth','margin')) {
+                    if ([string]$tl2.track.$k -ne [string]$trk.$k) { $t2 += ($k + '=' + $tl2.track.$k) }
+                }
+                if ([string]$tl2.track.css -ne [string]$trk.css) { $t2 += 'css differs' }
+            }
+            foreach ($cls in @('.strut','.joint')) {
+                if ([string]$trk.css -notmatch [regex]::Escape($cls)) { $t2 += ($cls + ' undefined') }
+            }
+            if ($t2.Count -eq 0) { OK "track layout and .strut/.joint styles match the database" }
+            else { BAD ("track data mismatch: " + ($t2 -join '; ')) }
+        }
+    } catch { BAD ("track data check error: " + $_.Exception.Message) }
+} else { BAD "track data check skipped: tool data missing" }
+
 Write-Output ""
 Write-Output ("== RESULT: PASS " + $script:pass + " / FAIL " + $script:fail + " ==")
 if ($script:fail -gt 0) { exit 1 } else { exit 0 }
