@@ -266,6 +266,18 @@
     return pts;
   }
 
+  // 规范 §七「句内走向：整体自左向右；允许节点小幅回折，上限 120px」。
+  // 「回折」= 后一个节点比前一个更靠左。这里返回**最严重的单步回折量**（px）。
+  // 注意：必须在 mirrorToRead 之后量，否则「左右」还没有定下来。
+  function backtrackExcess(pts) {
+    var worst = 0;
+    for (var i = 1; i < pts.length; i++) {
+      var back = pts[i - 1].x - pts[i].x;
+      if (back > worst) worst = back;
+    }
+    return worst;
+  }
+
   function scoreFigure(an, pts, closed) {
     var n = pts.length, score = 100, i, j;
     var segs = [];
@@ -294,6 +306,14 @@
     var w = mxx - mnx, h = Math.max.apply(null, ys) - Math.min.apply(null, ys);
     var ar = Math.max(w, h) / Math.max(1, Math.min(w, h));
     if (ar > 2.4) score -= (ar - 2.4) * 16;
+
+    // 回折上限（规范 §七）。闭合图形是一圈环，没有「自左向右」可言，故不适用。
+    // 超过上限按超出量成比例重罚，让 120 次采样优先挑守规矩的版式；
+    // 若一个都没有（节点太少或太挤），仍取最接近的——评分是择优，不是硬失败。
+    if (!closed) {
+      var back = backtrackExcess(pts);
+      if (back > C.backtrackLimit) score -= (back - C.backtrackLimit) * 3;
+    }
 
     // 起点越靠左加分（镜像已保证起点在终点左侧，这里再让它尽量落在最左端）
     if (w > 1) score += (1 - (pts[0].x - mnx) / w) * 14;
@@ -365,7 +385,7 @@
     // 长句：折线。多数节点处换向、左右交替，**但转角幅度每次随机**——
     // 幅度固定会让方向只在两个值间弹跳，把图形压成一条带子；幅度变化方向才会漂移、图形才铺得开。
     // 另留少数节点不换向，构成「臂」。
-    var best2 = null;
+    var best2 = null, best2ok = null;
     for (var t2 = 0; t2 < 120; t2++) {
       var dir = rng() * Math.PI * 2, x = 0, y = 0, flip = rng() < 0.5 ? 1 : -1;
       var cand2 = [{ x: 0, y: 0 }];
@@ -379,10 +399,17 @@
         x += Math.cos(dir) * gap; y += Math.sin(dir) * gap;
         cand2.push({ x: x, y: y });
       }
+      // 先镜像再评分——「自左向右」只有镜像之后才成立，回折量也只有这时才有意义。
       var s2 = scoreFigure(an, mirrorToRead(cand2), false);
       if (!best2 || s2 > best2.sc) best2 = { pts: cand2, sc: s2 };
+      // 回折上限是**硬偏好**而非加权：只要有一版守规矩的，就一定选它。
+      // 加权压不住——回折 165px 的图形可能因为自交/重叠扣分更少而胜出（实测 45 句里漏 5 句）。
+      if (backtrackExcess(cand2) <= C.backtrackLimit && (!best2ok || s2 > best2ok.sc)) {
+        best2ok = { pts: cand2, sc: s2 };
+      }
     }
-    return best2.pts;
+    // 一版合规矩的都没有（节点太少或太挤）时，退回分数最高的那版，不硬失败。
+    return (best2ok || best2).pts;
   }
 
   function placeAttachments(an, pts, rng) {

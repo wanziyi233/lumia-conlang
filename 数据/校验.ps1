@@ -937,6 +937,34 @@ if (Test-Path $toolData) {
     } catch { BAD ("animation data check error: " + $_.Exception.Message) }
 }
 
+# 36. backtrackLimit must be a positive number AND actually read by the engine.
+#     The value and its spec sentence sat in the database for a long time and
+#     were already compared by item 16, yet the engine never read it: the rule
+#     "a sentence runs left to right, allowing a short backtrack of at most
+#     120px" was documented and validated but not implemented. A parameter that
+#     is checked for existence but never consumed is dead data, and dead data
+#     looks identical to working data from the outside. This item pins the link.
+$btl = $const.backtrackLimit
+if ($null -eq $btl) { BAD "script.constellation.backtrackLimit missing" }
+else {
+    $btlNum = 0.0
+    $btlParsed = $false
+    try { $btlNum = [double]$btl; $btlParsed = $true } catch { $btlParsed = $false }
+    if (-not $btlParsed) { BAD ("backtrackLimit is not a number: " + $btl) }
+    elseif ($btlNum -le 0) { BAD ("backtrackLimit must be positive, got " + $btl) }
+    elseif (-not (Test-Path $engPath)) { BAD "backtrackLimit check skipped: engine source missing" }
+    else {
+        try {
+            $backSrc = [System.IO.File]::ReadAllText($engPath)
+            if ($backSrc -match 'C\.backtrackLimit') {
+                OK ("backtrackLimit is positive (" + $btl + ") and read by the engine")
+            } else {
+                BAD "backtrackLimit is never read by the engine (dead data)"
+            }
+        } catch { BAD ("backtrackLimit check error: " + $_.Exception.Message) }
+    }
+}
+
 Write-Output ""
 Write-Output ("== RESULT: PASS " + $script:pass + " / FAIL " + $script:fail + " ==")
 if ($script:fail -gt 0) { exit 1 } else { exit 0 }
