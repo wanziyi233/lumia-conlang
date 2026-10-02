@@ -544,6 +544,12 @@
       "example2": "文字/星座体数字与音节示例.svg",
       "vertical": { "rule": "竖排 = 横排版式整体顺时针旋转 90°：句内上→下，句间右→左，上入下出。其余规则不变" },
       "clustering": { "thresholdWords": 10, "clusterSize": "4-6", "clusterGap": 40, "sentenceGap": 60, "rule": "超过阈值的长句切为子簇；子簇间不画弧轨，靠留白大小区分于句间" },
+      "placement": {
+        "rule": "多句时的铺开方式。**不纵向排成一列**——那像目录而不像星空。改为沿一条缓螺旋铺开：第 i 句的中心落在半径 radiusStep*sqrt(i)、角 i*angleStep 处，半径随根号增长使面积分布均匀。随后做松弛：按「最近两颗星的距离」把两句互推，直到任意两句的星至少净空 clustering.sentenceGap（此值不含光晕半径，比较时已把两者光晕扣掉）。单句时半径恒为 0，结果与逐句排布完全相同。",
+        "angleStep": 1.15,
+        "radiusStep": 210,
+        "relaxIterations": 200
+      },
       "animation": {
         "spec": "文字/星座体规范.md",
         "rule": "开启动画时向图形注入 SMIL <animate>；关闭时不输出任何动画元素，得到与静态模式**逐字节相同**的 SVG。所有数值取自本段，引擎不硬编码。",

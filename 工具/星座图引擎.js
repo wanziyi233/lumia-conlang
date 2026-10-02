@@ -730,21 +730,84 @@
     });
 
     var all = [];
-    // 多句：各句先各自排布，再按句间留白纵向排开 —— 否则所有句子都会从原点起算、叠在一起。
-    var cursorY = 0, sentGap = C.clustering.sentenceGap;
+    // 多句铺开（规范 §七「多句排布」）：**不纵向排成一列**——那像目录而不像星空。
+    // 改为沿一条缓螺旋铺开（半径 ∝ sqrt(i)，面积分布均匀），再做几轮松弛：
+    // 按「最近两颗星的距离」把两句互推，直到任意两句的星都留出 clustering.sentenceGap。
+    // 参数在 script.constellation.placement；单句时半径恒为 0，结果与逐句排布完全相同。
+    var PL = C.placement || {};
+    var PL_ANG = PL.angleStep != null ? PL.angleStep : 1.15;
+    var PL_RAD = PL.radiusStep != null ? PL.radiusStep : 210;
+    var PL_IT = PL.relaxIterations != null ? PL.relaxIterations : 200;
+    var PL_GAP = C.clustering ? C.clustering.sentenceGap : 60;
+
+    var rows = [];
     figures.forEach(function (f) {
-      var pts = f.pts.slice();
-      f.atts.forEach(function (a) { pts.push(a); pts.push(a.from); });
-      if (!pts.length) return;
-      var mnx = Infinity, mxx = -Infinity, mny = Infinity, mxy = -Infinity;
-      pts.forEach(function (p) {
-        if (p.x < mnx) mnx = p.x; if (p.x > mxx) mxx = p.x;
-        if (p.y < mny) mny = p.y; if (p.y > mxy) mxy = p.y;
+      var stars = [];
+      f.pts.forEach(function (p, i) {
+        var nd = f.an.nodes[i];
+        stars.push({ x: p.x, y: p.y, r: nd ? nd.halo : HALO_MAIN });
       });
-      var dx = -mnx, dy = cursorY - mny;
-      f.pts.forEach(function (p) { p.x += dx; p.y += dy; });
-      f.atts.forEach(function (a) { a.x += dx; a.y += dy; a.from.x += dx; a.from.y += dy; });
-      cursorY += (mxy - mny) + sentGap;
+      f.atts.forEach(function (a) { stars.push({ x: a.x, y: a.y, r: a.halo }); });
+      if (!stars.length) return;
+      var mnx = Infinity, mxx = -Infinity, mny = Infinity, mxy = -Infinity;
+      stars.forEach(function (s) {
+        if (s.x - s.r < mnx) mnx = s.x - s.r;
+        if (s.x + s.r > mxx) mxx = s.x + s.r;
+        if (s.y - s.r < mny) mny = s.y - s.r;
+        if (s.y + s.r > mxy) mxy = s.y + s.r;
+      });
+      var w = mxx - mnx, h = mxy - mny;
+      stars.forEach(function (s) { s.x -= mnx; s.y -= mny; });   // 图内局部坐标，外接框左下角为原点
+      rows.push({ f: f, stars: stars, mnx: mnx, mny: mny, w: w, h: h, ox: 0, oy: 0 });
+    });
+
+    // 初始位置：阿基米德型缓螺旋
+    rows.forEach(function (r, i) {
+      var th = i * PL_ANG, rad = PL_RAD * Math.sqrt(i);
+      r.ox = Math.cos(th) * rad; r.oy = Math.sin(th) * rad;
+    });
+
+    // 松弛：每轮找出「离得最近的一对星」，把这两句沿连线互推；
+    // 再把整盘重心拉回原点，免得整幅图越推越偏。
+    for (var it = 0; it < PL_IT; it++) {
+      var moved = 0;
+      for (var ai = 0; ai < rows.length; ai++) {
+        for (var bi = ai + 1; bi < rows.length; bi++) {
+          var A = rows[ai], B = rows[bi];
+          var ax0 = A.ox - A.w / 2, ay0 = A.oy - A.h / 2;
+          var bx0 = B.ox - B.w / 2, by0 = B.oy - B.h / 2;
+          var bestD = Infinity, bax = 0, bay = 0, bbx = 0, bby = 0;
+          for (var si = 0; si < A.stars.length; si++) {
+            var sa = A.stars[si], sax = ax0 + sa.x, say = ay0 + sa.y;
+            for (var sj = 0; sj < B.stars.length; sj++) {
+              var sb = B.stars[sj], sbx = bx0 + sb.x, sby = by0 + sb.y;
+              var ddx = sbx - sax, ddy = sby - say;
+              var d = Math.sqrt(ddx * ddx + ddy * ddy) - (sa.r + sb.r);
+              if (d < bestD) { bestD = d; bax = sax; bay = say; bbx = sbx; bby = sby; }
+            }
+          }
+          if (bestD < PL_GAP) {
+            var vx = bbx - bax, vy = bby - bay;
+            var vl = Math.sqrt(vx * vx + vy * vy) || 1;
+            var push = (PL_GAP - bestD) * 0.5;
+            A.ox -= (vx / vl) * push; A.oy -= (vy / vl) * push;
+            B.ox += (vx / vl) * push; B.oy += (vy / vl) * push;
+            moved++;
+          }
+        }
+      }
+      var mcx = 0, mcy = 0;
+      rows.forEach(function (r) { mcx += r.ox; mcy += r.oy; });
+      if (rows.length) { mcx /= rows.length; mcy /= rows.length; }
+      rows.forEach(function (r) { r.ox -= mcx; r.oy -= mcy; });
+      if (!moved) break;
+    }
+
+    // 落位：把每句的外接框中心搬到它的目标位置
+    rows.forEach(function (r) {
+      var tx = r.ox - (r.mnx + r.w / 2), ty = r.oy - (r.mny + r.h / 2);
+      r.f.pts.forEach(function (p) { p.x += tx; p.y += ty; });
+      r.f.atts.forEach(function (a) { a.x += tx; a.y += ty; a.from.x += tx; a.from.y += ty; });
     });
 
     // 竖排（规范 §七）：整体顺时针旋转 90° —— 句内 左→右 变 上→下，句间 上→下 变 右→左，

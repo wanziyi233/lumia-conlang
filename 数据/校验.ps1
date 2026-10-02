@@ -1004,6 +1004,38 @@ if ($animCfg -and (Test-Path $engPath)) {
     } catch { BAD ("animation usage check error: " + $_.Exception.Message) }
 }
 
+# 38. multi-sentence placement must be configured AND actually read by the engine.
+#     Same dead-data family as items 36 and 37. These are the spiral parameters
+#     that decide how several sentences are spread over the canvas. If the engine
+#     ignored them, the layout would silently fall back to whatever the code had
+#     hardcoded, and nothing would look broken enough to notice.
+$plCfg = $null
+try { if ($const) { $plCfg = $const.placement } } catch { }
+if ($plCfg) {
+    $plBad = @()
+    foreach ($pk in @('rule', 'angleStep', 'radiusStep', 'relaxIterations')) {
+        if ($null -eq $plCfg.$pk) { $plBad += ($pk + ' is missing') }
+    }
+    foreach ($pk in @('angleStep', 'radiusStep', 'relaxIterations')) {
+        $pv = 0
+        if ($null -ne $plCfg.$pk) { try { $pv = [double]$plCfg.$pk } catch { $pv = 0 } }
+        if ($pv -le 0) { $plBad += ($pk + ' must be positive, got ' + $plCfg.$pk) }
+    }
+    if (Test-Path $engPath) {
+        try {
+            $plSrc = [System.IO.File]::ReadAllText($engPath)
+            foreach ($needle in @('C.placement', 'PL.angleStep', 'PL.radiusStep', 'PL.relaxIterations')) {
+                if ($plSrc -notmatch [regex]::Escape($needle)) {
+                    $plBad += ($needle + ' never appears in the engine')
+                }
+            }
+        } catch { $plBad += ('placement engine read error: ' + $_.Exception.Message) }
+    }
+    if ($plBad.Count -eq 0) {
+        OK ("placement is configured (angle " + $plCfg.angleStep + ", radius " + $plCfg.radiusStep + ") and read by the engine")
+    } else { BAD ("placement is dead data: " + ($plBad -join '; ')) }
+}
+
 Write-Output ""
 Write-Output ("== RESULT: PASS " + $script:pass + " / FAIL " + $script:fail + " ==")
 if ($script:fail -gt 0) { exit 1 } else { exit 0 }
