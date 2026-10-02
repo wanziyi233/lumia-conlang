@@ -79,7 +79,7 @@
       <label class="chk"><input type="checkbox" id="auto" checked> 自动更新（每打完一个词）</label>
     </div>
     <div class="row">
-      <span class="hint">动画 = 弧轨流动 · 句轨逐段生长 · 光晕呼吸；关掉即静止。</span>    </div>
+      <span class="hint">动画 = 弧轨流动 · 句轨逐段生长 · 光晕呼吸 · 星空漂移；关掉即静止。</span>    </div>
     <div class="row" id="vertRow">
       <label class="chk"><input type="checkbox" id="vert"> 竖排（整体转 90°，句内自上而下）</label>
     </div>
@@ -97,8 +97,8 @@
       <b>星轨体</b>：横排逐词、连成一条轨道；超宽自动折行，逗号画成轨道上的节点星，竖排不适用。<br>
       两种排布<b>共用同一套星符</b>，排版都是<b>确定性</b>的——同一句话每次生成都一样。<br>
       <b>交互</b>：滚轮以光标为锚点缩放，按住拖拽平移，「适应 / 1:1」复位；鼠标悬停在星上会显示词与释义。<br>
-      <b>动画</b>：勾选后轨道<b>逐段生长</b>、光晕呼吸、<b>弧轨流动</b>；不勾就是静止的，输出与加动画之前完全一致。
-      <b>弧轨流动要有 2 句以上才看得到</b>（弧轨连的是上一句末星与下一句首星），单句只有生长与呼吸。
+      <b>动画</b>：勾选后轨道<b>逐段生长</b>、光晕呼吸、<b>弧轨流动</b>、整幅星图<b>缓慢漂移</b>；不勾就是静止的，输出与加动画之前完全一致。<br>
+      <b>弧轨流动要有 2 句以上才看得到</b>（弧轨连的是上一句末星与下一句首星）。星轨体只有逐段生长，没有句间弧轨与漂移。
     </div>
   </div>
 
@@ -258,21 +258,11 @@
     tip.style.top = (e.clientY - bb.top + 14) + "px";
   }
 
-  /* ---------- 重新起跑一次性动画 ---------- */
-  // SMIL 的 begin 缺省是 0s，即「文档时间轴的第 0 秒」。单独打开 SVG 时文档刚开始，
-  // 没问题；但页面是**加载完之后**才把 SVG 插进 DOM 的——插入那一刻 begin="0s" 早已
-  // 成为过去，一次性动画一出现就已经播完并冻结（fill="freeze"），现象就是「勾了动画
-  // 跟静止一模一样」。所以这里按引擎写在 <animate data-begin> 上的时刻重新起跑。
-  // repeatCount="indefinite" 的弧轨流动与光晕呼吸不受此影响，它们一直在跑。
-  function restartAnim() {
-    var svg = stage.querySelector("svg");
-    if (!svg) return;
-    var list = svg.querySelectorAll("animate[data-begin]");
-    for (var i = 0; i < list.length; i++) {
-      var d = parseFloat(list[i].getAttribute("data-begin")) || 0;
-      try { list[i].beginElementAt(d); } catch (err) { /* 老浏览器没有这个 API，忽略 */ }
-    }
-  }
+  /* ---------- 动画 ---------- */
+  // 「逐段生长」用的是 CSS 动画：元素一插进文档就自动起跑，不需要页面做任何事。
+  // 早先用的是 SMIL，两次失败——一次是 keyTimes 末项没写 1（非法动画，直接失效），
+  // 一次是 begin 缺省指向文档时间轴第 0 秒，而 SVG 是页面加载完之后才插进 DOM 的。
+  // 循环类的动画（弧轨流动、光晕呼吸）仍是 SMIL 的 repeatCount="indefinite"，不受影响。
 
   function update() {
     var text = input.value;
@@ -299,7 +289,6 @@
       tx = 0; ty = 0; k = 1; applyT();
     } else {
       stage.innerHTML = res.svg;
-      restartAnim();
       // 首次出图自动缩放到刚好装下；之后**保留用户当前的缩放与平移**，
       // 免得用户放大盯着某个词的时候，一改输入就被弹回原样。
       if (firstPaint) { firstPaint = false; fit(); } else { applyT(); }

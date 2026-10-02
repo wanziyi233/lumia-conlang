@@ -524,7 +524,7 @@
       "backtrackLimit": 120,
       "spatialAllocation": "按词数分配；目标为每节点的平均占地面积大致相等",
       "interSentence": { "mode": "弧轨（虚线弧）", "dasharray": "3 6", "opacity": 0.27 },
-      "css": ".halo{fill:none;stroke:#6fd6ff;stroke-width:.5;opacity:.13}.track{fill:none;stroke:#6fd6ff;stroke-width:.9;opacity:.34}.close{fill:none;stroke:#6fd6ff;stroke-width:.9;opacity:.16}.arc{fill:none;stroke:#6fd6ff;stroke-width:1;opacity:.27;stroke-dasharray:3 6}.bond{fill:none;stroke:#6fd6ff;stroke-width:.8;opacity:.24}.node{fill:#9fb4c8;stroke:none}.fall{fill:#9fb4c8;stroke:none;opacity:.75}.lb{fill:#9fb4c8;font-family:sans-serif;font-size:12px;text-anchor:middle}.ttl{fill:#e8f0f8;font-family:sans-serif;font-size:17px;font-weight:bold}",
+      "css": ".halo{fill:none;stroke:#6fd6ff;stroke-width:.5;opacity:.13}.track{fill:none;stroke:#6fd6ff;stroke-width:.9;opacity:.34}.close{fill:none;stroke:#6fd6ff;stroke-width:.9;opacity:.16}.arc{fill:none;stroke:#6fd6ff;stroke-width:1;opacity:.27;stroke-dasharray:3 6}.bond{fill:none;stroke:#6fd6ff;stroke-width:.8;opacity:.24}.node{fill:#9fb4c8;stroke:none}.fall{fill:#9fb4c8;stroke:none;opacity:.75}.lb{fill:#9fb4c8;font-family:sans-serif;font-size:12px;text-anchor:middle}.ttl{fill:#e8f0f8;font-family:sans-serif;font-size:17px;font-weight:bold}@keyframes lumiaGrow{from{stroke-dashoffset:var(--lumia-len)}to{stroke-dashoffset:0}}",
       "haloFormula": "光晕半径 = cell / 2 + 1",
       "cell": { "main": 50, "companion": 32, "numeral": 44, "numeralAttached": 28, "syllable": 30 },
       "attachments": {
@@ -549,7 +549,8 @@
         "rule": "开启动画时向图形注入 SMIL <animate>；关闭时不输出任何动画元素，得到与静态模式**逐字节相同**的 SVG。所有数值取自本段，引擎不硬编码。",
         "arcFlow": { "dur": 3.2, "shift": 9, "rule": "句间弧轨的虚线沿线流动。shift 必须等于 .arc 的 stroke-dasharray 之和（一个完整周期）——否则每轮循环结束时纹样会跳一下；校验会强制这条" },
         "nodeBreath": { "dur": 4.5, "from": 0.13, "to": 0.40, "stagger": 0.25, "rule": "光晕明暗呼吸，按节点序号错开相位。from 必须等于 .halo 的 opacity，这样「动画」与「静止」的外观起点一致；to 只影响动画中的亮度上限，不影响静止外观" },
-        "trackDraw": { "dur": 1.6, "span": 0.75, "width": 0.25, "rule": "句轨、闭合轨与卫星连线逐段生长：span 是各段起点的散布比例，width 是单段自身生长所占的时长比例。初始状态即「已画好」，动画从 t=0 把 dashoffset 拉回 0 —— 不支持 SMIL 的渲染器会看到完整图形，不会看到空图" }
+        "trackDraw": { "dur": 1.6, "span": 0.75, "width": 0.25, "keyframes": "lumiaGrow", "rule": "句轨、闭合轨与卫星连线逐段生长：span 是各段起点的散布比例，width 是单段自身生长所占的时长比例。用 CSS 动画而不是 SMIL —— 一次性动画靠 SMIL 的 begin 起跑，而 begin 缺省指向**文档时间轴的第 0 秒**，图形又是页面加载完之后才插进 DOM 的，那一刻早已过去，动画一出现就已播完（这正是当初「勾了动画却看不到生长」的真凶）。CSS 动画在元素插入文档时自动起跑，不依赖任何时间基准。keyframes 是命名在 script.constellation.css 里的 @keyframes；每段用 --lumia-len 传入自己的真实路径长度" },
+        "drift": { "dur": 12, "amp": 14, "squash": 0.5, "phaseStep": 1.1, "keys": 12, "rule": "整幅星图的缓慢漂移：第 i 个句子块沿一条闭合椭圆轨迹移动（横向幅度 amp 像素、纵向乘 squash），相位按 i 递增 phaseStep 弧度——各句块因此**相对彼此**缓缓错位，句间弧轨的两端跟着走，得到「星空在流动」而不是「一张静止的图」。amp 必须小，大了就像画面在抖" }
       }
     },
     "track": {

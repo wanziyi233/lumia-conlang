@@ -863,7 +863,7 @@ if (-not $animCfg) { BAD "script.constellation.animation missing" }
 else {
     try {
         $badA = @()
-        foreach ($k in @('spec','rule','arcFlow','nodeBreath','trackDraw')) {
+        foreach ($k in @('spec','rule','arcFlow','nodeBreath','trackDraw','drift')) {
             if (-not $animCfg.PSObject.Properties[$k]) { $badA += ('missing ' + $k) }
         }
         if ($badA.Count -eq 0) {
@@ -896,6 +896,23 @@ else {
             if ($sp -le 0 -or $sp -gt 1) { $badA += 'trackDraw.span must be in (0,1]' }
             if ($wd -le 0 -or $wd -gt 1) { $badA += 'trackDraw.width must be in (0,1]' }
             if (($sp + $wd) -gt 1) { $badA += 'trackDraw span+width exceeds 1, last segment never finishes' }
+            # The one-shot growth is a CSS animation, so the @keyframes it names must
+            # really exist in the stylesheet. A name that resolves to nothing means
+            # the browser silently draws the finished path -- "animation on, no growth".
+            $kf = [string]$animCfg.trackDraw.keyframes
+            if (-not $kf) { $badA += 'trackDraw.keyframes must name a @keyframes rule' }
+            elseif ($cssA -notmatch ('@keyframes\s+' + [regex]::Escape($kf) + '\s*\{')) {
+                $badA += ('trackDraw.keyframes "' + $kf + '" has no @keyframes in constellation.css')
+            }
+            foreach ($dk in @('dur','amp','squash','phaseStep','keys')) {
+                if (-not $animCfg.drift.PSObject.Properties[$dk]) { $badA += ('drift.' + $dk + ' missing') }
+            }
+            if ($animCfg.drift.PSObject.Properties['dur'] -and [double]$animCfg.drift.dur -le 0) {
+                $badA += 'drift.dur must be positive' }
+            if ($animCfg.drift.PSObject.Properties['amp'] -and [double]$animCfg.drift.amp -le 0) {
+                $badA += 'drift.amp must be positive' }
+            if ($animCfg.drift.PSObject.Properties['keys'] -and [double]$animCfg.drift.keys -lt 2) {
+                $badA += 'drift.keys must be at least 2' }
         }
         if ($badA.Count -eq 0) {
             OK ("animation parameters agree with the stylesheets (arc period " + $animCfg.arcFlow.shift +
@@ -919,13 +936,15 @@ if (Test-Path $toolData) {
             if (-not $da) { $badB += 'animation absent from generated data' }
             elseif (-not $animCfg) { }
             else {
-                foreach ($pk in @('arcFlow','nodeBreath','trackDraw')) {
+                foreach ($pk in @('arcFlow','nodeBreath','trackDraw','drift')) {
                     foreach ($k in @('dur')) {
                         if ([string]$da.$pk.$k -ne [string]$animCfg.$pk.$k) { $badB += ($pk + '.' + $k + '=' + $da.$pk.$k) }
                     }
                 }
                 foreach ($pair in @(@('arcFlow','shift'), @('nodeBreath','from'), @('nodeBreath','to'),
-                                    @('nodeBreath','stagger'), @('trackDraw','span'), @('trackDraw','width'))) {
+                                    @('nodeBreath','stagger'), @('trackDraw','span'), @('trackDraw','width'),
+                                    @('trackDraw','keyframes'), @('drift','amp'), @('drift','squash'),
+                                    @('drift','phaseStep'), @('drift','keys'))) {
                     if ([string]$da.$($pair[0]).$($pair[1]) -ne [string]$animCfg.$($pair[0]).$($pair[1])) {
                         $badB += ($pair[0] + '.' + $pair[1] + '=' + $da.$($pair[0]).$($pair[1]))
                     }
@@ -963,6 +982,26 @@ else {
             }
         } catch { BAD ("backtrackLimit check error: " + $_.Exception.Message) }
     }
+}
+
+# 37. animation parameters must actually be consumed by the engine.
+#     Same dead-data family as item 36. The drift block, and the @keyframes name
+#     that the one-shot growth animation resolves against, only mean anything if
+#     the engine really reads them. A parameter that is merely carried along in
+#     the payload looks exactly like a working one from the outside.
+if ($animCfg -and (Test-Path $engPath)) {
+    try {
+        $animSrc = [System.IO.File]::ReadAllText($engPath)
+        $badC = @()
+        foreach ($needle in @('AN.drift', 'driftAt(', 'driftAnim(', 'arcDAt(', 'td.keyframes')) {
+            if ($animSrc -notmatch [regex]::Escape($needle)) {
+                $badC += ($needle + ' never appears in the engine')
+            }
+        }
+        if ($badC.Count -eq 0) {
+            OK "drift and the CSS keyframes name are actually used by the engine"
+        } else { BAD ("animation parameters are dead data: " + ($badC -join '; ')) }
+    } catch { BAD ("animation usage check error: " + $_.Exception.Message) }
 }
 
 Write-Output ""

@@ -538,6 +538,55 @@
            '" dur="' + b.dur + 's" begin="-' + r2(i * b.stagger) + 's" repeatCount="indefinite"/>';
   }
 
+  // ---------- 缓慢漂移（星空流动性）----------
+  // 第 i 个句子块沿一条闭合椭圆轨迹移动：横向幅度 amp、纵向幅度 amp*squash，
+  // 相位按句子序号递增 phaseStep 弧度。因为各句相位不同，它们**相对彼此**也在缓缓错位——
+  // 这正是「星空在流动」与「一张静止的图」的区别。
+  //
+  // 关键约束：句间弧轨连的是两个句子块，句块一走弧轨就得跟着走，
+  // 否则弧的一端会从光晕上脱开。所以弧轨的 d 也必须按同一组相位逐帧重算，
+  // 而不是只让句块自己漂。两边的相位必须来自同一个 driftAt()，绝不能各算各的。
+  function driftAt(i, u) {
+    var dr = AN && AN.drift;
+    if (!dr) return { x: 0, y: 0 };
+    var th = 2 * Math.PI * u + i * dr.phaseStep;
+    return { x: dr.amp * Math.cos(th), y: dr.amp * dr.squash * Math.sin(th) };
+  }
+
+  // 把 u = 0,1/keys,…,1 的偏移采样成一条 keyTimes（首 0 末 1，可无缝循环）。
+  function driftSamples(i) {
+    var dr = AN.drift, vals = [], ts = [];
+    for (var s = 0; s <= dr.keys; s++) {
+      var u = s / dr.keys, o = driftAt(i, u);
+      vals.push(r2(o.x) + " " + r2(o.y));
+      ts.push(r2(u));
+    }
+    return { values: vals.join(";"), keyTimes: ts.join(";") };
+  }
+
+  function driftAnim(i) {
+    if (!AN || !AN.drift) return "";
+    var sp = driftSamples(i), dr = AN.drift;
+    return '<animateTransform attributeName="transform" type="translate" values="' + sp.values +
+           '" keyTimes="' + sp.keyTimes + '" dur="' + dr.dur + 's" repeatCount="indefinite"/>';
+  }
+
+  // 弧轨的几何：两端各停在光晕外 8px，控制点沿法线偏 bow。
+  // 抽成函数是因为漂移时每一帧都要用**移动后的**端点重算一遍。
+  function arcDAt(A, B, hA, hB, oA, oB) {
+    var ax = A.x + oA.x, ay = A.y + oA.y, bx = B.x + oB.x, by = B.y + oB.y;
+    var ddx = bx - ax, ddy = by - ay, dL = hypot(ddx, ddy);
+    if (dL < 1) return null;
+    var ux = ddx / dL, uy = ddy / dL;
+    var x1 = ax + ux * (hA + 8), y1 = ay + uy * (hA + 8);
+    var x2 = bx - ux * (hB + 8), y2 = by - uy * (hB + 8);
+    var px = -uy, py = ux, bow = Math.max(40, dL * 0.22);
+    return "M" + r2(x1) + " " + r2(y1) +
+      " C" + r2(x1 + ux * dL * 0.3 + px * bow) + " " + r2(y1 + uy * dL * 0.3 + py * bow) +
+      "," + r2(x2 - ux * dL * 0.3 + px * bow) + " " + r2(y2 - uy * dL * 0.3 + py * bow) +
+      "," + r2(x2) + " " + r2(y2);
+  }
+
   // 「逐段生长」的路径先登记、后组装：每段的起止时刻取决于**总段数**，
   // 而总段数要等整个图形走完才知道，所以先放占位符，最后统一替换。
   function drawable(cls, d) {
@@ -565,19 +614,20 @@
     return 0;
   }
 
-  // 生长动画。要点：**不要**用 pathLength="1" 做归一化再配 stroke-dasharray="1"——
-  // librsvg（以及不少转换器）不认 pathLength，却照常执行 dasharray，
-  // 于是整条轨道被画成 1 用户单位的短虚线，看上去是断的（实测墨迹少了约 27%）。
-  // 改用**真实长度**当 dasharray，并把它作为静态属性写上去：
-  //   · 不认识 SMIL 的渲染器：dashoffset 默认 0 → 整条线完整画好；
-  //   · 认识 SMIL 的浏览器：t=0 时 dashoffset=L（隐形），随后按 keyTimes 收回到 0，逐段生长。
-  //
-  // data-begin 是给**页面**用的（SMIL 不认识它，纯属附加信息）：
-  // 一次性动画的 begin 缺省是 0s，即「文档时间轴的第 0 秒」。单独打开 SVG 时文档刚开始，
-  // 没问题；可是生成器是页面加载完之后才把 SVG 插进 DOM 的，那一刻 begin="0s" 早已成为过去，
-  // 动画一出现就已经播完并冻结 —— 现象就是「开了动画跟静止一样」。
-  // 于是页面在插入后按 data-begin 调 beginElementAt() 重新起跑。
-  // 呼吸与弧轨是 repeatCount="indefinite"，不受影响，故不加这个属性。
+  // 生长动画。要点：
+  //  · **不要**用 pathLength="1" 做归一化再配 stroke-dasharray="1"——
+  //    librsvg（以及不少转换器）不认 pathLength，却照常执行 dasharray，
+  //    于是整条轨道被画成 1 用户单位的短虚线，看上去是断的（实测墨迹少了约 27%）。
+  //    改用**真实长度**当 dasharray，并把它作为静态属性写上去：不认识这套动画的渲染器
+  //    看到的是 dashoffset 缺省 0，也就是完整图形，不会是空图。
+  //  · 用 **CSS 动画**而不是 SMIL。两次「勾了动画却看不到生长」的教训：
+  //    ① SMIL 的 keyTimes 首项必须 0、**末项必须 1**，写成 "0;k0;k1" 会被判非法而整条失效；
+  //    ② 更根本的是，一次性 SMIL 动画的 begin 缺省指向**文档时间轴的第 0 秒**，
+  //       而图形是页面加载完之后才插进 DOM 的——那一刻早已过去，动画一出现就已播完冻结。
+  //    CSS 动画在元素插入文档时自动起跑，不依赖任何时间基准，把这两个坑一起绕开。
+  //    循环类的动画（弧轨流动、光晕呼吸）仍用 SMIL：它们的 repeatCount 是 indefinite，
+  //    本来就不受 begin 时刻影响，而且 librsvg 之类静态渲染器会直接忽略它们。
+  //    每段用自己的 --lumia-len 传长度，@keyframes 命名在 script.constellation.css 里。
   function finalizeDraw(svg) {
     if (!AN || !drawList.length) return svg;
     var n = drawList.length, td = AN.trackDraw;
@@ -586,11 +636,11 @@
       // 略放大，宁长勿短——短了会在末端留一截永远画不到。
       var L = r2(approxLen(it.d) * 1.05 + 2);
       var k0 = n > 1 ? (+k / n) * td.span : 0;
-      var k1 = Math.min(0.999, k0 + td.width);
+      // 单段自身生长的时长是 width*dur，起点错开 k0*dur；
+      // both = 延迟期间先停在「未画出」，跑完保持「已画出」。
       return '<path class="' + it.cls + '" d="' + it.d + '" stroke-dasharray="' + L +
-             '"><animate attributeName="stroke-dashoffset" values="' + L + ";" + L + ';0" keyTimes="0;' +
-             r2(k0) + ";" + r2(k1) + '" dur="' + td.dur + 's" fill="freeze" data-begin="' +
-             r2(k0 * td.dur) + '"/></path>';
+             '" style="--lumia-len:' + L + ';animation:' + td.keyframes + " " +
+             r2(td.width * td.dur) + "s linear " + r2(k0 * td.dur) + 's both"/>';
     });
   }
 
@@ -729,7 +779,8 @@
     var body = ['<rect width="' + r2(W) + '" height="' + r2(H) + '" fill="#0a0e1a"/>'];
     var arcPaths = [], figEnds = [], layout = [];
 
-    figures.forEach(function (f) {
+    figures.forEach(function (f, fi) {
+      var segStart = body.length;
       var pts = f.pts.map(function (p) { return { x: p.x + ox, y: p.y + oy }; });
       var atts = f.atts.map(function (a) {
         return { kind: a.kind, tok: a.tok, syl: a.syl, cell: a.cell, box: a.box, halo: a.halo,
@@ -843,24 +894,42 @@
                     esc(nd.tok.w) + "</text>");
         });
       }
+
+      // 漂移：把这一句产生的全部元素包进一个 <g>，整组平移。
+      // AN 关掉时**不包**——静态输出的逐字节不变是硬约束。
+      // 注意 layout 里留下的是**未漂移**的坐标：漂移幅度只有十几像素，
+      // 远小于悬停判定半径 max(r+12, 18)，所以不必让它跟着每一帧动。
+      if (AN && AN.drift) {
+        var seg = body.splice(segStart);
+        body.push("<g>" + driftAnim(fi) + seg.join("") + "</g>");
+      }
     });
 
     // 句间弧轨（规范 interSentence）：上一句的末节点 → 下一句的首节点，虚线弧。
     // 画在图形之前，作为背景，与手绘示例一致。
     for (var q = 0; q + 1 < figEnds.length; q++) {
       var A = figEnds[q].last, B = figEnds[q + 1].first;
-      var ddx = B.x - A.x, ddy = B.y - A.y, dL = hypot(ddx, ddy);
-      if (dL < 1) continue;
-      var ux2 = ddx / dL, uy2 = ddy / dL;
-      var ax1 = A.x + ux2 * (figEnds[q].lastHalo + 8), ay1 = A.y + uy2 * (figEnds[q].lastHalo + 8);
-      var ax2 = B.x - ux2 * (figEnds[q + 1].firstHalo + 8), ay2 = B.y - uy2 * (figEnds[q + 1].firstHalo + 8);
-      var perpX = -uy2, perpY = ux2, bow = Math.max(40, dL * 0.22);
-      var arcD = "M" + r2(ax1) + " " + r2(ay1) +
-        " C" + r2(ax1 + ux2 * dL * 0.3 + perpX * bow) + " " + r2(ay1 + uy2 * dL * 0.3 + perpY * bow) +
-        "," + r2(ax2 - ux2 * dL * 0.3 + perpX * bow) + " " + r2(ay2 - uy2 * dL * 0.3 + perpY * bow) +
-        "," + r2(ax2) + " " + r2(ay2);
-      arcPaths.push(AN ? '<path class="arc" d="' + arcD + '">' + animArc() + "</path>"
-                       : '<path class="arc" d="' + arcD + '"/>');
+      var hA = figEnds[q].lastHalo, hB = figEnds[q + 1].firstHalo;
+      var nought = { x: 0, y: 0 };
+      var arcD = arcDAt(A, B, hA, hB, nought, nought);
+      if (!arcD) continue;
+      if (!AN) { arcPaths.push('<path class="arc" d="' + arcD + '"/>'); continue; }
+
+      var kids = animArc();
+      if (AN.drift) {
+        // 弧轨两端跟着句子块漂：这里按与 driftAnim() **完全相同**的相位逐帧重算 d。
+        // 两边若各算各的，弧的一端就会从光晕上脱开。
+        var drf = AN.drift, dvals = [], dts = [];
+        for (var ki = 0; ki <= drf.keys; ki++) {
+          var uu = ki / drf.keys;
+          dvals.push(arcDAt(A, B, hA, hB, driftAt(q, uu), driftAt(q + 1, uu)) || arcD);
+          dts.push(r2(uu));
+        }
+        arcD = dvals[0];                       // 静态值取 u=0 那一帧，动画从它接着走，不会跳
+        kids = '<animate attributeName="d" values="' + dvals.join(";") + '" keyTimes="' + dts.join(";") +
+               '" dur="' + drf.dur + 's" repeatCount="indefinite"/>' + kids;
+      }
+      arcPaths.push('<path class="arc" d="' + arcD + '">' + kids + "</path>");
     }
 
     if (opts.title) body.push('<text class="ttl" x="26" y="34">' + esc(opts.title) + "</text>");
