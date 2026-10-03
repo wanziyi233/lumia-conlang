@@ -839,7 +839,7 @@
     var W = maxX - minX + pad * 2, H = maxY - minY + pad * 2 + head;
     var ox = pad - minX, oy = pad + head - minY;
 
-    var body = ['<rect width="' + r2(W) + '" height="' + r2(H) + '" fill="#0a0e1a"/>'];
+    var body = ['<rect class="bg" width="' + r2(W) + '" height="' + r2(H) + '"/>'];
     var arcPaths = [], figEnds = [], layout = [];
 
     figures.forEach(function (f, fi) {
@@ -1104,7 +1104,7 @@
     var W = contentW + M * 2;
     var H = top + (lines.length - 1) * LH + CELL + M * 1.5;
 
-    var body = ['<rect width="' + r2(W) + '" height="' + r2(H) + '" fill="#0a0e1a"/>'];
+    var body = ['<rect class="bg" width="' + r2(W) + '" height="' + r2(H) + '"/>'];
     var layout = [];
     if (opts.title) body.push('<text class="ttl" x="' + M + '" y="34">' + esc(opts.title) + "</text>");
 
