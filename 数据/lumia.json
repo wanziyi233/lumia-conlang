@@ -530,7 +530,7 @@
       "backtrackLimit": 120,
       "spatialAllocation": "按词数分配；目标为每节点的平均占地面积大致相等",
       "interSentence": { "mode": "弧轨（虚线弧）", "dasharray": "3 6", "opacity": 0.42 },
-      "css": ".bg{fill:#070b14}.halo{fill:none;stroke:#6fd6ff;stroke-width:.5;opacity:.20}.track{fill:none;stroke:#6fd6ff;stroke-width:.9;opacity:.44}.close{fill:none;stroke:#6fd6ff;stroke-width:.9;opacity:.26}.arc{fill:none;stroke:#6fd6ff;stroke-width:1;opacity:.42;stroke-dasharray:3 6}.bond{fill:none;stroke:#6fd6ff;stroke-width:.8;opacity:.38}.node{fill:#9fb4c8;stroke:none}.fall{fill:#9fb4c8;stroke:none;opacity:.9}.lb{fill:#9fb4c8;font-family:sans-serif;font-size:12px;text-anchor:middle}.ttl{fill:#e8f0f8;font-family:sans-serif;font-size:17px;font-weight:bold}@keyframes lumiaGrow{from{stroke-dashoffset:var(--lumia-len)}to{stroke-dashoffset:0}}",
+      "css": ".bg{fill:#070b14}.halo{fill:none;stroke:#6fd6ff;stroke-width:.5;opacity:.20}.track{fill:none;stroke:#6fd6ff;stroke-width:.9;opacity:.44}.close{fill:none;stroke:#6fd6ff;stroke-width:.9;opacity:.26}.arc{fill:none;stroke:#6fd6ff;stroke-width:1;opacity:.42;stroke-dasharray:3 6}.bond{fill:none;stroke:#6fd6ff;stroke-width:.8;opacity:.38}.node{fill:#9fb4c8;stroke:none}.fall{fill:#9fb4c8;stroke:none;opacity:.9}.lb{fill:#9fb4c8;font-family:sans-serif;font-size:12px;text-anchor:middle}.ttl{fill:#e8f0f8;font-family:sans-serif;font-size:17px;font-weight:bold}@keyframes lumiaGrow{from{stroke-dashoffset:var(--lumia-len)}to{stroke-dashoffset:0}}@keyframes lumiaRise{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}",
       "haloFormula": "光晕半径 = cell / 2 + 1",
       "cell": { "main": 50, "companion": 32, "numeral": 44, "numeralAttached": 28, "syllable": 30 },
       "attachments": {
@@ -562,6 +562,7 @@
         "arcFlow": { "dur": 3.2, "shift": 9, "rule": "句间弧轨的虚线沿线流动。shift 必须等于 .arc 的 stroke-dasharray 之和（一个完整周期）——否则每轮循环结束时纹样会跳一下；校验会强制这条" },
         "nodeBreath": { "dur": 4.5, "from": 0.20, "to": 0.46, "stagger": 0.25, "rule": "光晕明暗呼吸，按节点序号错开相位。from 必须等于 .halo 的 opacity，这样「动画」与「静止」的外观起点一致；to 只影响动画中的亮度上限，不影响静止外观" },
         "trackDraw": { "dur": 1.6, "span": 0.75, "width": 0.25, "keyframes": "lumiaGrow", "rule": "句轨、闭合轨与卫星连线逐段生长：span 是各段起点的散布比例，width 是单段自身生长所占的时长比例。用 CSS 动画而不是 SMIL —— 一次性动画靠 SMIL 的 begin 起跑，而 begin 缺省指向**文档时间轴的第 0 秒**，图形又是页面加载完之后才插进 DOM 的，那一刻早已过去，动画一出现就已播完（这正是当初「勾了动画却看不到生长」的真凶）。CSS 动画在元素插入文档时自动起跑，不依赖任何时间基准。keyframes 是命名在 script.constellation.css 里的 @keyframes；每段用 --lumia-len 传入自己的真实路径长度" },
+         "appear": { "dur": 0.5, "stagger": 0.09, "maxTotal": 6, "keyframes": "lumiaRise", "rule": "**星轨体专用**的逐字浮现：把星轨体里每个出场单位（一个字形、一个逗号节点、一个词下标签）按**从左往右、自上而下**编号，延迟随编号递增，配合 @keyframes lumiaRise（由透明并下移 7px 淡入到位），于是一行字像被一笔写出来，而不是整片同时亮起——即「PPT 那样一点一点冒出来」。dur 是单个单位浮现所需的秒数；stagger 是相邻单位起步的时间差；maxTotal 是整串出场允许占用的最长秒数，单位数很多时按比例压缩 stagger，免得长文本要等十几秒才出完（设 0 表示不压缩）。星座体不用这条：它的动画是连线生长加星体漂移，改这条不影响它" },
         "drift": { "dur": 12, "amp": 14, "squash": 0.5, "phaseStep": 1.1, "keys": 12, "rule": "整幅星图的缓慢漂移：第 i 个句子块沿一条闭合椭圆轨迹移动（横向幅度 amp 像素、纵向乘 squash），相位按 i 递增 phaseStep 弧度——各句块因此**相对彼此**缓缓错位，句间弧轨的两端跟着走，得到「星空在流动」而不是「一张静止的图」。amp 必须小，大了就像画面在抖" }
       },
       "export": {

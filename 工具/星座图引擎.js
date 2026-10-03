@@ -589,9 +589,11 @@
 
   // 「逐段生长」的路径先登记、后组装：每段的起止时刻取决于**总段数**，
   // 而总段数要等整个图形走完才知道，所以先放占位符，最后统一替换。
-  function drawable(cls, d) {
+  // delay 是可选的**显式起始秒数**：星轨体要按「从左往右」的出场序号起步，
+  // 而这个序号与 drawList 的下标无关（字形与短轨混在一起），所以由调用方直接给定。
+  function drawable(cls, d, delay) {
     if (!AN) return '<path class="' + cls + '" d="' + d + '"/>';
-    drawList.push({ cls: cls, d: d });
+    drawList.push({ cls: cls, d: d, delay: delay != null ? delay : null });
     return "\u0001" + (drawList.length - 1) + "\u0001";
   }
 
@@ -635,7 +637,9 @@
       var it = drawList[+k];
       // 略放大，宁长勿短——短了会在末端留一截永远画不到。
       var L = r2(approxLen(it.d) * 1.05 + 2);
-      var k0 = n > 1 ? (+k / n) * td.span : 0;
+      // 起点：默认按段序在 span 内均匀散布；显式给了秒数就用它（星轨体按出场序号给）。
+      var k0 = it.delay != null ? (it.delay / td.dur)
+             : (n > 1 ? (+k / n) * td.span : 0);
       // 单段自身生长的时长是 width*dur，起点错开 k0*dur；
       // both = 延迟期间先停在「未画出」，跑完保持「已画出」。
       return '<path class="' + it.cls + '" d="' + it.d + '" stroke-dasharray="' + L +
@@ -1108,25 +1112,55 @@
     var layout = [];
     if (opts.title) body.push('<text class="ttl" x="' + M + '" y="34">' + esc(opts.title) + "</text>");
 
+    // 星轨体的「浮现」：出场单位按**从左往右、自上而下**编号，延迟随编号递增，
+    // 于是一行字像被一笔写出来，而不是整片同时亮起。星座体不走这条路
+    // （它的动画是连线生长 + 星体漂移，已经足够），所以这里只读 AN.appear。
+    // 长文本的单位数会很大，用 maxTotal 把整串出场压缩到可接受的秒数内。
+    var AP = AN && AN.appear ? AN.appear : null;
+    var apSeq = 0, apScale = 1, apUnits = 0;
+    if (AP) {
+      for (var u1 = 0; u1 < lines.length; u1++) {
+        for (var u2 = 0; u2 < lines[u1].length; u2++) {
+          var uc = lines[u1][u2];
+          apUnits += uc.joint ? 1 : (uc.n + (opts.labels ? 1 : 0));
+        }
+      }
+      var apSpread = Math.max(0, apUnits - 1) * (+AP.stagger);
+      if (+AP.maxTotal > 0 && apSpread > +AP.maxTotal) apScale = +AP.maxTotal / apSpread;
+    }
+    function apDelay(i) { return AP ? i * (+AP.stagger) * apScale : 0; }
+    // 包一层带 CSS 动画的 <g>。注意：动画必须挂在**外层**，因为里层那个 <g> 带着
+    // transform 属性定位，而 CSS 的 transform 会覆盖同元素上的 transform 属性——
+    // 挂错层会让整格字在动画结束瞬间跳回原点。动画关掉时不包，产出逐字节不变。
+    function apWrap(inner, i) {
+      if (!AP) return inner;
+      return '<g style="animation:' + AP.keyframes + ' ' + r2(+AP.dur) + 's linear ' +
+             r2(apDelay(i)) + 's both">' + inner + '</g>';
+    }
+
     for (var q = 0; q < lines.length; q++) {
       var y = top + q * LH + CELL / 2, x = M, ln = lines[q];
       for (var p = 0; p < ln.length; p++) {
         var cc = ln[p];
         if (cc.joint) {
-          body.push('<circle class="joint" cx="' + r2(x + cc.w / 2) + '" cy="' + r2(y) + '" r="3.5"/>');
+          body.push(apWrap('<circle class="joint" cx="' + r2(x + cc.w / 2) + '" cy="' + r2(y) + '" r="3.5"/>', apSeq));
+          apSeq += 1;
           layout.push({ w: "\uFF0C", zh: "", x: x + cc.w / 2, y: y, r: cc.w / 2 });
         } else {
           for (var f2 = 0; f2 < cc.n; f2++) {
-            body.push(glyphGroup(cc.frag[f2], x + CELL / 2 + f2 * STEP, y, CELL, cc.box, null));
+            body.push(apWrap(glyphGroup(cc.frag[f2], x + CELL / 2 + f2 * STEP, y, CELL, cc.box, null), apSeq));
+            apSeq += 1;
           }
           layout.push({ w: cc.label, zh: cc.zh, x: x + cc.w / 2, y: y, r: cc.w / 2 });
           if (opts.labels) {
-            body.push('<text class="lb" x="' + r2(x + cc.w / 2) + '" y="' + r2(y + CELL / 2 + 20) + '">' + esc(cc.label) + "</text>");
+            body.push(apWrap('<text class="lb" x="' + r2(x + cc.w / 2) + '" y="' + r2(y + CELL / 2 + 20) + '">' + esc(cc.label) + "</text>", apSeq));
+            apSeq += 1;
           }
         }
         var ex = x + cc.w;
         if (p < ln.length - 1) {
-          body.push(drawable("strut", "M" + r2(ex) + " " + r2(y) + " L" + r2(ex + GAP) + " " + r2(y)));
+          // 短轨跟着出场序号走：它比下一个字早一点点长出来，像连笔带出下一格。
+          body.push(drawable("strut", "M" + r2(ex) + " " + r2(y) + " L" + r2(ex + GAP) + " " + r2(y), apDelay(apSeq)));
         }
         x = ex + GAP;
       }
@@ -1141,13 +1175,24 @@
   }
 
   /* ---------- 烘焙：把动画在给定时刻求值成静态属性 ----------
-   * 用途：GIF / 逐帧导出。做三件事——
+   * 用途：GIF / 逐帧导出。做四件事——
    *   ① CSS 逐段生长（inline style 里的 --lumia-len 与 animation:… both）→ stroke-dashoffset
+   *   ①b CSS 浮现（星轨体：<g style="animation:…">）→ opacity 与上浮位移
    *   ② SMIL <animate>/<animateTransform>（弧轨流动、光晕呼吸、整句漂移、弧轨 d）→ 静态属性
    *   ③ 抹掉所有动画元素，产出必须是**真静止**的 SVG
    * 纯字符串进、纯字符串出：不碰 DOM，浏览器与 Node 下行为一致，所以可以直接测。
    * t 的单位是秒，从**动画起跑的那一刻**算起。
    */
+
+  // @keyframes NAME 里 from 的 translateY 位移（像素）。从样式表现取，不在引擎里写死；
+  // 取不到就退化为纯淡入。
+  function riseOf(name) {
+    var css = (G && G.css ? G.css : "") + (D && D.extraCss ? D.extraCss : "");
+    var re = new RegExp("@keyframes\\s+" + name +
+      "\\s*\\{\\s*from\\s*\\{[^}]*?translateY\\(\\s*(-?[\\d.]+)px", "i");
+    var m = re.exec(css);
+    return m ? +m[1] : 0;
+  }
 
   var NUMRE = /-?\d+(?:\.\d+)?/g;
 
@@ -1209,6 +1254,18 @@
         var p = +dur > 0 ? (t - +del) / +dur : 1;
         p = p < 0 ? 0 : p > 1 ? 1 : p;
         return ' stroke-dashoffset="' + r2(+L * (1 - p)) + '"';
+      });
+
+    // ①b 浮现：<g style="animation:…"> 上算 opacity 与上浮位移。
+    //     @keyframes 的形状固定是 from{opacity:0;transform:translateY(Rpx)} to{opacity:1}，
+    //     所以这里只需线性插值；R 从样式表现取（见 riseOf）。
+    svg = svg.replace(/<g style="animation:([\w-]+) ([\d.]+)s linear ([\d.]+)s both"/g,
+      function (_, name, dur, del) {
+        var p = +dur > 0 ? (t - +del) / +dur : 1;
+        p = p < 0 ? 0 : p > 1 ? 1 : p;
+        var rise = riseOf(name);
+        return '<g opacity="' + r2(p) + '"' +
+               (rise ? ' transform="translate(0,' + r2(rise * (1 - p)) + ')"' : "");
       });
 
     // ② SMIL：这些元素一律是**父元素的第一个子元素**（引擎就是这么发的），

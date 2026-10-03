@@ -863,7 +863,7 @@ if (-not $animCfg) { BAD "script.constellation.animation missing" }
 else {
     try {
         $badA = @()
-        foreach ($k in @('spec','rule','arcFlow','nodeBreath','trackDraw','drift')) {
+        foreach ($k in @('spec','rule','arcFlow','nodeBreath','trackDraw','appear','drift')) {
             if (-not $animCfg.PSObject.Properties[$k]) { $badA += ('missing ' + $k) }
         }
         if ($badA.Count -eq 0) {
@@ -904,6 +904,30 @@ else {
             elseif ($cssA -notmatch ('@keyframes\s+' + [regex]::Escape($kf) + '\s*\{')) {
                 $badA += ('trackDraw.keyframes "' + $kf + '" has no @keyframes in constellation.css')
             }
+            # The star-track reveal is a CSS animation too: one wrapper per unit, each
+            # with its own delay. Its @keyframes must exist AND must actually move the
+            # wrapper; a rule with no translateY leaves a plain cross-fade, which is
+            # near-invisible at these opacities -- exactly the "animation does nothing"
+            # complaint this block exists to fix.
+            foreach ($ak in @('dur','stagger','maxTotal','keyframes')) {
+                if (-not $animCfg.appear.PSObject.Properties[$ak]) { $badA += ('appear.' + $ak + ' missing') }
+            }
+            if ($animCfg.appear.PSObject.Properties['dur'] -and [double]$animCfg.appear.dur -le 0) {
+                $badA += 'appear.dur must be positive' }
+            if ($animCfg.appear.PSObject.Properties['stagger'] -and [double]$animCfg.appear.stagger -le 0) {
+                $badA += 'appear.stagger must be positive' }
+            if ($animCfg.appear.PSObject.Properties['maxTotal'] -and [double]$animCfg.appear.maxTotal -lt 0) {
+                $badA += 'appear.maxTotal must not be negative' }
+            $akf = [string]$animCfg.appear.keyframes
+            if (-not $akf) { $badA += 'appear.keyframes must name a @keyframes rule' }
+            elseif ($cssA -notmatch ('@keyframes\s+' + [regex]::Escape($akf) + '\s*\{')) {
+                $badA += ('appear.keyframes "' + $akf + '" has no @keyframes in constellation.css')
+            } else {
+                $akfBlock = [regex]::Match($cssA, ('@keyframes\s+' + [regex]::Escape($akf) + '\s*\{(?:[^{}]|\{[^{}]*\})*\}'))
+                if ($akfBlock.Success -and $akfBlock.Value -notmatch 'translateY\(') {
+                    $badA += ('appear.keyframes "' + $akf + '" has no translateY, units would only fade in place')
+                }
+            }
             foreach ($dk in @('dur','amp','squash','phaseStep','keys')) {
                 if (-not $animCfg.drift.PSObject.Properties[$dk]) { $badA += ('drift.' + $dk + ' missing') }
             }
@@ -916,7 +940,8 @@ else {
         }
         if ($badA.Count -eq 0) {
             OK ("animation parameters agree with the stylesheets (arc period " + $animCfg.arcFlow.shift +
-                ", halo opacity " + $animCfg.nodeBreath.from + ", dur " + $animCfg.trackDraw.dur + "s)")
+                ", halo opacity " + $animCfg.nodeBreath.from + ", dur " + $animCfg.trackDraw.dur +
+                "s, reveal step " + $animCfg.appear.stagger + "s)")
         } else { BAD ("animation parameter mismatch: " + ($badA -join '; ')) }
     } catch { BAD ("animation parameter check error: " + $_.Exception.Message) }
 }
@@ -936,14 +961,15 @@ if (Test-Path $toolData) {
             if (-not $da) { $badB += 'animation absent from generated data' }
             elseif (-not $animCfg) { }
             else {
-                foreach ($pk in @('arcFlow','nodeBreath','trackDraw','drift')) {
+                foreach ($pk in @('arcFlow','nodeBreath','trackDraw','appear','drift')) {
                     foreach ($k in @('dur')) {
                         if ([string]$da.$pk.$k -ne [string]$animCfg.$pk.$k) { $badB += ($pk + '.' + $k + '=' + $da.$pk.$k) }
                     }
                 }
                 foreach ($pair in @(@('arcFlow','shift'), @('nodeBreath','from'), @('nodeBreath','to'),
                                     @('nodeBreath','stagger'), @('trackDraw','span'), @('trackDraw','width'),
-                                    @('trackDraw','keyframes'), @('drift','amp'), @('drift','squash'),
+                                    @('trackDraw','keyframes'), @('appear','stagger'), @('appear','maxTotal'),
+                                    @('appear','keyframes'), @('drift','amp'), @('drift','squash'),
                                     @('drift','phaseStep'), @('drift','keys'))) {
                     if ([string]$da.$($pair[0]).$($pair[1]) -ne [string]$animCfg.$($pair[0]).$($pair[1])) {
                         $badB += ($pair[0] + '.' + $pair[1] + '=' + $da.$($pair[0]).$($pair[1]))
@@ -993,13 +1019,13 @@ if ($animCfg -and (Test-Path $engPath)) {
     try {
         $animSrc = [System.IO.File]::ReadAllText($engPath)
         $badC = @()
-        foreach ($needle in @('AN.drift', 'driftAt(', 'driftAnim(', 'arcDAt(', 'td.keyframes')) {
+        foreach ($needle in @('AN.drift', 'driftAt(', 'driftAnim(', 'arcDAt(', 'td.keyframes', 'AN.appear', 'apWrap(', 'apDelay(')) {
             if ($animSrc -notmatch [regex]::Escape($needle)) {
                 $badC += ($needle + ' never appears in the engine')
             }
         }
         if ($badC.Count -eq 0) {
-            OK "drift and the CSS keyframes name are actually used by the engine"
+            OK "drift, the CSS keyframes name and the star-track reveal are actually used by the engine"
         } else { BAD ("animation parameters are dead data: " + ($badC -join '; ')) }
     } catch { BAD ("animation usage check error: " + $_.Exception.Message) }
 }
