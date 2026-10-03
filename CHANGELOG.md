@@ -55,15 +55,23 @@
   当时的垫片测试把事件直接派发到星元素上，恰好绕过了这一步，所以没测出来。
 - **原因二（悬停）**：悬停**根本没有实现**——既没有提示框元素，也没有 `pointermove`
   的非拖拽分支。
-- **做法**：悬停与点击一律改成**按坐标命中**——把光标位置用镜头变换换算回星图坐标，
-  取「`hitFactor` × 星符外接半径」以内最近的一颗。新增 `script.starmap.hitFactor`（0.8）
-  与 `tipOffset`（16）两个参数；`starmap.css` 补 `.star.hov` 高亮；页内新增跟随光标的
-  提示框（`pointer-events:none`，免得它挡住命中测试）。
+- **原因三（点击，第二层）**：改按坐标命中之后还是点不动，因为 `click` 监听挂在
+  **`<svg>`（`sky`）**上，而被指针捕获重定向的 `click` 目标正是它的**父元素**
+  `#viewport`——事件从 `#viewport` 起往上冒泡，**永远经过不了子元素 `sky`**，
+  监听器一次都不触发。挂错一层，等于没修。（垫片此时仍测不出来，因为它把 `click`
+  直接派发到 `sky` 上；真实浏览器里这个事件压根到不了 `sky`。）
+- **做法**：① 悬停与点击一律改成**按坐标命中**——把光标位置用镜头变换换算回星图坐标，
+  取「`hitFactor` × 星符外接半径」以内最近的一颗；② `click` 监听改挂 `#viewport`，
+  这在两种情况下都对：被捕获时事件目标就是它，没被捕获时事件从星元素冒泡上来也经过它。
+  新增 `script.starmap.hitFactor`（0.8）与 `tipOffset`（16）两个参数；`starmap.css` 补
+  `.star.hov` 高亮；页内新增跟随光标的提示框（`pointer-events:none`，免得它挡住命中测试）。
 - 校验第 40 项相应加查：`hitFactor`／`tipOffset` 必须被页面真的读、`starmap.css` 必须
-  留着 `.star.hov`、页面必须出现 `hitTest`／`pointerleave`／`hov`——防止有人把「按事件
-  目标找星」的写法改回来。
-- 教训记在测试里：交互垫片必须**按真实浏览器的方式派发事件**（`click` 的
-  `target` 是容器，不是星），否则这种 bug 永远测不出来。
+  留着 `.star.hov`、页面必须出现 `hitTest`／`pointerleave`／`hov`、**`click` 监听必须挂在
+  `#viewport` 上**（挂在 `<svg>` 上直接判错）——防止有人把「按事件目标找星」或
+  「挂错一层」的写法改回来。
+- 教训记在测试里：交互垫片必须**按真实浏览器的方式派发事件**——`click` 的 `target`
+  是容器（不是星），而且必须**沿真实 DOM 往上冒泡**。老垫片直接 `sky.fire('click')`，
+  既设对了 target 又走错了传播路径，于是「监听挂错元素」这一类 bug 照样测不出来。
 - 布局参数全部存在数据库 `script.starmap`（`regionGap` / `starSpacing` / `glyphCell` /
   `labelMinCell` / `lineOpacity`）与其中的 `css`；页面不硬编码任何尺寸。
   校验第 40 项检查这些键确实被页面读，否则报「死数据」。

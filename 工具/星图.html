@@ -408,9 +408,12 @@
       '<div class="src">' + esc(ety) + src + '</div>';
   }
 
-  sky.addEventListener('click', function (e) {
-    // e.target 在这里不可信：pointerdown 里的 setPointerCapture 把随后的 click 重定向到了
-    // #viewport 上，e.target 于是永远不是那颗星。改按坐标命中，与悬停同一套逻辑。
+  // 注意监听挂在 view（#viewport）而不是 sky 上：pointerdown 里的 setPointerCapture 会把
+  // 随后的 click **重定向到 #viewport**，事件从 #viewport 开始冒泡、不经过它的子元素 sky，
+  // 挂在 sky 上一次都不会触发（这正是「点星没反应」的第二层原因）。挂在 view 上则两种
+  // 情况都对：被捕获时事件目标就是 view；没被捕获时事件从星元素冒泡上来也经过 view。
+  // e.target 同样不可信，一律按坐标命中，与悬停共用一套逻辑。
+  view.addEventListener('click', function (e) {
     if (moved > 4) return;
     var p = hitTest(e.clientX, e.clientY);
     if (p) select(p.w, false);

@@ -1111,6 +1111,16 @@ if (-not $SM) {
         foreach ($k in @('hitTest', 'pointerleave', 'hov')) {
             if ($smSrc -notmatch [regex]::Escape($k)) { $smErr += ('star map page lost its pointer handling: ' + $k) }
         }
+        # The click listener itself must sit on the viewport element, not on the svg:
+        # a captured click is retargeted to #viewport and bubbles UP from there, so a
+        # listener on the svg (its child) is never reached at all. Both mistakes have
+        # happened; the second one is invisible in a shim that fires click at the svg.
+        if ($smSrc -notmatch "view\.addEventListener\(\s*'click'") {
+            $smErr += 'star map page does not bind click on the viewport'
+        }
+        if ($smSrc -match "sky\.addEventListener\(\s*'click'") {
+            $smErr += 'star map page binds click on the svg, which a captured click never reaches'
+        }
     } else { $smErr += 'the star map page is missing' }
 }
 $cats = @($j.categories)
