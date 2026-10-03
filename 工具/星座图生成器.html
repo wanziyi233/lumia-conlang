@@ -72,8 +72,12 @@
     <div class="row">
       <button id="gen">生成 ⏎</button>
       <button id="dl">下载 SVG</button>
+      <button id="dlgif">导出 GIF</button>
       <label class="chk"><input type="checkbox" id="labels"> 显示词形</label>
       <label class="chk"><input type="checkbox" id="anim"> 动画</label>
+    </div>
+    <div class="row">
+      <span class="hint" id="gifMsg"></span>
     </div>
     <div class="row">
       <label class="chk"><input type="checkbox" id="auto" checked> 自动更新（每打完一个词）</label>
@@ -98,7 +102,9 @@
       两种排布<b>共用同一套星符</b>，排版都是<b>确定性</b>的——同一句话每次生成都一样。<br>
       <b>交互</b>：滚轮以光标为锚点缩放，按住拖拽平移，「适应 / 1:1」复位；鼠标悬停在星上会显示词与释义。<br>
       <b>动画</b>：勾选后轨道<b>逐段生长</b>、光晕呼吸、<b>弧轨流动</b>、整幅星图<b>缓慢漂移</b>；不勾就是静止的，输出与加动画之前完全一致。<br>
-      <b>弧轨流动要有 2 句以上才看得到</b>（弧轨连的是上一句末星与下一句首星）。星轨体只有逐段生长，没有句间弧轨与漂移。
+      <b>弧轨流动要有 2 句以上才看得到</b>（弧轨连的是上一句末星与下一句首星）。星轨体只有逐段生长，没有句间弧轨与漂移。<br>
+      <b>导出 GIF</b>：动画 SVG 只有在浏览器里打开时才会动，要拿去分享就点「导出 GIF」——它把整段动画逐帧烤成一张循环的位图。<br>
+      <span style="opacity:.7">导出的永远是带动画的版本（「动画」勾没勾都一样）；帧率、最长边与调色板级数取自 <code>数据/lumia.json</code> 的 <code>constellation.export</code>。</span>
     </div>
   </div>
 
@@ -119,12 +125,14 @@
 
 <script src="星座数据.js"></script>
 <script src="星座图引擎.js"></script>
+<script src="gif编码器.js"></script>
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
   var input = $("input"), stage = $("stage"), warn = $("warn"), bd = $("breakdown");
   var viewport = $("viewport"), tip = $("tip");
   var layout = [];
+  var busy = false;   // 烤 GIF 期间为 true，挡住重复点击
 
   var EXAMPLES = [
     "sela li lumia.",
@@ -330,6 +338,106 @@
     a.download = lastName;
     a.click();
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+  };
+
+  /* ---------- GIF 导出 ---------- */
+  // 动画 SVG 只有用浏览器打开才会动；要拿去分享，就得先把它烤成位图。
+  // 三步：引擎 bake() 把动画在时刻 t 求值成静态 SVG → <img> 载入并画进 canvas 取像素
+  //      → gif编码器.js 打包成 GIF。全程在本机浏览器里跑，不联网、不依赖外部库。
+  // 参数（时长、帧率、尺寸、调色板级数）全部读自数据/lumia.json 的 constellation.export。
+  var EX = (LUMIA.constellation && LUMIA.constellation.export) || {};
+  var EXP_DUR = +EX.duration || 12;
+  var EXP_FPS = +EX.fps || 10;
+  var EXP_SIDE = +EX.maxSide || 600;
+  var EXP_LEVELS = +EX.paletteLevels || 12;
+
+  function gifMsg(t) { $("gifMsg").textContent = t || ""; }
+
+  // 把 SVG 字符串按目标尺寸画进 canvas，取回 RGBA 像素。
+  function rasterize(svg, w, h) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
+      var img = new Image();
+      img.onload = function () {
+        var cv = document.createElement("canvas");
+        cv.width = w; cv.height = h;
+        var ctx = cv.getContext("2d");
+        // 不依赖 SVG 里那块 <rect class="bg">：万一它被裁掉一角，也不会露出白边。
+        var bg = /\.bg\s*\{[^}]*?fill\s*:\s*(#[0-9a-fA-F]{3,6})/.exec(svg);
+        ctx.fillStyle = bg ? bg[1] : "#070b14";
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0, w, h);
+        URL.revokeObjectURL(url);
+        resolve(ctx.getImageData(0, 0, w, h).data);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error("SVG 无法载入为图像")); };
+      img.src = url;
+    });
+  }
+
+  $("dlgif").onclick = function () {
+    if (busy) return;
+    var text = input.value, track = isTrack(), res;
+    try {
+      // 导出的**永远是带动画的版本**：勾没勾「动画」都一样，
+      // 否则导出的就是一张静止图——那就直接下 SVG 了。
+      res = track
+        ? Selagrafi.renderTrack(text, { labels: $("labels").checked, animate: true })
+        : Selagrafi.render(text, { labels: $("labels").checked, vertical: $("vert").checked, animate: true });
+    } catch (e) { gifMsg("渲染出错：" + e.message); return; }
+    if (!res.svg) { gifMsg("没有可导出的图形。"); return; }
+
+    var m = /width="([\d.]+)"\s+height="([\d.]+)"/.exec(res.svg);
+    if (!m) { gifMsg("读不出图形尺寸。"); return; }
+    var scale = Math.min(1, EXP_SIDE / Math.max(+m[1], +m[2]));
+    var w = Math.max(2, Math.round(+m[1] * scale));
+    var h = Math.max(2, Math.round(+m[2] * scale));
+    // 先把 SVG 自身缩到目标尺寸，再交给 <img> 栅格化——比画大图再缩更清楚。
+    var sized = res.svg.replace(/width="[\d.]+"\s+height="[\d.]+"/,
+      'width="' + w + '" height="' + h + '"');
+    var n = Math.max(2, Math.round(EXP_DUR * EXP_FPS));
+    var delayCs = Math.max(2, Math.round(100 / EXP_FPS));
+
+    busy = true;
+    $("dlgif").disabled = true;
+    var frames = [], i = 0;
+
+    function finish() {
+      try {
+        // 调色板现从这份 SVG 里取：里面就写着底色与各墨色，比另抄一份配色可靠。
+        var pal = LumiaGif.paletteFromCss(res.svg, EXP_LEVELS);
+        var bytes = LumiaGif.encode(frames, w, h, { palette: pal, delayCs: delayCs });
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(new Blob([bytes], { type: "image/gif" }));
+        a.download = track ? "lumia-track.gif" : "lumia-constellation.gif";
+        a.click();
+        setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+        gifMsg("已导出 " + n + " 帧 · " + w + "×" + h + " · " + Math.round(bytes.length / 1024) + " KB");
+      } catch (e) {
+        gifMsg("导出失败：" + e.message);
+      }
+      busy = false; $("dlgif").disabled = false;
+    }
+
+    function step() {
+      if (i >= n) {
+        // 让出一帧给界面刷新进度，再打包——否则长图会像卡住。
+        gifMsg("正在打包 …");
+        setTimeout(finish, 0);
+        return;
+      }
+      rasterize(Selagrafi.bake(sized, i / EXP_FPS), w, h).then(function (px) {
+        frames.push(px); i++;
+        gifMsg("正在烤帧 " + i + " / " + n + " …");
+        step();
+      }, function (err) {
+        busy = false; $("dlgif").disabled = false;
+        gifMsg("导出失败：" + err.message);
+      });
+    }
+
+    gifMsg("正在烤帧 …");
+    step();
   };
 
   input.addEventListener("input", function (e) {

@@ -83,11 +83,12 @@ It is deliberately "unbalanced": it names stars, planets, Saturn, the universe, 
 │   ├── 词典.html          可检索词典（由 数据/生成词典.ps1 生成）
 │   ├── 星座图生成器.html  输入 Lumia 句子，即时生成星座体 / 星轨体 SVG
 │   ├── 星图.html          全部 97 词铺成可缩放星空（滚轮缩放 / 拖拽平移 / 搜索 / 点星看词条）
-│   ├── 星座图引擎.js      解析 + 排布 + 输出 SVG（render = 星座体，renderTrack = 星轨体）
+│   ├── 星座图引擎.js      解析 + 排布 + 输出 SVG（render = 星座体，renderTrack = 星轨体，bake = 把动画烤成静态帧）
+│   ├── gif编码器.js       自带调色板与 LZW 的 GIF 编码器，供生成器页导出动画
 │   └── 星座数据.js        由 数据/生成星座图.ps1 从数据库生成
 ├── 数据/
 │   ├── lumia.json        全系统单一数据库（权威数据源）
-│   ├── 校验.ps1          一致性校验脚本（46 项）
+│   ├── 校验.ps1          一致性校验脚本（47 项）
 │   ├── 生成词典.ps1      生成 工具/词典.html
 │   ├── 生成星座图.ps1    生成 工具/星座数据.js
 │   ├── dict-template.html 词典 HTML 模板
@@ -102,6 +103,8 @@ It is deliberately "unbalanced": it names stars, planets, Saturn, the universe, 
 - 想看星符？直接开 **[星符总表](https://wanziyi233.github.io/lumia-conlang/文字/符表.svg)**。
 - 想自己造句出图？打开 **[文字生成器](https://wanziyi233.github.io/lumia-conlang/工具/星座图生成器.html)**——
   输入罗马字 Lumia（纯 ASCII，**不需要输入法**），可在 **星座体（主）** 与 **星轨体（辅）** 两种排布间切换，即时出图并可下载 SVG。
+  勾选「动画」后弧轨流动、轨道逐段生长、光晕呼吸、整幅星图缓慢漂移；想把它发给别人看，
+  用「导出 GIF」把整段动画烤成一张循环的位图。
 - 示例句 / Example：
 
 | Lumia | 中文 / English |
@@ -116,7 +119,7 @@ It is deliberately "unbalanced": it names stars, planets, Saturn, the universe, 
 需要 PowerShell。**注意命令名不一样**：Windows 自带的是 Windows PowerShell 5.1，命令为 `powershell`；`pwsh` 是 PowerShell 7+ 的命令，Windows 默认**没有**安装（macOS/Linux 需自行安装 [PowerShell](https://github.com/PowerShell/PowerShell)）。
 
 ```bash
-# 一致性体检（46 项检查）
+# 一致性体检（47 项检查）
 powershell -File 数据/校验.ps1
 
 # 改完 数据/lumia.json 后，刷新可检索词典

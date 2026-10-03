@@ -1123,6 +1123,46 @@ if ($smErr.Count -eq 0) {
     OK ("star map is configured (spacing " + $SM.starSpacing + ", cell " + $SM.glyphCell + ") and read by the page; categories cover the lexicon")
 } else { BAD ("star map / categories: " + ($smErr -join '; ')) }
 
+# 41. animated export. The GIF parameters live in the database, the generator page
+#     reads them, the encoder ships, and the engine really publishes bake().
+#     Three ways this rots: the numbers drift away from the page and it starts
+#     guessing; the encoder is deleted while the button stays; bake() is renamed
+#     and every export silently emits the first frame on a loop.
+$genPath = Join-Path (Join-Path $root $GJ2) ("$([char]0x661F)$([char]0x5EA7)$([char]0x56FE)$([char]0x751F)$([char]0x6210)$([char]0x5668)" + '.html')
+$gifName = 'gif' + "$([char]0x7F16)$([char]0x7801)$([char]0x5668)" + '.js'
+$gifPath = Join-Path (Join-Path $root $GJ2) $gifName
+$exErr = @()
+$constEx = $const.export
+if ($null -eq $constEx) {
+    $exErr += 'constellation.export is missing'
+} else {
+    foreach ($k in @('rule', 'duration', 'fps', 'maxSide', 'paletteLevels')) {
+        if ($null -eq $constEx.$k) { $exErr += ('export.' + $k + ' is missing') }
+    }
+    foreach ($k in @('duration', 'fps', 'maxSide', 'paletteLevels')) {
+        if ($null -ne $constEx.$k -and [double]$constEx.$k -le 0) { $exErr += ('export.' + $k + ' is not positive') }
+    }
+}
+if (Test-Path $gifPath) {
+    $gifSrc = [System.IO.File]::ReadAllText($gifPath)
+    foreach ($k in @('encode', 'paletteFromCss', 'LZW')) {
+        if ($gifSrc -notmatch $k) { $exErr += ('the GIF encoder never mentions ' + $k) }
+    }
+} else { $exErr += 'the GIF encoder is missing' }
+if (Test-Path $genPath) {
+    $genSrc = [System.IO.File]::ReadAllText($genPath)
+    foreach ($k in @('constellation.export', 'duration', 'fps', 'maxSide', 'paletteLevels', 'LumiaGif', 'Selagrafi.bake')) {
+        if ($genSrc -notmatch [regex]::Escape($k)) { $exErr += ('the generator page never reads ' + $k) }
+    }
+    if ($genSrc -notmatch [regex]::Escape($gifName)) { $exErr += 'the generator page does not load the GIF encoder' }
+} else { $exErr += 'the generator page is missing' }
+if ($engPath -and (Test-Path $engPath)) {
+    if ([System.IO.File]::ReadAllText($engPath) -notmatch 'bake\s*:') { $exErr += 'the engine never publishes bake' }
+}
+if ($exErr.Count -eq 0) {
+    OK ("animated export is configured (" + $constEx.duration + "s at " + $constEx.fps + " fps, max side " + $constEx.maxSide + "px) and baked by the page")
+} else { BAD ("animated export: " + ($exErr -join '; ')) }
+
 Write-Output ""
 Write-Output ("== RESULT: PASS " + $script:pass + " / FAIL " + $script:fail + " ==")
 if ($script:fail -gt 0) { exit 1 } else { exit 0 }

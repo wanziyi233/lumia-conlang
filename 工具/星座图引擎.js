@@ -1140,5 +1140,107 @@
     return { svg: svg, warnings: warnings, parts: parts, layout: layout };
   }
 
-  root.Selagrafi = { render: render, renderTrack: renderTrack, analyze: analyze, splitSentences: splitSentences, splitSyllables: splitSyllables };
+  /* ---------- 烘焙：把动画在给定时刻求值成静态属性 ----------
+   * 用途：GIF / 逐帧导出。做三件事——
+   *   ① CSS 逐段生长（inline style 里的 --lumia-len 与 animation:… both）→ stroke-dashoffset
+   *   ② SMIL <animate>/<animateTransform>（弧轨流动、光晕呼吸、整句漂移、弧轨 d）→ 静态属性
+   *   ③ 抹掉所有动画元素，产出必须是**真静止**的 SVG
+   * 纯字符串进、纯字符串出：不碰 DOM，浏览器与 Node 下行为一致，所以可以直接测。
+   * t 的单位是秒，从**动画起跑的那一刻**算起。
+   */
+
+  var NUMRE = /-?\d+(?:\.\d+)?/g;
+
+  // 两个结构相同的串（"12.3 4.5"，或一条 path 的 d）按权重 w 逐数字插值。
+  // 数字个数对不上就不插值、退回起点——宁可不动，也不要把路径插坏。
+  function lerpStr(a, b, w) {
+    var an = String(a).match(NUMRE) || [], bn = String(b).match(NUMRE) || [];
+    if (!an.length || an.length !== bn.length) return w < 0.5 ? a : b;
+    var k = 0;
+    return String(a).replace(NUMRE, function () {
+      var v = +an[k] * (1 - w) + +bn[k] * w; k++;
+      return String(r2(v));
+    });
+  }
+
+  // 在 values / keyTimes 采样序列上取相位 u（0..1）处的值。
+  function sampleAt(values, keyTimes, u) {
+    var vs = String(values).split(";");
+    if (vs.length < 2) return vs[0];
+    var ts = String(keyTimes || "").split(";");
+    if (ts.length !== vs.length) {          // 没有 keyTimes 时 SMIL 按等距分布
+      ts = vs.map(function (_, i) { return String(i / (vs.length - 1)); });
+    }
+    if (u <= +ts[0]) return vs[0];
+    if (u >= +ts[ts.length - 1]) return vs[vs.length - 1];
+    for (var i = 1; i < ts.length; i++) {
+      if (u <= +ts[i]) {
+        var t0 = +ts[i - 1], t1 = +ts[i];
+        return lerpStr(vs[i - 1], vs[i], t1 > t0 ? (u - t0) / (t1 - t0) : 0);
+      }
+    }
+    return vs[vs.length - 1];
+  }
+
+  function attrsOf(s) {
+    var o = {}, re = /([\w:-]+)="([^"]*)"/g, m;
+    while ((m = re.exec(s))) o[m[1]] = m[2];
+    return o;
+  }
+
+  // 把属性写进**开标签**：本来有就替换，没有就补在最后的 > 之前。
+  // 必须替换而不是追加——同一个元素挂两个 d 属性是非法 XML，渲染器会整份拒收。
+  function setAttr(tag, name, val) {
+    var re = new RegExp("\\s" + name + '="[^"]*"');
+    if (re.test(tag)) return tag.replace(re, " " + name + '="' + val + '"');
+    return tag.replace(/>$/, " " + name + '="' + val + '">');
+  }
+
+  function bake(svg, t) {
+    t = +t || 0;
+    if (!svg) return svg;
+
+    // ① 逐段生长：时长与延迟就在 inline style 里；@keyframes lumiaGrow 是
+    //    from{stroke-dashoffset:var(--lumia-len)} to{stroke-dashoffset:0}。
+    //    fill both 意味着延迟期间停在 from（未画出），跑完停在 to（已画出）。
+    //    注意 stroke-dasharray 已经是静态属性了，这里只补 dashoffset，不要重复发。
+    svg = svg.replace(/ style="--lumia-len:([\d.]+);animation:[\w-]+ ([\d.]+)s linear ([\d.]+)s both"/g,
+      function (_, L, dur, del) {
+        var p = +dur > 0 ? (t - +del) / +dur : 1;
+        p = p < 0 ? 0 : p > 1 ? 1 : p;
+        return ' stroke-dashoffset="' + r2(+L * (1 - p)) + '"';
+      });
+
+    // ② SMIL：这些元素一律是**父元素的第一个子元素**（引擎就是这么发的），
+    //    所以「开标签 + 紧跟其后的 animate」可以整体匹配，把结果写回开标签。
+    svg = svg.replace(/(<[A-Za-z][^>]*>)((?:<animate(?:Transform)?\b[^>]*\/>)+)/g,
+      function (_, tag, block) {
+        var pairs = [], re = /<animate(?:Transform)?\b([^>]*)\/>/g, m;
+        while ((m = re.exec(block))) {
+          var at = attrsOf(m[1]);
+          var dur = parseFloat(at.dur);
+          if (!(dur > 0)) continue;
+          var begin = parseFloat(at.begin || "0") || 0;      // 负 begin = 相位提前
+          var u = ((t - begin) / dur) % 1;
+          if (u < 0) u += 1;
+          if (at.attributeName === "transform") {
+            pairs.push(["transform", "translate(" + sampleAt(at.values, at.keyTimes, u) + ")"]);
+          } else if (at.attributeName === "d") {
+            pairs.push(["d", sampleAt(at.values, at.keyTimes, u)]);
+          } else if (at.attributeName === "opacity") {
+            pairs.push(["opacity", String(r2(parseFloat(sampleAt(at.values, at.keyTimes, u))))]);
+          } else if (at.attributeName === "stroke-dashoffset") {
+            var f = parseFloat(at.from || "0") || 0, to = parseFloat(at.to || "0") || 0;
+            pairs.push(["stroke-dashoffset", String(r2(f + (to - f) * u))]);
+          }
+        }
+        pairs.forEach(function (p) { tag = setAttr(tag, p[0], p[1]); });
+        return tag;
+      });
+
+    // ③ 兜底：清掉任何漏网的动画元素——导出物必须是真静止的。
+    return svg.replace(/<animate(?:Transform)?\b[^>]*\/>/g, "");
+  }
+
+  root.Selagrafi = { render: render, renderTrack: renderTrack, analyze: analyze, splitSentences: splitSentences, splitSyllables: splitSyllables, bake: bake };
 })(typeof globalThis !== "undefined" ? globalThis : this);
