@@ -1036,6 +1036,46 @@ if ($plCfg) {
     } else { BAD ("placement is dead data: " + ($plBad -join '; ')) }
 }
 
+# 39. every borrowing example in the phonology doc must match lexicon src.
+#     That table lists a source word next to the Lumia it became. It is the
+#     cheapest place for doc and database to drift apart: edit one, forget the
+#     other, and the repo documents a derivation the database does not contain.
+#     Each row is looked up in lexicon[] and checked against its src field.
+$YX = "$([char]0x97F3)$([char]0x7CFB)"
+$yxDoc = Join-Path (Join-Path $root $YX) ($YX + '.md')
+if (Test-Path $yxDoc) {
+    try {
+        $yxRows = @()
+        $inSec = $false
+        foreach ($yxLn in [System.IO.File]::ReadAllLines($yxDoc)) {
+            if ($yxLn -match '^###\s+5\.2') { $inSec = $true; continue }
+            if ($yxLn -match '^###\s+5\.3') { $inSec = $false }
+            if ($inSec -and $yxLn -match '^\|\s*([^|]+?)\s*\|\s*\*\*([A-Za-z]+)\*\*') {
+                $yxRows += ,@($matches[1].Trim(), $matches[2])
+            }
+        }
+        if ($yxRows.Count -lt 12) {
+            BAD ("borrowing example table in the phonology doc looks gutted: only " + $yxRows.Count + " rows")
+        } else {
+            $yxBad = @()
+            foreach ($r in $yxRows) {
+                $yxSrc = [string]$r[0]
+                $yxLum = [string]$r[1]
+                $yxHit = $null
+                foreach ($lw in $j.lexicon) { if ($lw.w -eq $yxLum) { $yxHit = $lw; break } }
+                if (-not $yxHit) { $yxBad += ($yxLum + ' is not in the lexicon') }
+                elseif (-not $yxHit.src) { $yxBad += ($yxLum + ' has no src in the database') }
+                elseif ($yxHit.src -notmatch [regex]::Escape($yxSrc)) {
+                    $yxBad += ($yxLum + ': doc says ' + $yxSrc + ', database says ' + $yxHit.src)
+                }
+            }
+            if ($yxBad.Count -eq 0) {
+                OK ("borrowing examples match lexicon src (" + $yxRows.Count + " rows)")
+            } else { BAD ("borrowing examples drifted: " + ($yxBad -join '; ')) }
+        }
+    } catch { BAD ("borrowing example check error: " + $_.Exception.Message) }
+}
+
 Write-Output ""
 Write-Output ("== RESULT: PASS " + $script:pass + " / FAIL " + $script:fail + " ==")
 if ($script:fail -gt 0) { exit 1 } else { exit 0 }

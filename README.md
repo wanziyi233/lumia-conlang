@@ -85,7 +85,7 @@ It is deliberately "unbalanced": it names stars, planets, Saturn, the universe, 
 │   └── 星座数据.js        由 数据/生成星座图.ps1 从数据库生成
 ├── 数据/
 │   ├── lumia.json        全系统单一数据库（权威数据源）
-│   ├── 校验.ps1          一致性校验脚本（44 项）
+│   ├── 校验.ps1          一致性校验脚本（45 项）
 │   ├── 生成词典.ps1      生成 工具/词典.html
 │   ├── 生成星座图.ps1    生成 工具/星座数据.js
 │   ├── dict-template.html 词典 HTML 模板
@@ -114,7 +114,7 @@ It is deliberately "unbalanced": it names stars, planets, Saturn, the universe, 
 需要 PowerShell。**注意命令名不一样**：Windows 自带的是 Windows PowerShell 5.1，命令为 `powershell`；`pwsh` 是 PowerShell 7+ 的命令，Windows 默认**没有**安装（macOS/Linux 需自行安装 [PowerShell](https://github.com/PowerShell/PowerShell)）。
 
 ```bash
-# 一致性体检（44 项检查）
+# 一致性体检（45 项检查）
 powershell -File 数据/校验.ps1
 
 # 改完 数据/lumia.json 后，刷新可检索词典
