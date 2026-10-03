@@ -82,7 +82,7 @@ It is deliberately "unbalanced": it names stars, planets, Saturn, the universe, 
 ├── 工具/                 浏览器里打开就能用的两样东西
 │   ├── 词典.html          可检索词典（由 数据/生成词典.ps1 生成）
 │   ├── 星座图生成器.html  输入 Lumia 句子，即时生成星座体 / 星轨体 SVG
-│   ├── 星图.html          全部 97 词铺成可缩放星空（滚轮缩放 / 拖拽平移 / 搜索 / 点星看词条）
+│   ├── 星图.html          全部 97 词铺成可缩放星空（滚轮缩放 / 拖拽平移 / 搜索 / 悬停看词 / 点星看词条）
 │   ├── 星座图引擎.js      解析 + 排布 + 输出 SVG（render = 星座体，renderTrack = 星轨体，bake = 把动画烤成静态帧）
 │   ├── gif编码器.js       自带调色板与 LZW 的 GIF 编码器，供生成器页导出动画
 │   └── 星座数据.js        由 数据/生成星座图.ps1 从数据库生成

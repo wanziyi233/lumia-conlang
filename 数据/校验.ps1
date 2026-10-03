@@ -1090,16 +1090,26 @@ $SM = $j.script.starmap
 if (-not $SM) {
     $smErr += 'script.starmap is missing'
 } else {
-    foreach ($k in @('name', 'spec', 'rule', 'regionGap', 'starSpacing', 'glyphCell', 'labelMinCell', 'lineOpacity', 'css')) {
+    foreach ($k in @('name', 'spec', 'rule', 'regionGap', 'starSpacing', 'glyphCell', 'labelMinCell', 'lineOpacity', 'hitFactor', 'tipOffset', 'css')) {
         if ($null -eq $SM.$k) { $smErr += ('starmap.' + $k + ' is missing') }
     }
-    foreach ($k in @('regionGap', 'starSpacing', 'glyphCell', 'labelMinCell', 'lineOpacity')) {
+    foreach ($k in @('regionGap', 'starSpacing', 'glyphCell', 'labelMinCell', 'lineOpacity', 'hitFactor', 'tipOffset')) {
         if ($null -ne $SM.$k -and [double]$SM.$k -le 0) { $smErr += ('starmap.' + $k + ' is not positive') }
+    }
+    if ($null -ne $SM.css -and ([string]$SM.css -notmatch '\.star\.hov')) {
+        $smErr += 'starmap.css lost the hover highlight rule'
     }
     if (Test-Path $smPage) {
         $smSrc = [System.IO.File]::ReadAllText($smPage)
-        foreach ($k in @('D.starmap', 'regionGap', 'starSpacing', 'glyphCell', 'labelMinCell', 'lineOpacity')) {
+        foreach ($k in @('D.starmap', 'regionGap', 'starSpacing', 'glyphCell', 'labelMinCell', 'lineOpacity', 'hitFactor', 'tipOffset')) {
             if ($smSrc -notmatch [regex]::Escape($k)) { $smErr += ('star map page never reads ' + $k) }
+        }
+        # Hover and click must resolve a star from the pointer POSITION, never from the
+        # event target: pointer capture retargets click to the container, so a
+        # target-based lookup selects nothing in a real browser. It only looked right
+        # in a shim that dispatched events straight at the star element.
+        foreach ($k in @('hitTest', 'pointerleave', 'hov')) {
+            if ($smSrc -notmatch [regex]::Escape($k)) { $smErr += ('star map page lost its pointer handling: ' + $k) }
         }
     } else { $smErr += 'the star map page is missing' }
 }
@@ -1120,7 +1130,7 @@ if (Test-Path $smTpl) {
     }
 }
 if ($smErr.Count -eq 0) {
-    OK ("star map is configured (spacing " + $SM.starSpacing + ", cell " + $SM.glyphCell + ") and read by the page; categories cover the lexicon")
+    OK ("star map is configured (spacing " + $SM.starSpacing + ", cell " + $SM.glyphCell + ", hit " + $SM.hitFactor + ") and read by the page; categories cover the lexicon")
 } else { BAD ("star map / categories: " + ($smErr -join '; ')) }
 
 # 41. animated export. The GIF parameters live in the database, the generator page

@@ -586,13 +586,15 @@
     "starmap": {
       "name": "星图",
       "spec": "词典/词典.md",
-      "rule": "把全部 97 个核心词铺成一片可缩放星图（工具/星图.html）。按词类（见顶层 categories）分成星区，区内每个词按黄金角螺旋散开，避免排成行列；同区内的星用最小生成树相连，只为聚拢视线、方便导航，**不代表语义关系**。86 个非数词与专名 Satuna 画星符；11 个数词按设计不配星符，画成星数（数字符），与 numerals.numeralGlyphs 的说法一致。",
+      "rule": "把全部 97 个核心词铺成一片可缩放星图（工具/星图.html）。按词类（见顶层 categories）分成星区，区内每个词按黄金角螺旋散开，避免排成行列；同区内的星用最小生成树相连，只为聚拢视线、方便导航，**不代表语义关系**。86 个非数词与专名 Satuna 画星符；11 个数词按设计不配星符，画成星数（数字符），与 numerals.numeralGlyphs 的说法一致。悬停与点击都按**世界坐标**命中：把光标位置换算回星图坐标，取 hitFactor×星符外接半径 以内最近的一颗。不依赖 SVG 的事件目标——拖拽用的指针捕获会把 click 重定向到容器上，e.target 于是永远不是那颗星，只按目标去找就会「只能看不能点」。",
       "regionGap": 1500,
       "starSpacing": 150,
       "glyphCell": 118,
       "labelMinCell": 96,
       "lineOpacity": 0.22,
-      "css": ".region{fill:none;stroke:#6fd6ff;stroke-width:1;opacity:.1}.regname{fill:#9fb4c8;font-family:sans-serif;font-size:34px;letter-spacing:.2em;text-anchor:middle}.starline{fill:none;stroke:#6fd6ff;stroke-width:.7}.starhalo{fill:none;stroke:#6fd6ff;stroke-width:1.2;opacity:.22}.star.sel .starhalo{stroke:#ffd166;opacity:.9;stroke-width:2.6}.star.dim{opacity:.15}.starlabel{fill:#9fb4c8;font-family:ui-monospace,Consolas,monospace;font-size:15px;text-anchor:middle}.starzh{fill:#e8f0f8;font-family:sans-serif;font-size:13px;text-anchor:middle;opacity:.8}.hit{fill:transparent}"
+      "hitFactor": 0.8,
+      "tipOffset": 16,
+      "css": ".region{fill:none;stroke:#6fd6ff;stroke-width:1;opacity:.1}.regname{fill:#9fb4c8;font-family:sans-serif;font-size:34px;letter-spacing:.2em;text-anchor:middle}.starline{fill:none;stroke:#6fd6ff;stroke-width:.7}.starhalo{fill:none;stroke:#6fd6ff;stroke-width:1.2;opacity:.22}.star.hov .starhalo{stroke:#9fe4ff;opacity:.85;stroke-width:2.2}.star.sel .starhalo{stroke:#ffd166;opacity:.9;stroke-width:2.6}.star.dim{opacity:.15}.starlabel{fill:#9fb4c8;font-family:ui-monospace,Consolas,monospace;font-size:15px;text-anchor:middle}.starzh{fill:#e8f0f8;font-family:sans-serif;font-size:13px;text-anchor:middle;opacity:.8}"
     },
     "direction": "横写左→右；主书写规范=星座体（一句话摆成一个星座，见 文字/星座体规范.md），辅助规范=星轨体（横排连写）"
   },

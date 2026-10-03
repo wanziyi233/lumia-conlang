@@ -53,6 +53,13 @@
   #zoombar { position:absolute; right:14px; bottom:14px; display:flex; gap:6px; align-items:center;
              background:rgba(7,11,20,.85); border:1px solid var(--line); border-radius:8px; padding:6px 8px; }
   #zoombar span { min-width:48px; text-align:center; color:var(--dim); font-size:12px; }
+  /* 悬停提示：跟着光标走，不吃事件（pointer-events:none），否则会挡住命中测试 */
+  #tip { position:absolute; display:none; pointer-events:none; z-index:5; max-width:260px;
+         background:rgba(7,11,20,.94); border:1px solid var(--line); border-radius:6px;
+         padding:5px 9px; font-size:13px; }
+  #tip .w { font-family:ui-monospace,Consolas,monospace; color:var(--acc); }
+  #tip .zh { color:#e8f0f8; margin-left:8px; }
+  #tip .src { color:var(--dim); font-size:11px; margin-top:3px; }
   .fallback { padding:24px; color:var(--dim); }
 </style>
 </head>
@@ -61,7 +68,7 @@
   <h1>Lumia 星图</h1>
   <span class="sub">全部 97 个核心词 · 按词类分星区</span>
   <span class="sp"></span>
-  <span class="hint">滚轮缩放 · 拖拽平移 · 点星看词条</span>
+  <span class="hint">滚轮缩放 · 拖拽平移 · 悬停看词 · 点星看词条</span>
 </header>
 
 <div class="wrap">
@@ -77,6 +84,7 @@
 
   <div id="viewport">
     <svg id="sky" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div id="tip"></div>
     <div id="zoombar">
       <button id="zoomOut" title="缩小">−</button>
       <span id="zoomLbl">100%</span>
@@ -106,6 +114,8 @@
   var RG   = +SM.regionGap   || 1500;  // 星区中心到整图中心的距离
   var LMIN = +SM.labelMinCell|| 96;    // 放大到多大才显示词形标签
   var LOP  = (SM.lineOpacity != null) ? +SM.lineOpacity : 0.22;
+  var HITF = +SM.hitFactor   || 0.8;   // 可悬停/可点击的圆盘 = 星符外接半径 × 此值
+  var TIPOFF = +SM.tipOffset || 16;    // 提示框相对光标的偏移
 
   var GLYPH = (D.glyphs && D.glyphs.word)  || {};
   var DIGIT = (D.glyphs && D.glyphs.digit) || {};
@@ -218,13 +228,13 @@
   stars.forEach(function (p) {
     var st = starOf(p.w), info = D.words[p.w] || {};
     var bw = st.gw * UNIT, bh = st.gh * UNIT, r = Math.max(bw, bh);
+    p.r = r;   // 命中测试要用：可悬停/可点击的圆盘 = r × HITF
     o.push('<g class="star" data-w="' + esc(p.w) + '" data-cat="' + esc(p.cat) + '"' +
            ' transform="translate(' + p.x.toFixed(1) + ',' + p.y.toFixed(1) + ')">');
     o.push('<circle class="starhalo" r="' + (r * 0.62).toFixed(1) + '"/>');
     /* 星符里的点（.d）也要跟着放大：几何在 glyphs 网格上，故缩到世界单位 */
     o.push('<g transform="translate(' + (-bw / 2).toFixed(2) + ',' + (-bh / 2).toFixed(2) +
            ') scale(' + UNIT.toFixed(5) + ')">' + st.body + '</g>');
-    o.push('<circle class="hit" r="' + (r * 0.8).toFixed(1) + '"/>');
     o.push('<text class="starlabel" y="' + (bh / 2 + 26).toFixed(1) + '">' + esc(p.w) + '</text>');
     o.push('<text class="starzh" y="' + (bh / 2 + 42).toFixed(1) + '">' + esc(info.zh || '') + '</text>');
     o.push('</g>');
@@ -278,21 +288,71 @@
   }, { passive:false });
 
   var dragging = false, lx = 0, ly = 0, moved = 0;
+
+  /* ---------- 命中测试 ---------- */
+  // 悬停与点击都**不认 e.target**，而是把光标位置换算回星图坐标、再找最近的那颗星。
+  // 原因：下面 pointerdown 里的 setPointerCapture 会把随后的 click 重定向到 #viewport
+  // 上，e.target 于是永远不是那颗星——只按事件目标去找的写法在真实浏览器里一颗也选不中
+  // （手动派发事件的垫片测试恰好绕过了这一步，所以看不出来）。
+  function hitTest(clientX, clientY) {
+    var r = view.getBoundingClientRect();
+    var wx = (clientX - r.left - tx) / k, wy = (clientY - r.top - ty) / k;
+    var best = null, bestD = Infinity;
+    for (var i = 0; i < stars.length; i++) {
+      var p = stars[i], dx = p.x - wx, dy = p.y - wy;
+      var d = Math.sqrt(dx * dx + dy * dy);
+      if (d <= (p.r || 0) * HITF && d < bestD) { bestD = d; best = p; }
+    }
+    return best;
+  }
+
+  var nodeOf = {}, hovered = null, tip = document.getElementById('tip');
+  (function () {
+    var n = sky.querySelectorAll('g.star');
+    for (var i = 0; i < n.length; i++) nodeOf[n[i].getAttribute('data-w')] = n[i];
+  })();
+
+  function setHover(p, clientX, clientY) {
+    if (p !== hovered) {
+      if (hovered && nodeOf[hovered.w]) nodeOf[hovered.w].classList.remove('hov');
+      hovered = p;
+      if (hovered && nodeOf[hovered.w]) nodeOf[hovered.w].classList.add('hov');
+    }
+    if (!p) { tip.style.display = 'none'; view.style.cursor = ''; return; }
+    var info = D.words[p.w] || {}, r = view.getBoundingClientRect();
+    tip.innerHTML = '<span class="w">' + esc(p.w) + '</span>' +
+      (info.zh ? '<span class="zh">' + esc(info.zh) + '</span>' : '') +
+      (info.ipa ? '<div class="src">' + esc(info.ipa) + '</div>' : '');
+    tip.style.display = 'block';
+    var x = clientX - r.left + TIPOFF, y = clientY - r.top + TIPOFF;
+    // 贴边时翻到光标另一侧，别让提示框跑出视口
+    if (x + tip.offsetWidth > r.width) x = clientX - r.left - tip.offsetWidth - TIPOFF;
+    if (y + tip.offsetHeight > r.height) y = clientY - r.top - tip.offsetHeight - TIPOFF;
+    tip.style.left = Math.max(0, x) + 'px';
+    tip.style.top = Math.max(0, y) + 'px';
+    view.style.cursor = 'pointer';
+  }
+
   view.addEventListener('pointerdown', function (e) {
     if (e.button !== 0) return;
     dragging = true; moved = 0; lx = e.clientX; ly = e.clientY;
     view.classList.add('drag');
+    setHover(null, 0, 0);
     if (view.setPointerCapture) try { view.setPointerCapture(e.pointerId); } catch (x) {}
   });
   view.addEventListener('pointermove', function (e) {
-    if (!dragging) return;
-    var dx = e.clientX - lx, dy = e.clientY - ly;
-    moved += Math.abs(dx) + Math.abs(dy);
-    tx += dx; ty += dy; lx = e.clientX; ly = e.clientY; apply();
+    if (dragging) {
+      var dx = e.clientX - lx, dy = e.clientY - ly;
+      moved += Math.abs(dx) + Math.abs(dy);
+      tx += dx; ty += dy; lx = e.clientX; ly = e.clientY; apply();
+      return;
+    }
+    setHover(hitTest(e.clientX, e.clientY), e.clientX, e.clientY);
   });
   function endDrag() { dragging = false; view.classList.remove('drag'); }
   view.addEventListener('pointerup', endDrag);
   view.addEventListener('pointercancel', endDrag);
+  view.addEventListener('pointerleave', function () { setHover(null, 0, 0); });
 
   document.getElementById('zoomIn').onclick = function () {
     var r = view.getBoundingClientRect(); zoomAt(r.width / 2, r.height / 2, 1.3);
@@ -349,10 +409,11 @@
   }
 
   sky.addEventListener('click', function (e) {
+    // e.target 在这里不可信：pointerdown 里的 setPointerCapture 把随后的 click 重定向到了
+    // #viewport 上，e.target 于是永远不是那颗星。改按坐标命中，与悬停同一套逻辑。
     if (moved > 4) return;
-    var t = e.target, g = null;
-    while (t && t !== sky) { if (t.classList && t.classList.contains('star')) { g = t; break; } t = t.parentNode; }
-    if (g) select(g.getAttribute('data-w'), false);
+    var p = hitTest(e.clientX, e.clientY);
+    if (p) select(p.w, false);
   });
 
   /* ---------- 侧栏列表与过滤 ---------- */
