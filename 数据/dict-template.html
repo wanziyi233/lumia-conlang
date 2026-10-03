@@ -48,7 +48,8 @@
 
 <script>
 const DATA = __DATA__;
-const CATS = { func: '功能词', astro: '天文词', num: '数字', base: '基础词' };
+// 类别中文名来自数据库（lumia.json 的顶层 categories），此处不再硬编码。
+const CATS = Object.fromEntries((DATA.categories || []).map(c => [c.code, c.zh]));
 let curCat = 'all';
 const rows = DATA.lexicon || [];
 const tbody = document.querySelector('#tbl tbody');

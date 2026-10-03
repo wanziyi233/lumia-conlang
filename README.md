@@ -34,6 +34,7 @@
 | ✍️ 文字设计说明 | [阅读](https://wanziyi233.github.io/lumia-conlang/文字/文字.html) | `文字/文字.md` |
 | 🌌 **星座体**（主书写规范） | [规范](https://wanziyi233.github.io/lumia-conlang/文字/星座体规范.html) · [示例](https://wanziyi233.github.io/lumia-conlang/文字/星座体示例.svg) | `文字/星座体规范.md` |
 | 🛠️ **文字生成器**（星座体 / 星轨体） | [打开工具](https://wanziyi233.github.io/lumia-conlang/工具/星座图生成器.html) | `工具/星座图生成器.html` |
+| 🌠 **星图**（97 词铺成一片可缩放星空） | [打开星图](https://wanziyi233.github.io/lumia-conlang/工具/星图.html) | `工具/星图.html` |
 
 > **关于图片**：GitHub 的仓库文件预览有时无法显示 SVG（在本机装了网络加速工具时尤其常见）。
 > **本站点（github.io）不受此影响**，所有星符图表均正常显示。
@@ -81,11 +82,12 @@ It is deliberately "unbalanced": it names stars, planets, Saturn, the universe, 
 ├── 工具/                 浏览器里打开就能用的两样东西
 │   ├── 词典.html          可检索词典（由 数据/生成词典.ps1 生成）
 │   ├── 星座图生成器.html  输入 Lumia 句子，即时生成星座体 / 星轨体 SVG
+│   ├── 星图.html          全部 97 词铺成可缩放星空（滚轮缩放 / 拖拽平移 / 搜索 / 点星看词条）
 │   ├── 星座图引擎.js      解析 + 排布 + 输出 SVG（render = 星座体，renderTrack = 星轨体）
 │   └── 星座数据.js        由 数据/生成星座图.ps1 从数据库生成
 ├── 数据/
 │   ├── lumia.json        全系统单一数据库（权威数据源）
-│   ├── 校验.ps1          一致性校验脚本（45 项）
+│   ├── 校验.ps1          一致性校验脚本（46 项）
 │   ├── 生成词典.ps1      生成 工具/词典.html
 │   ├── 生成星座图.ps1    生成 工具/星座数据.js
 │   ├── dict-template.html 词典 HTML 模板
@@ -114,7 +116,7 @@ It is deliberately "unbalanced": it names stars, planets, Saturn, the universe, 
 需要 PowerShell。**注意命令名不一样**：Windows 自带的是 Windows PowerShell 5.1，命令为 `powershell`；`pwsh` 是 PowerShell 7+ 的命令，Windows 默认**没有**安装（macOS/Linux 需自行安装 [PowerShell](https://github.com/PowerShell/PowerShell)）。
 
 ```bash
-# 一致性体检（45 项检查）
+# 一致性体检（46 项检查）
 powershell -File 数据/校验.ps1
 
 # 改完 数据/lumia.json 后，刷新可检索词典

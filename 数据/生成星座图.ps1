@@ -13,6 +13,7 @@ $SJ   = "$([char]0x6570)$([char]0x636E)"                                        
 $WZ   = "$([char]0x6587)$([char]0x5B57)"                                        # 文字
 $GJ   = "$([char]0x5DE5)$([char]0x5177)"                                        # 工具
 $JQTB = "$([char]0x661F)$([char]0x5EA7)$([char]0x6570)$([char]0x636E)"          # 星座数据
+$SCJQTB = "$([char]0x751F)$([char]0x6210)$([char]0x661F)$([char]0x5EA7)$([char]0x56FE)"  # 生成星座图
 
 $root = if ($PSScriptRoot) { Split-Path -Parent $PSScriptRoot } else { (Get-Location).Path }
 $jsonPath = Join-Path (Join-Path $root $SJ) 'lumia.json'
@@ -26,7 +27,11 @@ $j = [System.IO.File]::ReadAllText($jsonPath) | ConvertFrom-Json
 
 # 词表：小写词形 -> {cat, pos, zh}
 $words = [ordered]@{}
-foreach ($e in $j.lexicon) { $words[[string]$e.w] = [ordered]@{ cat = $e.cat; pos = $e.pos; zh = $e.zh } }
+foreach ($e in $j.lexicon) {
+    $entry = [ordered]@{ cat = $e.cat; pos = $e.pos; zh = $e.zh; ipa = $e.ipa; en = $e.en; ety = $e.ety }
+    if ($e.src) { $entry['src'] = $e.src }
+    $words[[string]$e.w] = $entry
+}
 
 # 专名：小写 -> {w, zh}
 $pn = [ordered]@{}
@@ -45,6 +50,8 @@ $payload = [ordered]@{
     properNames   = $pn
     constellation = $j.script.constellation
     track         = $j.script.track
+    starmap       = $j.script.starmap
+    categories    = $j.categories
     glyphs        = $j.script.glyphs
     digits        = $j.numerals.digits
     powers        = $j.numerals.powers
@@ -53,7 +60,7 @@ $payload = [ordered]@{
 }
 
 $json = $payload | ConvertTo-Json -Depth 100 -Compress
-$text = '/* ' + 'generated from ' + $SJ + '/lumia.json by ' + $SJ + '/gen-constellation.ps1 -- do not edit by hand */' + "`n" +
+$text = '/* ' + 'generated from ' + $SJ + '/lumia.json by ' + $SJ + '/' + $SCJQTB + '.ps1 -- do not edit by hand */' + "`n" +
         'globalThis.LUMIA = ' + $json + ';' + "`n"
 
 [System.IO.File]::WriteAllText($outPath, $text, (New-Object System.Text.UTF8Encoding($false)))

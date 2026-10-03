@@ -1076,6 +1076,53 @@ if (Test-Path $yxDoc) {
     } catch { BAD ("borrowing example check error: " + $_.Exception.Message) }
 }
 
+# 40. star map configuration and the single-source category table.
+#     Three failure modes this one guards against:
+#       - script.starmap exists but nothing reads it (dead data);
+#       - a lexicon category that no categories[] entry names, or a categories[]
+#         entry no lexicon word uses;
+#       - the dictionary template hardcoding the category labels a second time,
+#         which is exactly where they lived before they moved into the database.
+$smPage = Join-Path (Join-Path $root $GJ2) ("$([char]0x661F)$([char]0x56FE)" + '.html')
+$smTpl  = Join-Path (Join-Path $root $SJ) 'dict-template.html'
+$smErr  = @()
+$SM = $j.script.starmap
+if (-not $SM) {
+    $smErr += 'script.starmap is missing'
+} else {
+    foreach ($k in @('name', 'spec', 'rule', 'regionGap', 'starSpacing', 'glyphCell', 'labelMinCell', 'lineOpacity', 'css')) {
+        if ($null -eq $SM.$k) { $smErr += ('starmap.' + $k + ' is missing') }
+    }
+    foreach ($k in @('regionGap', 'starSpacing', 'glyphCell', 'labelMinCell', 'lineOpacity')) {
+        if ($null -ne $SM.$k -and [double]$SM.$k -le 0) { $smErr += ('starmap.' + $k + ' is not positive') }
+    }
+    if (Test-Path $smPage) {
+        $smSrc = [System.IO.File]::ReadAllText($smPage)
+        foreach ($k in @('D.starmap', 'regionGap', 'starSpacing', 'glyphCell', 'labelMinCell', 'lineOpacity')) {
+            if ($smSrc -notmatch [regex]::Escape($k)) { $smErr += ('star map page never reads ' + $k) }
+        }
+    } else { $smErr += 'the star map page is missing' }
+}
+$cats = @($j.categories)
+if ($cats.Count -eq 0) {
+    $smErr += 'the top-level categories table is missing'
+} else {
+    $catCodes = @()
+    foreach ($c in $cats) { $catCodes += [string]$c.code }
+    $usedCats = @()
+    foreach ($lw in $j.lexicon) { if ($usedCats -notcontains $lw.cat) { $usedCats += $lw.cat } }
+    foreach ($u in $usedCats) { if ($catCodes -notcontains $u) { $smErr += ('lexicon category not named in categories[]: ' + $u) } }
+    foreach ($c in $catCodes) { if ($usedCats -notcontains $c) { $smErr += ('categories[] names a category no lexicon word uses: ' + $c) } }
+}
+if (Test-Path $smTpl) {
+    if ([System.IO.File]::ReadAllText($smTpl) -notmatch 'DATA\.categories') {
+        $smErr += 'the dictionary template hardcodes category labels again'
+    }
+}
+if ($smErr.Count -eq 0) {
+    OK ("star map is configured (spacing " + $SM.starSpacing + ", cell " + $SM.glyphCell + ") and read by the page; categories cover the lexicon")
+} else { BAD ("star map / categories: " + ($smErr -join '; ')) }
+
 Write-Output ""
 Write-Output ("== RESULT: PASS " + $script:pass + " / FAIL " + $script:fail + " ==")
 if ($script:fail -gt 0) { exit 1 } else { exit 0 }

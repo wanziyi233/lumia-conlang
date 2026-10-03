@@ -21,6 +21,12 @@
       "字形镜像对：luna（月亮）与 aka（弧）都是半圆，靠**鼓出方向**区分——月亮向左鼓（开口朝右），弧向右鼓（开口朝左）。这是刻意保留的形近，不要当 bug 去消除"
     ]
   },
+  "categories": [
+    { "code": "func", "zh": "功能词", "en": "function word", "note": "助词、代词、疑问词；承载语法而非实义" },
+    { "code": "astro", "zh": "天文词", "en": "astronomy", "note": "天体、宇宙与科幻意象；多数借自希腊·拉丁" },
+    { "code": "num", "zh": "数字", "en": "numeral", "note": "0–9 与十百千；无一纯数字词，数词一词双义" },
+    { "code": "base", "zh": "基础词", "en": "base", "note": "日常实义词；全部自创（a priori）" }
+  ],
   "phonology": {
     "vowels": [
       { "letter": "a", "ipa": "/ɑ/", "enRef": "father" },
@@ -569,6 +575,17 @@
       "maxWidth": 1180,
       "margin": 44,
       "css": ".strut{fill:none;stroke:#6fd6ff;stroke-width:.9;opacity:.34}.joint{fill:#6fd6ff;stroke:none;opacity:.5}"
+    },
+    "starmap": {
+      "name": "星图",
+      "spec": "词典/词典.md",
+      "rule": "把全部 97 个核心词铺成一片可缩放星图（工具/星图.html）。按词类（见顶层 categories）分成星区，区内每个词按黄金角螺旋散开，避免排成行列；同区内的星用最小生成树相连，只为聚拢视线、方便导航，**不代表语义关系**。86 个非数词与专名 Satuna 画星符；11 个数词按设计不配星符，画成星数（数字符），与 numerals.numeralGlyphs 的说法一致。",
+      "regionGap": 1500,
+      "starSpacing": 150,
+      "glyphCell": 118,
+      "labelMinCell": 96,
+      "lineOpacity": 0.22,
+      "css": ".region{fill:none;stroke:#6fd6ff;stroke-width:1;opacity:.1}.regname{fill:#9fb4c8;font-family:sans-serif;font-size:34px;letter-spacing:.2em;text-anchor:middle}.starline{fill:none;stroke:#6fd6ff;stroke-width:.7}.starhalo{fill:none;stroke:#6fd6ff;stroke-width:1.2;opacity:.22}.star.sel .starhalo{stroke:#ffd166;opacity:.9;stroke-width:2.6}.star.dim{opacity:.15}.starlabel{fill:#9fb4c8;font-family:ui-monospace,Consolas,monospace;font-size:15px;text-anchor:middle}.starzh{fill:#e8f0f8;font-family:sans-serif;font-size:13px;text-anchor:middle;opacity:.8}.hit{fill:transparent}"
     },
     "direction": "横写左→右；主书写规范=星座体（一句话摆成一个星座，见 文字/星座体规范.md），辅助规范=星轨体（横排连写）"
   },
