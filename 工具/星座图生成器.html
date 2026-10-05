@@ -255,10 +255,29 @@
     if (!best) { clearHl(); return; }
     clearHl();
     hl = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    hl.setAttribute("cx", best.x); hl.setAttribute("cy", best.y);
-    hl.setAttribute("r", best.r + 7);
     hl.setAttribute("fill", "#ffd166"); hl.setAttribute("opacity", ".16");
-    svg.appendChild(hl);
+    /* 高亮必须跟着节点一起漂移。漂移是加在句子块那层 <g> 上的 animateTransform，
+       节点每一刻都在动（横向可达 drift.amp 像素），而 layout 里存的是**静止**坐标；
+       高亮挂在 SVG 根上，节点一走它就偏出去，字形会滑到圈外。
+       所以：在节点自己的光晕里找一个圆心与静止坐标重合的，把高亮插成它的**兄弟**
+       （同一父元素 → 继承同一个漂移），圆心与半径直接取光晕的属性，天然同心。
+       认光晕靠**坐标**而不是元素顺序——顺序一变就静默错位，坐标对不上就明确退回。 */
+    var halos = svg.querySelectorAll("circle.halo"), anchor = null;
+    for (var h = 0; h < halos.length; h++) {
+      var hx = parseFloat(halos[h].getAttribute("cx")), hy = parseFloat(halos[h].getAttribute("cy"));
+      if (Math.abs(hx - best.x) < 0.51 && Math.abs(hy - best.y) < 0.51) { anchor = halos[h]; break; }
+    }
+    if (anchor) {
+      hl.setAttribute("cx", anchor.getAttribute("cx"));
+      hl.setAttribute("cy", anchor.getAttribute("cy"));
+      hl.setAttribute("r", (parseFloat(anchor.getAttribute("r")) || best.r) + 6);
+      anchor.parentNode.insertBefore(hl, anchor);
+    } else {
+      /* 星轨体不发光晕（也不漂移），静止坐标就是准确坐标 */
+      hl.setAttribute("cx", best.x); hl.setAttribute("cy", best.y);
+      hl.setAttribute("r", best.r + 7);
+      svg.appendChild(hl);
+    }
     tip.textContent = best.w + (best.zh ? " · " + best.zh : "") + (best.sat ? "（卫星／音节）" : "");
     tip.style.display = "block";
     var bb = viewport.getBoundingClientRect();

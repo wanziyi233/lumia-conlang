@@ -1209,6 +1209,28 @@ if ($exErr.Count -eq 0) {
     OK ("animated export is configured (" + $constEx.duration + "s at " + $constEx.fps + " fps, max side " + $constEx.maxSide + "px) and baked by the page")
 } else { BAD ("animated export: " + ($exErr -join '; ')) }
 
+# 42. hover highlight anchoring. A node halo is the only element that already
+#     sits inside the drifting group AT the node's own coordinates, so the
+#     generator anchors its highlight disc to that halo's parent instead of to
+#     the static layout coordinates. Two ways this rots: someone "simplifies"
+#     the highlight back onto the SVG root (the disc then drifts off the glyph
+#     again -- and it still looks perfectly fine in a still frame, which is why
+#     it survived unnoticed), or the engine stops emitting circle.halo with
+#     cx/cy and the lookup quietly falls back to the root for every node.
+$hlErr = @()
+if (Test-Path $genPath) {
+    if ($genSrc -notmatch 'circle\.halo') { $hlErr += 'the generator page never looks for circle.halo' }
+    if ($genSrc -notmatch 'insertBefore\(hl') { $hlErr += 'the generator page never inserts the highlight as a sibling of the halo' }
+} else { $hlErr += 'the generator page is missing' }
+if ($engPath -and (Test-Path $engPath)) {
+    $engHlSrc = [System.IO.File]::ReadAllText($engPath)
+    if ($engHlSrc -notmatch 'class=.halo.') { $hlErr += 'the engine no longer emits circle.halo' }
+    if ($engHlSrc -notmatch 'haloCircle') { $hlErr += 'the engine no longer has a haloCircle helper' }
+}
+if ($hlErr.Count -eq 0) {
+    OK 'the hover highlight is anchored to the node halo, so it drifts together with the glyph'
+} else { BAD ("hover highlight: " + ($hlErr -join '; ')) }
+
 Write-Output ""
 Write-Output ("== RESULT: PASS " + $script:pass + " / FAIL " + $script:fail + " ==")
 if ($script:fail -gt 0) { exit 1 } else { exit 0 }
