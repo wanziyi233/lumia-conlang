@@ -1240,10 +1240,12 @@ if ($hlErr.Count -eq 0) {
 # 43. reading order aids. The constellation writes one word on every star but gives
 #     no positional cue for the order, so two things must carry it: a start ring whose
 #     gap points at the second word plus an end dot (both drawn OUTSIDE g.nd, so the
-#     step reader's dimming never hides them), and a step reader that lights one word
-#     at a time. Both rot silently: delete the marks and the figure still looks like a
-#     constellation; drop the g.nd grouping or the pi field and the reader dims the
-#     wrong groups -- or nothing at all -- without ever raising an error.
+#     step reader's dimming never hides them), and a step reader that lights one
+#     sentence at a time over a per-sentence <g class="sent"> wrapper. The end dot IS
+#     the old period dot (class fall): drawing a separate one put two dots at the end
+#     of every sentence. These rot silently: delete the marks and the figure still
+#     looks like a constellation; drop the sent wrapper and the reader dims nothing
+#     at all -- without ever raising an error.
 $rkErr = @()
 $mk = $const.marks
 if (-not $mk) { $rkErr += 'script.constellation.marks missing' }
@@ -1258,19 +1260,20 @@ else {
 }
 if ($engPath -and (Test-Path $engPath)) {
     $engMkSrc = [System.IO.File]::ReadAllText($engPath)
-    foreach ($k in @('C.marks', 'class="mark start"', 'class="mark end"', 'class="nd"')) {
+    # class="fall" is the end dot (the period); MK.endDistance proves marks still place it.
+    foreach ($k in @('C.marks', 'class="mark start"', 'class="fall"', 'class="nd"', 'class="sent"', 'MK.endDistance')) {
         if ($engMkSrc -notmatch [regex]::Escape($k)) { $rkErr += ('the engine never emits ' + $k) }
     }
-    # 附件条目的 pi 指向主干词：步进阅读器靠它把修饰语并到它所修饰的词上。
-    if ($engMkSrc -notmatch 'pi:\s*ni') { $rkErr += 'word layout entries no longer carry pi' }
 } else { $rkErr += 'the engine source is missing' }
 if ($genSrc) {
-    foreach ($k in @('g.nd', 'stepBuild', 'stepApply', 'byPi')) {
+    # 一步 = 一句：阅读器压暗的单位是 <g class="sent">，不再按词分组（也就没有 pi 了）。
+    foreach ($k in @('g.sent', 'stepBuild', 'stepApply')) {
         if ($genSrc -notmatch [regex]::Escape($k)) { $rkErr += ('the generator page never uses ' + $k) }
     }
+    if ($genSrc -match 'byPi|e\.pi') { $rkErr += 'the generator page still steps word by word' }
 } else { $rkErr += 'the generator page is missing' }
 if ($rkErr.Count -eq 0) {
-    OK ('reading order aids present: start ring r' + $mk.startRadius + ' with a ' + $mk.startGap + ' degree gap, end dot r' + $mk.endRadius + ', and a step reader over g.nd')
+    OK ('reading order aids present: start ring r' + $mk.startRadius + ' with a ' + $mk.startGap + ' degree gap, a single end dot r' + $mk.endRadius + ', and a per-sentence step reader')
 } else { BAD ("reading order aids: " + ($rkErr -join '; ')) }
 
 Write-Output ""

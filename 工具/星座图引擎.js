@@ -445,7 +445,7 @@
         }
         out.push({
           kind: "satellite", tok: a.tok, cell: NUM_ATTACHED, box: BOX_DIGIT,
-          x: pick.x, y: pick.y, pi: i,
+          x: pick.x, y: pick.y,
           // from 必须是**副本**：若直接存节点对象引用，归一化时 pts 与 atts 会各平移一次，
           // 该节点就被平移两遍，整张图随即错位。
           from: { x: p.x, y: p.y }, fromHalo: node.halo, halo: satHalo
@@ -461,7 +461,7 @@
           px += Math.cos(perp) * C.attachments.syllabary.chainGap;
           py += Math.sin(perp) * C.attachments.syllabary.chainGap;
           out.push({
-            kind: "chain", syl: node.chain[s], cell: SYL, box: BOX_SYL, x: px, y: py, pi: i,
+            kind: "chain", syl: node.chain[s], cell: SYL, box: BOX_SYL, x: px, y: py,
             from: { x: fx, y: fy }, fromHalo: fh, halo: SYL / 2 + 1
           });
           prevHalo = SYL / 2 + 1;
@@ -851,7 +851,7 @@
       var pts = f.pts.map(function (p) { return { x: p.x + ox, y: p.y + oy }; });
       var atts = f.atts.map(function (a) {
         return { kind: a.kind, tok: a.tok, syl: a.syl, cell: a.cell, box: a.box, halo: a.halo,
-                 fromHalo: a.fromHalo, x: a.x + ox, y: a.y + oy, pi: a.pi,
+                 fromHalo: a.fromHalo, x: a.x + ox, y: a.y + oy,
                  from: { x: a.from.x + ox, y: a.from.y + oy } };
       });
 
@@ -884,7 +884,7 @@
           if (nd.junction) return;
           // pi：词条写自己的 node 序号；附件条的 pi 指向它的主干词。
           // 两侧用同一个序号空间，页面就能把修饰语并到它所修饰的那个词上（步进阅读器要用）。
-          layout.push({ w: nd.tok.w, zh: nd.tok.zh, x: pts[ni].x, y: pts[ni].y, r: nd.halo, pi: ni });
+          layout.push({ w: nd.tok.w, zh: nd.tok.zh, x: pts[ni].x, y: pts[ni].y, r: nd.halo });
         });
         atts.forEach(function (a) {
           // 卫星附件有 tok；音节串附件只有 syl，没有词形可言——不要假设 tok 一定存在。
@@ -974,16 +974,21 @@
         body.push('<g class="nd">' + inner + "</g>");
       });
 
-      if (pts.length) {
+      // 落星（句号）与收笔点**是同一个点**，不另画一个：句末本来就有落星，
+      // 再加一颗就是两颗挨着的点，看不出哪个是读到头。
+      // 没配 marks 时沿用旧的固定斜角（末星右下 +42,+42，r=2.5，见规范 §五）；
+      // 配了 marks 就交给下面那段，按末段方向摆到光晕之外。
+      if (pts.length && !C.marks) {
         var lp = pts[pts.length - 1];
         body.push('<circle class="fall" cx="' + r2(lp.x + 42) + '" cy="' + r2(lp.y + 42) + '" r="2.5"/>');
       }
 
       // 起笔 / 收笔标记：短句最缺的就是「从哪读起、到哪读完」。
       // 起笔是留了缺口的环，缺口朝着第二个词，所以它同时给出**起点与方向**；
-      // 收笔是末词外侧的实心点，沿末段方向让开「光晕半径 + endDistance」。
-      // 两者画在 g.nd **之外**：步进阅读器压暗其余词时，这两个路标不该跟着暗；
-      // 但它们仍在漂移 <g> 之内，跟着整句一起飘。
+      // 收笔就是落星本身（class 仍叫 fall），只是按末段方向摆到光晕之外，
+      // 半径取 marks.endRadius——句末因此**只有一颗点**。
+      // 两者画在 g.nd **之外**：逐句阅读器压暗其余句时，这两个路标不该跟着暗；
+      // 但它们仍在 <g class="sent"> 之内，跟着整句一起飘。
       if (pts.length && C.marks) {
         var MK = C.marks;
         var ord = [];
@@ -1004,19 +1009,18 @@
           var ey = iLp >= 0 ? pts[iL].y - pts[iLp].y : (V ? 1 : 0);
           var eL = hypot(ex, ey) || 1;
           var dE = an.nodes[iL].halo + MK.endDistance;
-          body.push('<circle class="mark end" cx="' + r2(pts[iL].x + (ex / eL) * dE) + '" cy="' +
+          body.push('<circle class="fall" cx="' + r2(pts[iL].x + (ex / eL) * dE) + '" cy="' +
                     r2(pts[iL].y + (ey / eL) * dE) + '" r="' + r2(MK.endRadius) + '"/>');
         }
       }
 
-      // 漂移：把这一句产生的全部元素包进一个 <g>，整组平移。
-      // AN 关掉时**不包**——静态输出的逐字节不变是硬约束。
+      // 每句一个 <g class="sent">，**恒存在**：它既是漂移的载体（漂移开时多一个
+      // <animateTransform> 子元素），也是「逐句阅读」压暗的单位——整句（字形、句轨、
+      // 起笔环、落星）一起亮或一起暗。结构不随动画开关变化，只有动画元素是否存在随它变化。
       // 注意 layout 里留下的是**未漂移**的坐标：漂移幅度只有十几像素，
       // 远小于悬停判定半径 max(r+12, 18)，所以不必让它跟着每一帧动。
-      if (AN && AN.drift) {
-        var seg = body.splice(segStart);
-        body.push("<g>" + driftAnim(fi) + seg.join("") + "</g>");
-      }
+      var seg = body.splice(segStart);
+      body.push('<g class="sent">' + (AN && AN.drift ? driftAnim(fi) : "") + seg.join("") + "</g>");
     });
 
     // 句间弧轨（规范 interSentence）：上一句的末节点 → 下一句的首节点，虚线弧。
