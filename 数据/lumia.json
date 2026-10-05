@@ -530,7 +530,7 @@
       "backtrackLimit": 120,
       "spatialAllocation": "按词数分配；目标为每节点的平均占地面积大致相等",
       "interSentence": { "mode": "弧轨（虚线弧）", "dasharray": "3 6", "opacity": 0.42 },
-      "css": ".bg{fill:#070b14}.halo{fill:none;stroke:#6fd6ff;stroke-width:.5;opacity:.20}.track{fill:none;stroke:#6fd6ff;stroke-width:.9;opacity:.44}.close{fill:none;stroke:#6fd6ff;stroke-width:.9;opacity:.26}.arc{fill:none;stroke:#6fd6ff;stroke-width:1;opacity:.42;stroke-dasharray:3 6}.bond{fill:none;stroke:#6fd6ff;stroke-width:.8;opacity:.38}.node{fill:#9fb4c8;stroke:none}.fall{fill:#9fb4c8;stroke:none;opacity:.9}.lb{fill:#9fb4c8;font-family:sans-serif;font-size:12px;text-anchor:middle}.ttl{fill:#e8f0f8;font-family:sans-serif;font-size:17px;font-weight:bold}@keyframes lumiaGrow{from{stroke-dashoffset:var(--lumia-len)}to{stroke-dashoffset:0}}@keyframes lumiaRise{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}",
+      "css": ".bg{fill:#070b14}.halo{fill:none;stroke:#6fd6ff;stroke-width:.5;opacity:.20}.track{fill:none;stroke:#6fd6ff;stroke-width:.9;opacity:.44}.close{fill:none;stroke:#6fd6ff;stroke-width:.9;opacity:.26}.arc{fill:none;stroke:#6fd6ff;stroke-width:1;opacity:.42;stroke-dasharray:3 6}.bond{fill:none;stroke:#6fd6ff;stroke-width:.8;opacity:.38}.node{fill:#9fb4c8;stroke:none}.fall{fill:#9fb4c8;stroke:none;opacity:.9}.lb{fill:#9fb4c8;font-family:sans-serif;font-size:12px;text-anchor:middle}.ttl{fill:#e8f0f8;font-family:sans-serif;font-size:17px;font-weight:bold}.mark{opacity:.62}.mark.start{fill:none;stroke:#e8f0f8;stroke-width:1.1}.mark.end{fill:#e8f0f8;stroke:none}.nd{transition:opacity .18s linear}@keyframes lumiaGrow{from{stroke-dashoffset:var(--lumia-len)}to{stroke-dashoffset:0}}@keyframes lumiaRise{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}",
       "haloFormula": "光晕半径 = cell / 2 + 1",
       "cell": { "main": 50, "companion": 32, "numeral": 44, "numeralAttached": 28, "syllable": 30 },
       "attachments": {
@@ -546,6 +546,14 @@
         },
         "syllabary": { "cell": 30, "chainGap": 42, "rule": "首节坐句轨节点位，后续音节向句轨外侧依次延伸，并以同款较浅连线相接" },
         "rule": "附着物不参与句轨主路径；句轨只连词级节点"
+      },
+      "marks": {
+        "rule": "起笔与收笔标记：回答「从哪读起、到哪读完」——这是星座体相对星轨体最缺的一条线索。每句各有一对。起笔是首词外面的一个**留缺口的环**，缺口朝着第二个词，所以它同时给出**起点和方向**；环的半径取 max(startRadius, 该词光晕半径 + startMargin)，startGap 是缺口的角度。收笔是末词外侧的一个**实心点**（像句号），沿末段的方向让开「光晕半径 + endDistance」。两者都画在词的分组（g.nd）**之外**——步进阅读器压暗其余词时它们不跟着暗；但仍在漂移组**之内**，跟着整句一起飘。只作用于星座体：星轨体本身从左往右读，不需要这层提示。",
+        "startRadius": 38,
+        "startMargin": 9,
+        "startGap": 46,
+        "endRadius": 3.2,
+        "endDistance": 18
       },
       "example2": "文字/星座体数字与音节示例.svg",
       "vertical": { "rule": "竖排 = 横排版式整体顺时针旋转 90°：句内上→下，句间右→左，上入下出。其余规则不变" },

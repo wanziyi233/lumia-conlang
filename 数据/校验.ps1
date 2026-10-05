@@ -836,11 +836,17 @@ if (Test-Path $engPath) {
         $engSrc = [System.IO.File]::ReadAllText($engPath)
         $allCss = [string]$gl.css + [string]$const.css + [string]$trk.css
         $names = @()
-        $clsRe = 'class="([A-Za-z][A-Za-z0-9_-]*)"|drawable\("([A-Za-z][A-Za-z0-9_-]*)"'
+        # class 值可以是多个类名（class="mark start"）。早先这里只认单类名，
+        # 于是 "mark start" 整条被跳过——正是最该被查的那种漏网。
+        # 但引擎也拼字符串（class="' + cls + '"），那种是运行时才知道的类名，
+        # 静态查不了；所以捕获里只允许出现类名字符，含引号或加号的整条丢掉。
+        $clsRe = 'class="([A-Za-z0-9_ -]+)"|drawable\("([A-Za-z][A-Za-z0-9_-]*)"'
         foreach ($m in [regex]::Matches($engSrc, $clsRe)) {
-            $nm = $m.Groups[1].Value
-            if (-not $nm) { $nm = $m.Groups[2].Value }
-            if ($names -notcontains $nm) { $names += $nm }
+            $raw = $m.Groups[1].Value
+            if (-not $raw) { $raw = $m.Groups[2].Value }
+            foreach ($nm in ($raw -split '\s+')) {
+                if ($nm -and ($names -notcontains $nm)) { $names += $nm }
+            }
         }
         $miss = @()
         foreach ($n in $names) {
@@ -1230,6 +1236,42 @@ if ($engPath -and (Test-Path $engPath)) {
 if ($hlErr.Count -eq 0) {
     OK 'the hover highlight is anchored to the node halo, so it drifts together with the glyph'
 } else { BAD ("hover highlight: " + ($hlErr -join '; ')) }
+
+# 43. reading order aids. The constellation writes one word on every star but gives
+#     no positional cue for the order, so two things must carry it: a start ring whose
+#     gap points at the second word plus an end dot (both drawn OUTSIDE g.nd, so the
+#     step reader's dimming never hides them), and a step reader that lights one word
+#     at a time. Both rot silently: delete the marks and the figure still looks like a
+#     constellation; drop the g.nd grouping or the pi field and the reader dims the
+#     wrong groups -- or nothing at all -- without ever raising an error.
+$rkErr = @()
+$mk = $const.marks
+if (-not $mk) { $rkErr += 'script.constellation.marks missing' }
+else {
+    foreach ($k in @('rule', 'startRadius', 'startMargin', 'startGap', 'endRadius', 'endDistance')) {
+        if (-not $mk.PSObject.Properties[$k]) { $rkErr += ('marks is missing ' + $k) }
+    }
+    foreach ($k in @('startRadius', 'startMargin', 'startGap', 'endRadius', 'endDistance')) {
+        if ($null -ne $mk.$k -and [double]$mk.$k -le 0) { $rkErr += ('marks.' + $k + ' is not positive') }
+    }
+    if ($null -ne $mk.startGap -and [double]$mk.startGap -ge 180) { $rkErr += 'marks.startGap must stay below 180 degrees' }
+}
+if ($engPath -and (Test-Path $engPath)) {
+    $engMkSrc = [System.IO.File]::ReadAllText($engPath)
+    foreach ($k in @('C.marks', 'class="mark start"', 'class="mark end"', 'class="nd"')) {
+        if ($engMkSrc -notmatch [regex]::Escape($k)) { $rkErr += ('the engine never emits ' + $k) }
+    }
+    # 附件条目的 pi 指向主干词：步进阅读器靠它把修饰语并到它所修饰的词上。
+    if ($engMkSrc -notmatch 'pi:\s*ni') { $rkErr += 'word layout entries no longer carry pi' }
+} else { $rkErr += 'the engine source is missing' }
+if ($genSrc) {
+    foreach ($k in @('g.nd', 'stepBuild', 'stepApply', 'byPi')) {
+        if ($genSrc -notmatch [regex]::Escape($k)) { $rkErr += ('the generator page never uses ' + $k) }
+    }
+} else { $rkErr += 'the generator page is missing' }
+if ($rkErr.Count -eq 0) {
+    OK ('reading order aids present: start ring r' + $mk.startRadius + ' with a ' + $mk.startGap + ' degree gap, end dot r' + $mk.endRadius + ', and a step reader over g.nd')
+} else { BAD ("reading order aids: " + ($rkErr -join '; ')) }
 
 Write-Output ""
 Write-Output ("== RESULT: PASS " + $script:pass + " / FAIL " + $script:fail + " ==")

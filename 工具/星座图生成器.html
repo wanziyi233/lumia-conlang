@@ -73,11 +73,19 @@
       <button id="gen">生成 ⏎</button>
       <button id="dl">下载 SVG</button>
       <button id="dlgif">导出 GIF</button>
+      <button id="step" title="一次点亮一个词，其余压暗">逐词阅读</button>
       <label class="chk"><input type="checkbox" id="labels"> 显示词形</label>
       <label class="chk"><input type="checkbox" id="anim"> 动画</label>
     </div>
     <div class="row">
       <span class="hint" id="gifMsg"></span>
+    </div>
+    <div class="row" id="stepRow" style="display:none">
+      <button id="stepPrev" title="上一个词（←）">◀ 上一步</button>
+      <button id="stepNext" title="下一个词（→）">下一步 ▶</button>
+      <button id="stepPlay" title="自动逐个播放">自动播放</button>
+      <button id="stepExit" title="退出（Esc）">退出</button>
+      <span class="hint" id="stepInfo"></span>
     </div>
     <div class="row">
       <label class="chk"><input type="checkbox" id="auto" checked> 自动更新（每打完一个词）</label>
@@ -104,7 +112,8 @@
       <b>动画</b>：勾选后轨道<b>逐段生长</b>、光晕呼吸、<b>弧轨流动</b>、整幅星图<b>缓慢漂移</b>；不勾就是静止的，输出与加动画之前完全一致。<br>
       <b>弧轨流动要有 2 句以上才看得到</b>（弧轨连的是上一句末星与下一句首星）。星轨体只有逐段生长，没有句间弧轨与漂移。<br>
       <b>导出 GIF</b>：动画 SVG 只有在浏览器里打开时才会动，要拿去分享就点「导出 GIF」——它把整段动画逐帧烤成一张循环的位图。<br>
-      <span style="opacity:.7">导出的永远是带动画的版本（「动画」勾没勾都一样）；帧率、最长边与调色板级数取自 <code>数据/lumia.json</code> 的 <code>constellation.export</code>。</span>
+      <span style="opacity:.7">导出的永远是带动画的版本（「动画」勾没勾都一样）；帧率、最长边与调色板级数取自 <code>数据/lumia.json</code> 的 <code>constellation.export</code>。</span><br>
+      <b>逐词阅读</b>：星座体的词序没有位置线索，一次点亮一个词、其余压暗，按 <b>← →</b> 逐个走，<b>Esc</b> 退出。修饰语（数词、音节串）与它修饰的主干词算作同一步。
     </div>
   </div>
 
@@ -296,6 +305,9 @@
     var track = isTrack();
     $("vert").disabled = track;
     $("vertRow").style.opacity = track ? ".45" : "1";
+    $("step").disabled = track;
+    $("step").title = track ? "星轨体本身就是从左往右读的，不需要逐步提示" : "一次点亮一个词，其余压暗";
+    if (track && stepOn) stepExit();
 
     var animate = $("anim").checked;
     var res;
@@ -347,6 +359,9 @@
       });
       bd.innerHTML = lines.join("<hr>");
     }
+
+    // 逐词阅读开着的时候，新画的 <g class="nd"> 是新的元素，要重新贴一次压暗。
+    stepRefresh();
   }
 
   $("dl").onclick = function () {
@@ -458,6 +473,99 @@
     gifMsg("正在烤帧 …");
     step();
   };
+
+  /* ---------- 逐词阅读 ---------- */
+  // 星座体是「一句一图」，词与词之间的先后没有位置线索（位置由螺旋与松弛算出，不含信息）。
+  // 引擎给每个词、每个附件发了一个 <g class="nd">，顺序与 res.layout 一一对应，
+  // 于是「当前读到哪个词」只要把其余分组压暗就行，不必去猜元素归属。
+  // 一步 = 一个主干词 + 它带的全部修饰语（附件条目的 pi 指向主干词，两侧同一序号空间）。
+  var stepOn = false, stepUnits = [], stepAt = 0, stepTimer = null;
+
+  function stepBuild() {
+    var units = [], byPi = {};
+    layout.forEach(function (e, i) {
+      if (e.sat) {
+        var p = (e.pi != null && byPi[e.pi] != null) ? byPi[e.pi] : units.length - 1;
+        if (p >= 0) { units[p].idx.push(i); return; }
+        units.push({ idx: [i], w: e.w, zh: e.zh });   // 找不到主干词也不丢，单列一步
+        return;
+      }
+      byPi[e.pi] = units.length;
+      units.push({ idx: [i], w: e.w, zh: e.zh });
+    });
+    return units;
+  }
+
+  function stepApply() {
+    var svg = stage.querySelector("svg");
+    if (!svg || !stepUnits.length) return;
+    var gs = svg.querySelectorAll("g.nd"), cur = stepUnits[stepAt];
+    for (var i = 0; i < gs.length; i++) {
+      gs[i].style.opacity = cur.idx.indexOf(i) >= 0 ? "" : "0.12";
+    }
+    var extra = cur.idx.length > 1 ? "（+" + (cur.idx.length - 1) + " 个修饰语）" : "";
+    $("stepInfo").textContent = "第 " + (stepAt + 1) + " / " + stepUnits.length + " 步　" +
+      cur.w + (cur.zh ? " · " + cur.zh : "") + extra;
+  }
+
+  function stepGo(d) {
+    if (!stepOn || !stepUnits.length) return;
+    stepAt = Math.max(0, Math.min(stepUnits.length - 1, stepAt + d));
+    stepApply();
+  }
+
+  function stepStopPlay() {
+    if (stepTimer) { clearInterval(stepTimer); stepTimer = null; }
+    if ($("stepPlay")) $("stepPlay").textContent = "自动播放";
+  }
+
+  function stepEnter() {
+    stepUnits = stepBuild();
+    if (stepUnits.length < 2) { $("stepInfo").textContent = "至少要有两个词才能逐步读。"; return; }
+    stepOn = true; stepAt = 0;
+    $("stepRow").style.display = "flex";
+    stepApply();
+  }
+
+  function stepExit() {
+    stepStopPlay();
+    stepOn = false; stepUnits = [];
+    var svg = stage.querySelector("svg");
+    if (svg) {
+      var gs = svg.querySelectorAll("g.nd");
+      for (var i = 0; i < gs.length; i++) gs[i].style.opacity = "";
+    }
+    $("stepRow").style.display = "none";
+    $("stepInfo").textContent = "";
+  }
+
+  // 重画之后（改输入、切竖排、勾「显示词形」）分组是新的，要重新贴一次压暗。
+  function stepRefresh() {
+    if (!stepOn) return;
+    stepUnits = stepBuild();
+    if (!stepUnits.length) { stepExit(); return; }
+    stepAt = Math.min(stepAt, stepUnits.length - 1);
+    stepApply();
+  }
+
+  $("step").onclick = function () { if (stepOn) { stepExit(); } else { stepEnter(); } };
+  $("stepPrev").onclick = function () { stepGo(-1); };
+  $("stepNext").onclick = function () { stepGo(1); };
+  $("stepExit").onclick = stepExit;
+  $("stepPlay").onclick = function () {
+    if (stepTimer) { stepStopPlay(); return; }
+    this.textContent = "暂停";
+    stepTimer = setInterval(function () {
+      if (stepAt >= stepUnits.length - 1) stepAt = -1;   // 走到头就从头再来
+      stepGo(1);
+    }, 900);
+  };
+  document.addEventListener("keydown", function (e) {
+    if (!stepOn || e.target === input) return;
+    if (e.key === "ArrowRight") { e.preventDefault(); stepGo(1); }
+    else if (e.key === "ArrowLeft") { e.preventDefault(); stepGo(-1); }
+    else if (e.key === "Escape") { stepExit(); }
+  });
 
   input.addEventListener("input", function (e) {
     // 关闭开关时不自动更新，交给回车或「生成」按钮。

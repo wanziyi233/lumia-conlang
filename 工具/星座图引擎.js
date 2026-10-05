@@ -445,7 +445,7 @@
         }
         out.push({
           kind: "satellite", tok: a.tok, cell: NUM_ATTACHED, box: BOX_DIGIT,
-          x: pick.x, y: pick.y,
+          x: pick.x, y: pick.y, pi: i,
           // from 必须是**副本**：若直接存节点对象引用，归一化时 pts 与 atts 会各平移一次，
           // 该节点就被平移两遍，整张图随即错位。
           from: { x: p.x, y: p.y }, fromHalo: node.halo, halo: satHalo
@@ -461,7 +461,7 @@
           px += Math.cos(perp) * C.attachments.syllabary.chainGap;
           py += Math.sin(perp) * C.attachments.syllabary.chainGap;
           out.push({
-            kind: "chain", syl: node.chain[s], cell: SYL, box: BOX_SYL, x: px, y: py,
+            kind: "chain", syl: node.chain[s], cell: SYL, box: BOX_SYL, x: px, y: py, pi: i,
             from: { x: fx, y: fy }, fromHalo: fh, halo: SYL / 2 + 1
           });
           prevHalo = SYL / 2 + 1;
@@ -851,7 +851,7 @@
       var pts = f.pts.map(function (p) { return { x: p.x + ox, y: p.y + oy }; });
       var atts = f.atts.map(function (a) {
         return { kind: a.kind, tok: a.tok, syl: a.syl, cell: a.cell, box: a.box, halo: a.halo,
-                 fromHalo: a.fromHalo, x: a.x + ox, y: a.y + oy,
+                 fromHalo: a.fromHalo, x: a.x + ox, y: a.y + oy, pi: a.pi,
                  from: { x: a.from.x + ox, y: a.from.y + oy } };
       });
 
@@ -882,12 +882,14 @@
       if (pts.length) {
         an.nodes.forEach(function (nd, ni) {
           if (nd.junction) return;
-          layout.push({ w: nd.tok.w, zh: nd.tok.zh, x: pts[ni].x, y: pts[ni].y, r: nd.halo });
+          // pi：词条写自己的 node 序号；附件条的 pi 指向它的主干词。
+          // 两侧用同一个序号空间，页面就能把修饰语并到它所修饰的那个词上（步进阅读器要用）。
+          layout.push({ w: nd.tok.w, zh: nd.tok.zh, x: pts[ni].x, y: pts[ni].y, r: nd.halo, pi: ni });
         });
         atts.forEach(function (a) {
           // 卫星附件有 tok；音节串附件只有 syl，没有词形可言——不要假设 tok 一定存在。
           layout.push({ w: a.tok ? a.tok.w : (a.syl || ""), zh: a.tok ? a.tok.zh : "",
-                        x: a.x, y: a.y, r: a.halo, sat: true });
+                        x: a.x, y: a.y, r: a.halo, sat: true, pi: a.pi });
         });
       }
 
@@ -920,33 +922,56 @@
       an.nodes.forEach(function (nd, i) {
         if (nd.junction) {
           body.push('<circle class="node" cx="' + r2(pts[i].x) + '" cy="' + r2(pts[i].y) + '" r="3.5"/>');
-        } else {
-          body.push(haloCircle(pts[i].x, pts[i].y, nd.halo));
         }
-      });
-      atts.forEach(function (a) {
-        body.push(haloCircle(a.x, a.y, a.halo));
       });
 
+      // 每个**词**、每个**附件**各成为一个 <g class="nd">，组内依次是：光晕 → 字形 → 标签。
+      // 为什么要分组：步进阅读器要按「词」压暗或点亮。没有组就只能靠坐标去猜哪些元素属于同一个词，
+      // 那种耦合在版式一改就会静默失效（悬停高亮当年就是这么错的）。
+      // 组的先后顺序与 layout 一致——先各节点（跳过逗号节点星）、后各附件。
+      // 首词外面画着起笔环，它的标签要让开环，否则那行字正好压在弧线上。
+      var markFirstI = -1, markFirstR = 0;
+      if (C.marks) {
+        for (var mi = 0; mi < an.nodes.length; mi++) {
+          if (!an.nodes[mi].junction) {
+            markFirstI = mi;
+            markFirstR = Math.max(C.marks.startRadius, an.nodes[mi].halo + C.marks.startMargin);
+            break;
+          }
+        }
+      }
       an.nodes.forEach(function (nd, i) {
         if (nd.junction) return;                       // 节点星没有字形
+        var inner = haloCircle(pts[i].x, pts[i].y, nd.halo);
         var frag = nd.chain ? syllableFrag(nd.chain[0]) : glyphOf(nd.tok);
-        if (frag) body.push(glyphGroup(frag, pts[i].x, pts[i].y, nd.cell,
-                                       nd.chain ? BOX_SYL : BOX_WORD,
-                                       nd.companion ? C.nodeScale.companionOpacity : null));
+        if (frag) inner += glyphGroup(frag, pts[i].x, pts[i].y, nd.cell,
+                                      nd.chain ? BOX_SYL : BOX_WORD,
+                                      nd.companion ? C.nodeScale.companionOpacity : null);
+        if (opts.labels) {
+          var ly = pts[i].y + nd.halo + 15;
+          if (i === markFirstI) ly = Math.max(ly, pts[i].y + markFirstR + 13);
+          inner += '<text class="lb" x="' + r2(pts[i].x) + '" y="' + r2(ly) + '">' +
+                   esc(nd.tok.w) + "</text>";
+        }
+        body.push('<g class="nd">' + inner + "</g>");
       });
       atts.forEach(function (a) {
+        var inner = haloCircle(a.x, a.y, a.halo);
         if (a.kind === "satellite") {
           var row = digitFragRow(numeralValue(a.tok.w));
-          if (!row) return;
-          if (row.length === 1) { body.push(glyphGroup(row[0], a.x, a.y, a.cell, a.box)); return; }
-          var cellD = a.cell * 0.62, step = cellD * 1.02;
-          var x0 = a.x - step * (row.length - 1) / 2;
-          for (var k = 0; k < row.length; k++) body.push(glyphGroup(row[k], x0 + step * k, a.y, cellD, a.box));
+          if (row) {
+            if (row.length === 1) inner += glyphGroup(row[0], a.x, a.y, a.cell, a.box);
+            else {
+              var cellD = a.cell * 0.62, step = cellD * 1.02;
+              var x0 = a.x - step * (row.length - 1) / 2;
+              for (var k = 0; k < row.length; k++) inner += glyphGroup(row[k], x0 + step * k, a.y, cellD, a.box);
+            }
+          }
         } else {
           var frag2 = syllableFrag(a.syl);
-          if (frag2) body.push(glyphGroup(frag2, a.x, a.y, a.cell, a.box));
+          if (frag2) inner += glyphGroup(frag2, a.x, a.y, a.cell, a.box);
         }
+        body.push('<g class="nd">' + inner + "</g>");
       });
 
       if (pts.length) {
@@ -954,12 +979,34 @@
         body.push('<circle class="fall" cx="' + r2(lp.x + 42) + '" cy="' + r2(lp.y + 42) + '" r="2.5"/>');
       }
 
-      if (opts.labels) {
-        an.nodes.forEach(function (nd, i) {
-          if (nd.junction) return;
-          body.push('<text class="lb" x="' + r2(pts[i].x) + '" y="' + r2(pts[i].y + nd.halo + 15) + '">' +
-                    esc(nd.tok.w) + "</text>");
-        });
+      // 起笔 / 收笔标记：短句最缺的就是「从哪读起、到哪读完」。
+      // 起笔是留了缺口的环，缺口朝着第二个词，所以它同时给出**起点与方向**；
+      // 收笔是末词外侧的实心点，沿末段方向让开「光晕半径 + endDistance」。
+      // 两者画在 g.nd **之外**：步进阅读器压暗其余词时，这两个路标不该跟着暗；
+      // 但它们仍在漂移 <g> 之内，跟着整句一起飘。
+      if (pts.length && C.marks) {
+        var MK = C.marks;
+        var ord = [];
+        an.nodes.forEach(function (nd, i) { if (!nd.junction) ord.push(i); });
+        if (ord.length) {
+          var i0 = ord[0], i1 = ord.length > 1 ? ord[1] : -1;
+          var rS = Math.max(MK.startRadius, an.nodes[i0].halo + MK.startMargin);
+          var dirS = i1 >= 0 ? Math.atan2(pts[i1].y - pts[i0].y, pts[i1].x - pts[i0].x) : (V ? Math.PI / 2 : 0);
+          var gapS = (MK.startGap * Math.PI) / 180;
+          var a0 = dirS + gapS / 2, a1 = dirS + Math.PI * 2 - gapS / 2;
+          body.push('<path class="mark start" d="M' + r2(pts[i0].x + Math.cos(a0) * rS) + ' ' +
+                    r2(pts[i0].y + Math.sin(a0) * rS) + ' A' + r2(rS) + ' ' + r2(rS) + ' 0 1 1 ' +
+                    r2(pts[i0].x + Math.cos(a1) * rS) + ' ' + r2(pts[i0].y + Math.sin(a1) * rS) + '"/>');
+
+          var iL = ord[ord.length - 1];
+          var iLp = ord.length > 1 ? ord[ord.length - 2] : -1;
+          var ex = iLp >= 0 ? pts[iL].x - pts[iLp].x : (V ? 0 : 1);
+          var ey = iLp >= 0 ? pts[iL].y - pts[iLp].y : (V ? 1 : 0);
+          var eL = hypot(ex, ey) || 1;
+          var dE = an.nodes[iL].halo + MK.endDistance;
+          body.push('<circle class="mark end" cx="' + r2(pts[iL].x + (ex / eL) * dE) + '" cy="' +
+                    r2(pts[iL].y + (ey / eL) * dE) + '" r="' + r2(MK.endRadius) + '"/>');
+        }
       }
 
       // 漂移：把这一句产生的全部元素包进一个 <g>，整组平移。
