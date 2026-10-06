@@ -1276,6 +1276,62 @@ if ($rkErr.Count -eq 0) {
     OK ('reading order aids present: start ring r' + $mk.startRadius + ' with a ' + $mk.startGap + ' degree gap, a single end dot r' + $mk.endRadius + ', and a per-sentence step reader')
 } else { BAD ("reading order aids: " + ($rkErr -join '; ')) }
 
+# 44. camera follow. With a few sentences the constellation is wider than the window, so
+#     the sentence the reader is on drifts off screen; zooming out far enough to bring it
+#     back makes the glyphs unreadable, and the reader ends up dragging the view by hand.
+#     So the engine hands out sentBoxes -- one box per sentence, indexed exactly like the
+#     <g class="sent"> wrappers -- and the step reader carries the camera onto the current
+#     box. The rule is shrink-only: if the current zoom already fits the sentence the camera
+#     merely translates, and if it does not fit it zooms out no further than a readable
+#     floor (a sentence longer than the window is left to overhang, not shrunk to dust).
+#     It never zooms in on its own: the zoom the reader picked stays theirs.
+$foErr = @()
+$fo = $const.follow
+if (-not $fo) { $foErr += 'script.constellation.follow missing' }
+else {
+    foreach ($k in @('rule', 'padding', 'minCell', 'dur')) {
+        if (-not $fo.PSObject.Properties[$k]) { $foErr += ('follow is missing ' + $k) }
+    }
+    foreach ($k in @('padding', 'minCell', 'dur')) {
+        if ($null -ne $fo.$k -and [double]$fo.$k -le 0) { $foErr += ('follow.' + $k + ' is not positive') }
+    }
+    # the floor is a fraction of one word cell, so it cannot exceed the cell itself
+    if ($null -ne $fo.minCell -and $null -ne $gl.box.word -and [double]$fo.minCell -gt [double]$gl.box.word) {
+        $foErr += 'follow.minCell cannot exceed glyphs.box.word: the floor would be above 1:1'
+    }
+}
+# The page reads these numbers out of the GENERATED payload, so a stale 工具/星座数据.js
+# silently falls back to the hard-coded defaults in the page and the DB edit does nothing.
+if ($fo -and $tl) {
+    $tf = $tl.constellation.follow
+    if (-not $tf) { $foErr += 'the generated tool data carries no constellation.follow' }
+    else {
+        foreach ($k in @('padding', 'minCell', 'dur')) {
+            if ([double]$tf.$k -ne [double]$fo.$k) { $foErr += ('generated follow.' + $k + '=' + $tf.$k + ' != database ' + $fo.$k) }
+        }
+    }
+}
+if ($engPath -and (Test-Path $engPath)) {
+    $engFoSrc = [System.IO.File]::ReadAllText($engPath)
+    # sentBoxes is the per-sentence box; MKP widens it so the start ring and the end dot
+    # (both drawn outside the halo) are not clipped out of their own sentence's frame.
+    foreach ($k in @('sentBoxes', 'MKP')) {
+        if ($engFoSrc -notmatch [regex]::Escape($k)) { $foErr += ('the engine never computes ' + $k) }
+    }
+} else { $foErr += 'the engine source is missing' }
+if ($genSrc) {
+    foreach ($k in @('focusSent', 'FO_PAD', 'FO_MIN', 'FO_DUR', 'constellation.follow')) {
+        if ($genSrc -notmatch [regex]::Escape($k)) { $foErr += ('the generator page never uses ' + $k) }
+    }
+    # the shrink-only clamp is the whole policy: without it the follow grabs the zoom.
+    if ($genSrc -notmatch [regex]::Escape('if (fitK < k2) k2 = Math.max(fitK, Math.min(k2, FO_MIN));')) {
+        $foErr += 'the camera follow lost its shrink-only clamp'
+    }
+} else { $foErr += 'the generator page is missing' }
+if ($foErr.Count -eq 0) {
+    OK ('camera follow present: the step reader carries the camera to the current sentence and shrinks no further than a ' + $fo.minCell + 'px word cell')
+} else { BAD ("camera follow: " + ($foErr -join '; ')) }
+
 Write-Output ""
 Write-Output ("== RESULT: PASS " + $script:pass + " / FAIL " + $script:fail + " ==")
 if ($script:fail -gt 0) { exit 1 } else { exit 0 }

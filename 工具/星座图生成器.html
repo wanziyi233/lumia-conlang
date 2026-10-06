@@ -26,6 +26,9 @@
   #viewport { position:absolute; inset:0; overflow:hidden; cursor:grab; touch-action:none; }
   #viewport.drag { cursor:grabbing; }
   #stage { position:absolute; left:0; top:0; transform-origin:0 0; }
+  /* 只在跟随的那一刻给镜头加过渡（.follow 由 followPulse 临时挂上）：
+     常挂着会让滚轮缩放变得黏糊糊，拖拽也会拖泥带水。 */
+  #stage.follow { transition: transform ease-out; }
   #stage svg { display:block; }
   #stage .empty { padding:24px; }
   #tip { position:absolute; pointer-events:none; display:none; z-index:5;
@@ -113,7 +116,7 @@
       <b>弧轨流动要有 2 句以上才看得到</b>（弧轨连的是上一句末星与下一句首星）。星轨体只有逐段生长，没有句间弧轨与漂移。<br>
       <b>导出 GIF</b>：动画 SVG 只有在浏览器里打开时才会动，要拿去分享就点「导出 GIF」——它把整段动画逐帧烤成一张循环的位图。<br>
       <span style="opacity:.7">导出的永远是带动画的版本（「动画」勾没勾都一样）；帧率、最长边与调色板级数取自 <code>数据/lumia.json</code> 的 <code>constellation.export</code>。</span><br>
-      <b>逐句阅读</b>：星座体的词序没有位置线索，一次点亮一句、其余压暗，按 <b>← →</b> 逐句走，<b>Esc</b> 退出。副标题给出这一句的词义。
+      <b>逐句阅读</b>：星座体的词序没有位置线索，一次点亮一句、其余压暗，按 <b>← →</b> 逐句走，<b>Esc</b> 退出。副标题给出这一句的词义。切换句子时<b>镜头会跟过去</b>——把这一句带进视野，且只缩不放：你调好的放大程度不会被抢走，也不会缩到看不清。
     </div>
   </div>
 
@@ -141,6 +144,9 @@
   var input = $("input"), stage = $("stage"), warn = $("warn"), bd = $("breakdown");
   var viewport = $("viewport"), tip = $("tip");
   var layout = [];
+  // 每句一个包围盒（用户坐标，与页面上的 g.sent 一一对应），引擎随 render 一起给出。
+  // 逐句阅读时据此把镜头带到当前句，见下方「镜头跟随」。
+  var sentBoxes = [];
   var busy = false;   // 烤 GIF 期间为 true，挡住重复点击
 
   var EXAMPLES = [
@@ -323,6 +329,7 @@
     lastName = track ? "lumia-track.svg" : "lumia-constellation.svg";
     clearHl();
     layout = res.layout || [];
+    sentBoxes = res.sentBoxes || [];
     if (!res.svg) {
       stage.innerHTML = '<div class="empty">' + (res.warnings.join("；") || "没有可解析的句子") + "</div>";
       tx = 0; ty = 0; k = 1; applyT();
@@ -350,9 +357,13 @@
       Selagrafi.splitSentences(text).forEach(function (s, i) {
         var an = Selagrafi.analyze(s);
         var parts = an.nodes.map(function (nd) {
+          // 逗号是一个 junction 节点（规范 §五 的节点星），**没有词形，tok 是 null**。
+          // 引擎的 layout 早就跳过它了，这里也必须跳过：否则任何带逗号的句子都会在
+          // t.w 上抛异常，把 update() 剩下的事（重贴压暗、更新提示栏）一起带崩。
+          if (nd.junction) return "<code>,</code> <span style='opacity:.6'>[逗号·节点星]</span>";
           var t = nd.tok, kind = nd.chain ? "音节串首节" : (nd.companion ? "伴星" : "主星");
           var sat = (nd.attach || []).filter(function (a) { return a.kind === "satellite"; });
-          var extra = sat.length ? "（+" + sat.map(function (a) { return a.tok.w; }).join(",") + " 卫星）" : "";
+          var extra = sat.length ? "（+" + sat.map(function (a) { return a.tok ? a.tok.w : a.syl; }).join(",") + " 卫星）" : "";
           return "<code>" + t.w + "</code>" + (t.zh ? "·" + t.zh : "") + " <span style='opacity:.6'>[" + kind + extra + "]</span>";
         });
         lines.push("<b>第 " + (i + 1) + " 句</b> " + (an.closed ? "（≤4 词，闭合）" : "（长句，开放）") + "<br>" + parts.join("<br>"));
@@ -481,16 +492,67 @@
   // 单位是**句子**而不是词：逐词点亮又慢又碎，一句话本来就该整句读完。
   var stepOn = false, stepUnits = [], stepAt = 0, stepTimer = null;
 
+  // 镜头跟随的参数在数据/lumia.json 的 constellation.follow。
+  var FO = (LUMIA.constellation && LUMIA.constellation.follow) || {};
+  var FO_PAD = +FO.padding || 80;     // 目标句四周留的屏幕边距（像素）
+  var FO_MIN = Math.max(0.05, (+FO.minCell || 110) / (LUMIA.glyphs.box.word || 120));   // 可读下限
+  var FO_DUR = +FO.dur || 220;        // 镜头过渡时长（毫秒）
+
+  // 镜头跟随：把当前句带进视野，省得读者自己拖着找。
+  // **只缩不放**——你已经调好的放大程度不会被抢走；也不低于可读下限，
+  // 长句宁可超出视野由你平移，也不缩到看不清。
+  function focusSent(i) {
+    var svg = stage.querySelector("svg");
+    var bx = sentBoxes[i];
+    if (!svg || !bx || !(bx.w > 0) || !(bx.h > 0)) return;
+    var b = viewport.getBoundingClientRect();
+    var fitK = Math.min((b.width - FO_PAD * 2) / bx.w, (b.height - FO_PAD * 2) / bx.h);
+    var k2 = k;
+    if (fitK < k2) k2 = Math.max(fitK, Math.min(k2, FO_MIN));
+    if (!(k2 > 0.02)) return;
+    tx = b.width / 2 - (bx.x + bx.w / 2) * k2;      // 焦点对准该句包围盒的中心
+    ty = b.height / 2 - (bx.y + bx.h / 2) * k2;
+    k = k2;
+    followPulse();
+    applyT();
+  }
+
+  // 只在跟随的那一刻给镜头挂上过渡（见 #stage.follow）：
+  // 常挂着会让滚轮缩放黏糊糊、拖拽也拖泥带水。
+  var followTimer = null;
+  function followPulse() {
+    stage.style.transitionDuration = FO_DUR + "ms";
+    stage.classList.add("follow");
+    if (followTimer) clearTimeout(followTimer);
+    followTimer = setTimeout(function () { stage.classList.remove("follow"); }, FO_DUR + 40);
+  }
+
   function stepBuild() {
     var svg = stage.querySelector("svg");
     if (!svg) return [];
     var gs = svg.querySelectorAll("g.sent"), out = [];
     Selagrafi.splitSentences(input.value).forEach(function (s) {
       var an = Selagrafi.analyze(s);
-      if (!an.nodes.length) return;            // 没有可画的词，引擎不会为它画一句，这里也不列
-      out.push({ text: s, gloss: an.nodes.map(function (nd) { return nd.tok.zh || nd.tok.w; }).join(" · ") });
+      // 只取真正有词形的节点：逗号那种 junction 节点 tok 是 null，
+      // 直接读 nd.tok.zh 会在带逗号的句子上抛异常。
+      var words = an.nodes.filter(function (nd) { return nd.tok; });
+      // 画不出词的句子也要占一格：页面上的 g.sent 是按句一一发出的，
+      // 这里若把空句滤掉，后面每一句的下标就整体错位，压暗与镜头都会跟错句。
+      out.push({
+        text: s,
+        gloss: words.map(function (nd) { return nd.tok.zh || nd.tok.w; }).join(" · "),
+        dead: !words.length
+      });
     });
     return out.slice(0, gs.length);            // 以页面上真实存在的 g.sent 数为准
+  }
+
+  // 找下一个读得下去的句子（画不出词的那种跳过）。返回 null 表示这个方向上没得走。
+  function stepSeek(from, d) {
+    for (var i = from; i >= 0 && i < stepUnits.length; i += d) {
+      if (!stepUnits[i].dead) return i;
+    }
+    return null;
   }
 
   function stepApply() {
@@ -502,12 +564,16 @@
     }
     $("stepInfo").textContent = "第 " + (stepAt + 1) + " / " + stepUnits.length + " 句　" +
       cur.text + (cur.gloss ? "　" + cur.gloss : "");
+    focusSent(stepAt);
   }
 
   function stepGo(d) {
-    if (!stepOn || !stepUnits.length) return;
-    stepAt = Math.max(0, Math.min(stepUnits.length - 1, stepAt + d));
+    if (!stepOn || !stepUnits.length) return false;
+    var to = stepSeek(stepAt + d, d);
+    if (to == null || to === stepAt) return false;
+    stepAt = to;
     stepApply();
+    return true;
   }
 
   function stepStopPlay() {
@@ -517,8 +583,11 @@
 
   function stepEnter() {
     stepUnits = stepBuild();
-    if (stepUnits.length < 2) { $("stepInfo").textContent = "至少要有两句才能逐步读。"; return; }
-    stepOn = true; stepAt = 0;
+    var alive = 0;
+    stepUnits.forEach(function (u) { if (!u.dead) alive++; });
+    if (alive < 2) { $("stepInfo").textContent = "至少要有两句才能逐步读。"; return; }
+    stepOn = true;
+    stepAt = stepSeek(0, 1);          // 第一句可能画不出词，从第一句读得下去的起步
     $("stepRow").style.display = "flex";
     stepApply();
   }
@@ -541,6 +610,11 @@
     stepUnits = stepBuild();
     if (!stepUnits.length) { stepExit(); return; }
     stepAt = Math.min(stepAt, stepUnits.length - 1);
+    if (stepUnits[stepAt].dead) {                  // 重画后这一句可能反而画不出词了
+      var to = stepSeek(stepAt + 1, 1);
+      if (to == null) to = stepSeek(stepAt - 1, -1);
+      if (to != null) stepAt = to;
+    }
     stepApply();
   }
 
@@ -552,8 +626,7 @@
     if (stepTimer) { stepStopPlay(); return; }
     this.textContent = "暂停";
     stepTimer = setInterval(function () {
-      if (stepAt >= stepUnits.length - 1) stepAt = -1;   // 走到头就从头再来
-      stepGo(1);
+      if (!stepGo(1)) { stepAt = -1; stepGo(1); }   // 走到头就从头再来
     }, 900);
   };
   document.addEventListener("keydown", function (e) {

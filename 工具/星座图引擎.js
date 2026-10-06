@@ -745,7 +745,7 @@
     var PL_GAP = C.clustering ? C.clustering.sentenceGap : 60;
 
     var rows = [];
-    figures.forEach(function (f) {
+    figures.forEach(function (f, fi) {
       var stars = [];
       f.pts.forEach(function (p, i) {
         var nd = f.an.nodes[i];
@@ -762,7 +762,7 @@
       });
       var w = mxx - mnx, h = mxy - mny;
       stars.forEach(function (s) { s.x -= mnx; s.y -= mny; });   // 图内局部坐标，外接框左下角为原点
-      rows.push({ f: f, stars: stars, mnx: mnx, mny: mny, w: w, h: h, ox: 0, oy: 0 });
+      rows.push({ fi: fi, f: f, stars: stars, mnx: mnx, mny: mny, w: w, h: h, ox: 0, oy: 0 });
     });
 
     // 初始位置：阿基米德型缓螺旋
@@ -843,6 +843,19 @@
     var W = maxX - minX + pad * 2, H = maxY - minY + pad * 2 + head;
     var ox = pad - minX, oy = pad + head - minY;
 
+    // 每句一个包围盒（最终用户坐标），与 sentences / figures **一一对应**，
+    // 画不出来的句子为 null。这是给页面「逐句阅读」的镜头跟随用的：
+    // 切换句子时把镜头带过去，读者不必自己拖着找——见 script.constellation.follow。
+    // 起笔环与落星画在光晕**之外**（marks.startRadius、marks.endDistance+endRadius），
+    // 只按光晕算出来的盒装不下它们，镜头贴上去会把这两个标记切掉——统一留出其中最大的一项。
+    var MKP = C.marks ? Math.max(C.marks.startRadius, C.marks.endDistance + C.marks.endRadius) : 3;
+    var sentBoxes = figures.map(function () { return null; });
+    rows.forEach(function (r) {
+      var bcx = r.ox, bcy = r.oy, bw = r.w + MKP * 2, bh = r.h + MKP * 2;
+      if (V) { var ncx = -bcy; bcy = bcx; bcx = ncx; var nbw = bh; bh = bw; bw = nbw; }
+      sentBoxes[r.fi] = { x: r2(bcx + ox - bw / 2), y: r2(bcy + oy - bh / 2), w: r2(bw), h: r2(bh) };
+    });
+
     var body = ['<rect class="bg" width="' + r2(W) + '" height="' + r2(H) + '"/>'];
     var arcPaths = [], figEnds = [], layout = [];
 
@@ -882,14 +895,13 @@
       if (pts.length) {
         an.nodes.forEach(function (nd, ni) {
           if (nd.junction) return;
-          // pi：词条写自己的 node 序号；附件条的 pi 指向它的主干词。
-          // 两侧用同一个序号空间，页面就能把修饰语并到它所修饰的那个词上（步进阅读器要用）。
           layout.push({ w: nd.tok.w, zh: nd.tok.zh, x: pts[ni].x, y: pts[ni].y, r: nd.halo });
         });
         atts.forEach(function (a) {
           // 卫星附件有 tok；音节串附件只有 syl，没有词形可言——不要假设 tok 一定存在。
+          // sat 标出「这是挂在主干上的附件」，页面据此把它并进主干那一步。
           layout.push({ w: a.tok ? a.tok.w : (a.syl || ""), zh: a.tok ? a.tok.zh : "",
-                        x: a.x, y: a.y, r: a.halo, sat: true, pi: a.pi });
+                        x: a.x, y: a.y, r: a.halo, sat: true });
         });
       }
 
@@ -1057,7 +1069,7 @@
       "<style>" + G.css + D.extraCss + "</style>" +
       body[0] + arcPaths.join("") + body.slice(1).join("") + "</svg>");
 
-    return { svg: svg, warnings: warnings, layout: layout };
+    return { svg: svg, warnings: warnings, layout: layout, sentBoxes: sentBoxes };
   }
 
   /* ---------- 星轨体（辅助书写规范）---------- */

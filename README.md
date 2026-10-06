@@ -88,7 +88,7 @@ It is deliberately "unbalanced": it names stars, planets, Saturn, the universe, 
 │   └── 星座数据.js        由 数据/生成星座图.ps1 从数据库生成
 ├── 数据/
 │   ├── lumia.json        全系统单一数据库（权威数据源）
-│   ├── 校验.ps1          一致性校验脚本（49 项）
+│   ├── 校验.ps1          一致性校验脚本（50 项）
 │   ├── 生成词典.ps1      生成 工具/词典.html
 │   ├── 生成星座图.ps1    生成 工具/星座数据.js
 │   ├── dict-template.html 词典 HTML 模板
@@ -106,7 +106,8 @@ It is deliberately "unbalanced": it names stars, planets, Saturn, the universe, 
   勾选「动画」后弧轨流动、轨道逐段生长、光晕呼吸、整幅星图缓慢漂移；想把它发给别人看，
   用「导出 GIF」把整段动画烤成一张循环的位图。
   星座体的词序不靠位置表示，所以句首有**缺口环**（缺口指向第二个词）、句末的**落星**同时充当收笔点；
-  点「逐句阅读」可以一次点亮一句、其余压暗，按 ← → 逐句走。
+  点「逐句阅读」可以一次点亮一句、其余压暗，按 ← → 逐句走，**镜头会跟着当前句走**（只平移、
+  必要时缩小，但不会缩到看不清，也不会替你放大）。
 - 示例句 / Example：
 
 | Lumia | 中文 / English |
@@ -121,7 +122,7 @@ It is deliberately "unbalanced": it names stars, planets, Saturn, the universe, 
 需要 PowerShell。**注意命令名不一样**：Windows 自带的是 Windows PowerShell 5.1，命令为 `powershell`；`pwsh` 是 PowerShell 7+ 的命令，Windows 默认**没有**安装（macOS/Linux 需自行安装 [PowerShell](https://github.com/PowerShell/PowerShell)）。
 
 ```bash
-# 一致性体检（49 项检查）
+# 一致性体检（50 项检查）
 powershell -File 数据/校验.ps1
 
 # 改完 数据/lumia.json 后，刷新可检索词典
